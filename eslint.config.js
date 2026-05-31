@@ -12,6 +12,25 @@ export default defineConfig([
   reactHooks.configs.flat.recommended,
   reactRefresh.configs.vite,
   {
+    files: ['*.config.{ts,js}', 'e2e/**/*.ts'],
+    languageOptions: {
+      globals: {
+        ...globals.node,
+        __dirname: 'readonly',
+      },
+    },
+  },
+  {
+    files: ['**/*.{js,ts,tsx}'],
+    rules: {
+      'prefer-const': 'error',
+      'no-var': 'error',
+      'curly': ['error', 'all'],
+      'eqeqeq': ['error', 'always', { null: 'ignore' }],
+      'no-implicit-coercion': 'error',
+    },
+  },
+  {
     files: ['src/**/*.{ts,tsx}'],
     extends: [
       ...tseslint.configs.strictTypeChecked,
@@ -23,6 +42,12 @@ export default defineConfig([
         projectService: true,
         tsconfigRootDir: import.meta.dirname,
       },
+    },
+    rules: {
+      '@typescript-eslint/consistent-type-imports': [
+        'error',
+        { prefer: 'type-imports', fixStyle: 'inline-type-imports' },
+      ],
     },
   },
   prettierConfig,
