@@ -1,2 +1,1 @@
-packages:
-  - 'src/shared/ui/design-system/packages/*'
+packages: []
