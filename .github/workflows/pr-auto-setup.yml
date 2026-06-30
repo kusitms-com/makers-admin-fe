@@ -5,7 +5,6 @@ on:
     types:
       - opened
       - reopened
-      - edited
 
 permissions:
   contents: read
@@ -58,10 +57,36 @@ jobs:
               const [, rawType, rawSlug] = branchMatch;
               branchType = rawType.toLowerCase();
               const titlePrefix = formatType(branchType);
-              const titleSource = decodeURIComponent(rawSlug).replace(/[-_]+/g, ' ').trim();
 
-              if (titleSource) {
-                nextTitle = `[${titlePrefix}] ${titleSource}`;
+              const issueNumberMatch = rawSlug.match(/-(\d+)$/);
+
+              if (issueNumberMatch) {
+                const issueNumber = Number(issueNumberMatch[1]);
+                try {
+                  const { data: issue } = await github.rest.issues.get({
+                    owner: context.repo.owner,
+                    repo: context.repo.repo,
+                    issue_number: issueNumber,
+                  });
+                  const issueTitle = issue.title
+                    .replace(/^\[[^\]]+\]\s*/, '')
+                    .replace(/^#?\d+\s*[-:]?\s*/, '')
+                    .trim();
+                  if (issueTitle) {
+                    nextTitle = `[${titlePrefix}] ${issueTitle}`;
+                  }
+                } catch (error) {
+                  core.warning(`Issue #${issueNumber} lookup failed. Falling back to branch slug: ${error.message}`);
+                  const fallbackTitle = rawSlug.replace(/-\d+$/, '').replace(/[-_]+/g, ' ').trim();
+                  if (fallbackTitle) {
+                    nextTitle = `[${titlePrefix}] ${fallbackTitle}`;
+                  }
+                }
+              } else {
+                const titleSource = rawSlug.replace(/[-_]+/g, ' ').trim();
+                if (titleSource) {
+                  nextTitle = `[${titlePrefix}] ${titleSource}`;
+                }
               }
             } else {
               core.info(`Skip branch-based PR title sync. Branch does not match issue-type pattern: ${branchName}`);
