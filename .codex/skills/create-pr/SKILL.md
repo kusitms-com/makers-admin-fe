@@ -1,6 +1,6 @@
 ---
 name: create-pr
-description: 현재 브랜치를 분석하여 프로젝트 PR 템플릿에 맞는 풀 리퀘스트 초안을 작성합니다. 실제 규칙은 `.claude/skills/create-pr/SKILL.md`에서 읽고 그대로 따릅니다.
+description: 현재 브랜치를 분석하여 주요 변경사항과 명사형 작업 내용 중심의 PR 본문 초안을 작성합니다. 실제 규칙은 `.claude/skills/create-pr/SKILL.md`에서 읽고 그대로 따릅니다.
 ---
 
 # Create PR Proxy
