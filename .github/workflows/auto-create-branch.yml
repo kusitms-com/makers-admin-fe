@@ -102,9 +102,9 @@ jobs:
             }
 
       - name: Push issue branch
+        env:
+          BRANCH_NAME: ${{ steps.extract.outputs.branch_name }}
         run: |
-          BRANCH_NAME="${{ steps.extract.outputs.branch_name }}"
-
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
