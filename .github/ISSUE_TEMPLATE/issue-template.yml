@@ -1,0 +1,47 @@
+name: 기능 구현
+description: 새로운 기능 구현을 위한 이슈 템플릿
+body:
+  - type: input
+    id: branch
+    attributes:
+      label: 브랜치명
+      description: '영어 케밥 케이스로 입력해 주세요. 예시: login-page, token-expiry-fix'
+      placeholder: 'login-page'
+    validations:
+      required: true
+
+  - type: dropdown
+    id: branchType
+    attributes:
+      label: 작업 타입
+      description: 브랜치 prefix와 이슈 라벨에 사용할 타입을 선택해 주세요.
+      options:
+        - feat
+        - fix
+        - hotfix
+        - refactor
+        - test
+        - docs
+        - chore
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      value: |
+        - 구현할 내용 1
+        - 구현할 내용 2
+    validations:
+      required: true
+
+  - type: textarea
+    id: todo
+    attributes:
+      label: Todo
+      value: |
+        - [ ] 구현할 내용 1
+        - [ ] 구현할 내용 2
+    validations:
+      required: true

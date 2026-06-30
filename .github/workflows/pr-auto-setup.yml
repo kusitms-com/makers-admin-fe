@@ -1,0 +1,113 @@
+name: PR Metadata Bootstrap
+
+on:
+  pull_request:
+    types:
+      - opened
+      - reopened
+      - edited
+
+permissions:
+  contents: read
+  pull-requests: write
+  issues: write
+
+jobs:
+  sync-metadata:
+    if: github.actor != 'dependabot[bot]'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Normalize PR metadata
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const pr = context.payload.pull_request;
+            const prNumber = pr.number;
+            const prAuthor = pr.user.login;
+            const branchName = pr.head.ref;
+            const isWorkInProgress = /- \[x\] 작업 진행 중/i.test(pr.body || '');
+
+            const labelMap = {
+              feat: '✨Feature',
+              fix: '🐛Fix',
+              hotfix: '🚨Hotfix',
+              refactor: '♻️Refactor',
+              test: '✅Test',
+              docs: '📝Docs',
+              chore: '🛠️Chore',
+            };
+
+            const formatType = (type) => type.charAt(0).toUpperCase() + type.slice(1);
+            const branchMatch = branchName.match(/^(\d+)-([a-z]+)\/(.+)$/i);
+
+            if (pr.assignees.length === 0) {
+              await github.rest.issues.addAssignees({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: prNumber,
+                assignees: [prAuthor],
+              });
+            }
+
+            let branchType = '';
+            let nextTitle = pr.title.replace(/^\[WIP\]\s*/i, '');
+
+            if (branchMatch) {
+              const [, issueNumberText, rawType, rawSlug] = branchMatch;
+              const issueNumber = Number(issueNumberText);
+              branchType = rawType.toLowerCase();
+              const titlePrefix = formatType(branchType);
+
+              let titleSource = decodeURIComponent(rawSlug).replace(/[-_]+/g, ' ').trim();
+
+              try {
+                const { data: issue } = await github.rest.issues.get({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  issue_number: issueNumber,
+                });
+
+                titleSource = issue.title
+                  .replace(/^\[[^\]]+\]\s*/, '')
+                  .replace(/^#?\d+\s*[-:]?\s*/, '')
+                  .trim();
+              } catch (error) {
+                core.warning(`Issue #${issueNumber} lookup failed. Fallback to branch slug: ${error.message}`);
+              }
+
+              if (titleSource) {
+                nextTitle = `[${titlePrefix}] ${titleSource}`;
+              }
+            } else {
+              core.info(`Skip branch-based PR title sync. Branch does not match issue-type pattern: ${branchName}`);
+            }
+
+            if (isWorkInProgress) {
+              nextTitle = `[WIP] ${nextTitle}`;
+            }
+
+            if (nextTitle && nextTitle !== pr.title) {
+              await github.rest.pulls.update({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                pull_number: prNumber,
+                title: nextTitle,
+              });
+            }
+
+            const label = labelMap[branchType];
+
+            if (label) {
+              try {
+                await github.rest.issues.addLabels({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  issue_number: prNumber,
+                  labels: [label],
+                });
+              } catch (error) {
+                core.warning(`Failed to add PR label: ${error.message}`);
+              }
+            }
