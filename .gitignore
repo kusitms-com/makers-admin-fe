@@ -24,9 +24,13 @@ dist-ssr
 *.sln
 *.sw?
 
-# Claude / OMC
-.claude/
-.omc/
+# Agent runtime
+.omc
+.omx
+.codex/*
+!.codex/hooks.json
+!.codex/skills/
+!.codex/skills/**
 
 # Playwright
 /test-results/
