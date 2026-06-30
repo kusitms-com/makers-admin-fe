@@ -4,9 +4,16 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
+    "prepare": "husky install",
     "dev": "vite",
     "build": "tsc -b && vite build",
+    "type-check": "tsc -b --pretty false",
     "lint": "eslint .",
+    "format:check": "prettier . --check",
+    "gen:index": "tsx scripts/gen-index.ts",
+    "gen:index:check": "tsx scripts/gen-index.ts --check",
+    "icons:build": "tsx scripts/build-icons.ts",
+    "icons:check": "tsx scripts/build-icons.ts --check",
     "preview": "vite preview",
     "test": "vitest",
     "test:ui": "vitest --ui",
@@ -35,6 +42,9 @@
   "devDependencies": {
     "@eslint/js": "^10.0.1",
     "@playwright/test": "^1.60.0",
+    "@svgr/core": "^8.1.0",
+    "@svgr/plugin-jsx": "^8.1.0",
+    "@svgr/plugin-svgo": "^8.1.0",
     "@tailwindcss/vite": "^4.3.0",
     "@testing-library/react": "^16.3.2",
     "@testing-library/user-event": "^14.6.1",
@@ -52,9 +62,18 @@
     "prettier": "^3.8.3",
     "prettier-plugin-tailwindcss": "^0.8.0",
     "tailwindcss": "^4.3.0",
+    "tsx": "^4.22.4",
     "typescript": "~6.0.2",
     "typescript-eslint": "^8.59.2",
     "vite": "^8.0.12",
+    "husky": "^8.0.0",
+    "lint-staged": "^16.4.0",
     "vitest": "^4.1.6"
+  },
+  "lint-staged": {
+    "*.{ts,tsx,js,json,css,md}": [
+      "eslint --fix",
+      "prettier --write"
+    ]
   }
 }
