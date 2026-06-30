@@ -1,4 +1,4 @@
-name: PR Metadata Bootstrap
+name: PR Auto Setup
 
 on:
   pull_request:
@@ -40,7 +40,7 @@ jobs:
             };
 
             const formatType = (type) => type.charAt(0).toUpperCase() + type.slice(1);
-            const branchMatch = branchName.match(/^(\d+)-([a-z]+)\/(.+)$/i);
+            const branchMatch = branchName.match(/^([a-z]+)\/(.+)$/i);
 
             if (pr.assignees.length === 0) {
               await github.rest.issues.addAssignees({
@@ -55,27 +55,10 @@ jobs:
             let nextTitle = pr.title.replace(/^\[WIP\]\s*/i, '');
 
             if (branchMatch) {
-              const [, issueNumberText, rawType, rawSlug] = branchMatch;
-              const issueNumber = Number(issueNumberText);
+              const [, rawType, rawSlug] = branchMatch;
               branchType = rawType.toLowerCase();
               const titlePrefix = formatType(branchType);
-
-              let titleSource = decodeURIComponent(rawSlug).replace(/[-_]+/g, ' ').trim();
-
-              try {
-                const { data: issue } = await github.rest.issues.get({
-                  owner: context.repo.owner,
-                  repo: context.repo.repo,
-                  issue_number: issueNumber,
-                });
-
-                titleSource = issue.title
-                  .replace(/^\[[^\]]+\]\s*/, '')
-                  .replace(/^#?\d+\s*[-:]?\s*/, '')
-                  .trim();
-              } catch (error) {
-                core.warning(`Issue #${issueNumber} lookup failed. Fallback to branch slug: ${error.message}`);
-              }
+              const titleSource = decodeURIComponent(rawSlug).replace(/[-_]+/g, ' ').trim();
 
               if (titleSource) {
                 nextTitle = `[${titlePrefix}] ${titleSource}`;

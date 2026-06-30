@@ -51,7 +51,7 @@ jobs:
 
             const branchType = sanitize(readSection('작업 타입')) || 'feat';
             const branchSlug = sanitize(readSection('브랜치명') || `issue-${issueNumber}`);
-            const branchName = `${issueNumber}-${branchType}/${branchSlug}`;
+            const branchName = `${branchType}/${branchSlug}-${issueNumber}`;
             const titlePrefix = branchType.charAt(0).toUpperCase() + branchType.slice(1);
             const newIssueTitle = issueTitle.startsWith('[')
               ? issueTitle
