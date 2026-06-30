@@ -10,7 +10,7 @@ if ($prompt -match 'commit|staged|push') {
   $suggestions.Add('/commit-kr - create a Korean commit message')
 }
 
-if ($prompt -match 'pr|pull request') {
+if ($prompt -match '\bpr\b|pull request') {
   $suggestions.Add('/create-pr - create a PR title and body draft')
 }
 
