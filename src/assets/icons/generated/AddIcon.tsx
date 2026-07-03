@@ -1,12 +1,7 @@
 // @generated
 import type { SVGProps } from 'react'
 const AddIcon = (props: SVGProps<SVGSVGElement>) => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    fill="none"
-    viewBox="0 0 16 16"
-    {...props}
-  >
+  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 16 16" {...props}>
     <g clipPath="url(#a)">
       <path fill="currentColor" d="M8 2.429v11.143zM2.429 8H13.57z" />
       <path

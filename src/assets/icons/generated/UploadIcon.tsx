@@ -1,12 +1,7 @@
 // @generated
 import type { SVGProps } from 'react'
 const UploadIcon = (props: SVGProps<SVGSVGElement>) => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    fill="none"
-    viewBox="0 0 18 18"
-    {...props}
-  >
+  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 18 18" {...props}>
     <mask id="a" width={18} height={18} x={0} y={0} maskUnits="userSpaceOnUse">
       <path fill="currentColor" d="M0 0h18v18H0z" />
     </mask>

@@ -1,12 +1,7 @@
 // @generated
 import type { SVGProps } from 'react'
 const ChevronDownIcon = (props: SVGProps<SVGSVGElement>) => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    fill="none"
-    viewBox="0 0 12 8"
-    {...props}
-  >
+  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 12 8" {...props}>
     <g clipPath="url(#a)">
       <path
         stroke="currentColor"
