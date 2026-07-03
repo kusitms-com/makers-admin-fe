@@ -84,6 +84,7 @@ const renderComponent = async (source: IconSource) => {
     {
       expandProps: 'end',
       icon: false,
+      jsxRuntime: 'automatic',
       plugins: svgrPlugins,
       prettier: false,
       svgo: true,
