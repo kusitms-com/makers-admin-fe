@@ -72,11 +72,11 @@ export function Sidebar({ activeKey, onNavigate, onLogout, className }: SidebarP
   return (
     <aside
       className={cn(
-        'bg-fill-normal flex h-full w-[220px] flex-col border-r border-[rgba(112,115,124,0.16)]',
+        'bg-fill-normal border-line-neutral flex h-full w-[220px] flex-col border-r',
         className,
       )}
     >
-      <div className="flex h-[84px] items-center gap-2.5 border-b border-[rgba(112,115,124,0.16)] py-4 pr-5 pb-[18px] pl-6">
+      <div className="border-line-neutral flex h-[84px] items-center gap-2.5 border-b py-4 pr-5 pb-[18px] pl-6">
         <Logo size="sm" />
       </div>
       <nav className="flex flex-1 flex-col justify-between px-3 py-4">
