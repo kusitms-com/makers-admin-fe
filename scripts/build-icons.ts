@@ -3,7 +3,7 @@ import { basename, extname, join } from 'node:path'
 import { transform } from '@svgr/core'
 import jsxPlugin from '@svgr/plugin-jsx'
 import svgoPlugin from '@svgr/plugin-svgo'
-import { format } from 'prettier'
+import { format, resolveConfig } from 'prettier'
 
 const GENERATED_TAG = '// @generated'
 const ICON_ROOT = join(process.cwd(), 'src/assets/icons')
@@ -84,6 +84,7 @@ const renderComponent = async (source: IconSource) => {
     {
       expandProps: 'end',
       icon: false,
+      jsxRuntime: 'automatic',
       plugins: svgrPlugins,
       prettier: false,
       svgo: true,
@@ -105,11 +106,12 @@ const renderComponent = async (source: IconSource) => {
     { componentName: source.componentName },
   )
 
+  const prettierConfig =
+    (await resolveConfig(join(OUTPUT_DIR, `${source.componentName}.tsx`))) ?? {}
+
   return format(`${GENERATED_TAG}\n${componentCode}`, {
+    ...prettierConfig,
     parser: 'typescript',
-    semi: false,
-    singleQuote: true,
-    trailingComma: 'all',
   })
 }
 
@@ -120,13 +122,13 @@ const renderIndex = async (sources: IconSource[]) => {
     )
     .join('\n')
 
+  const prettierConfig = (await resolveConfig(join(OUTPUT_DIR, 'index.ts'))) ?? {}
+
   return format(
     `${GENERATED_TAG}\n\nexport type { SVGProps as IconProps } from 'react'\n\n${exports}\n`,
     {
+      ...prettierConfig,
       parser: 'typescript',
-      semi: false,
-      singleQuote: true,
-      trailingComma: 'all',
     },
   )
 }
