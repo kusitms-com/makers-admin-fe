@@ -21,4 +21,13 @@ describe('ProjectThumbnailCard', () => {
 
     expect(onDelete).toHaveBeenCalledTimes(1)
   })
+
+  it('삭제 버튼이 포커스될 때도 오버레이가 노출되도록 group-focus-within 클래스를 갖는다', () => {
+    render(<ProjectThumbnailCard imageUrl="/thumb.png" serviceName="큐시즘 웹" />)
+
+    const overlay = screen.getByRole('button', { name: '삭제하기' }).closest('.opacity-0')
+
+    expect(overlay).not.toBeNull()
+    expect(overlay?.className).toContain('group-focus-within:opacity-100')
+  })
 })
