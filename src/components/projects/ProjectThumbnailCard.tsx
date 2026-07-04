@@ -25,7 +25,7 @@ export function ProjectThumbnailCard({
         className="relative h-[150px] w-full bg-cover bg-center"
         style={{ backgroundImage: `url(${imageUrl})` }}
       >
-        <div className="absolute inset-0 flex items-center justify-center bg-black/15 opacity-0 transition-opacity group-hover:opacity-100">
+        <div className="bg-fill-transparent-black absolute inset-0 flex items-center justify-center opacity-0 transition-opacity group-hover:opacity-100">
           <Button variant="error" size="m" className="w-[100px]" onClick={onDelete}>
             삭제하기
           </Button>
