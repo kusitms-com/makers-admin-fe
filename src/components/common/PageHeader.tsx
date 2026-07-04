@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react'
 import { cn } from '@lib/utils'
+import { Button } from './Button'
 
 interface PageHeaderProps {
   title: string
@@ -22,13 +23,9 @@ export function PageHeader({ title, actionLabel, onAction, children, className }
         {children}
       </div>
       {actionLabel && (
-        <button
-          type="button"
-          onClick={onAction}
-          className="bg-brand-primary text-label-14sb text-fill-normal h-10 rounded-[8px] px-4 py-2 transition-colors hover:brightness-95"
-        >
+        <Button variant="strong" size="m" onClick={onAction} className="hover:brightness-95">
           {actionLabel}
-        </button>
+        </Button>
       )}
     </div>
   )
