@@ -26,7 +26,10 @@ export default defineConfig([
   js.configs.recommended,
   reactHooks.configs.flat.recommended,
   reactRefresh.configs.vite,
-  jsxA11y.flatConfigs.recommended,
+  {
+    ...jsxA11y.flatConfigs.recommended,
+    files: ['**/*.{jsx,tsx}'],
+  },
   {
     files: ['*.config.{ts,js}', 'e2e/**/*.ts', '.claude/hooks/**/*.mjs'],
     languageOptions: {
