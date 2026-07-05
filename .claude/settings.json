@@ -12,7 +12,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "powershell -ExecutionPolicy Bypass -File .claude/hooks/guard-rules.ps1"
+            "command": "node .claude/hooks/guard-rules.mjs"
           }
         ]
       },
@@ -21,7 +21,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "powershell -ExecutionPolicy Bypass -File .claude/hooks/guard-rules.ps1"
+            "command": "node .claude/hooks/guard-rules.mjs"
           }
         ]
       }
@@ -32,7 +32,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "powershell -ExecutionPolicy Bypass -File .claude/hooks/lint-check.ps1"
+            "command": "node .claude/hooks/lint-check.mjs"
           }
         ]
       }
@@ -42,7 +42,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "powershell -ExecutionPolicy Bypass -File .claude/hooks/skill-suggest.ps1"
+            "command": "node .claude/hooks/skill-suggest.mjs"
           }
         ]
       }
