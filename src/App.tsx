@@ -1,5 +1,7 @@
+import { QueryProvider } from '@/providers/QueryProvider'
+
 function App() {
-  return null
+  return <QueryProvider>{null}</QueryProvider>
 }
 
 export default App
