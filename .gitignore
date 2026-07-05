@@ -31,6 +31,7 @@ dist-ssr
 !.codex/hooks.json
 !.codex/skills/
 !.codex/skills/**
+.agents
 
 # Playwright
 /test-results/
