@@ -1,13 +1,9 @@
 import { clsx, type ClassValue } from 'clsx'
 import { extendTailwindMerge } from 'tailwind-merge'
 
-// @kusitms.com/tokens typography classes (text-body-16sb, text-label-14sb, ...) share the
-// `text-` prefix with color utilities. tailwind-merge only recognizes stock Tailwind font
-// sizes (text-lg, text-xl, ...), so it falls back to treating unknown text-* suffixes as
-// text-color and silently drops one of the two. Listing the token suffixes in `theme.text`
-// (must be literal strings; tailwind-merge does not test regex/function entries here)
-// classifies them as font-size so they stop conflicting with text-color utilities.
-// tv() (src/lib/tv.ts) reuses this list so variant-driven components get the same merge fix.
+// text-body-16sb 같은 typography 토큰이 text-* 색상 유틸리티와 접두사가 겹쳐
+// tailwind-merge가 충돌로 오인하는 문제를 막기 위해 font-size로 명시한다.
+// tv()(src/lib/tv.ts)도 같은 목록을 재사용한다.
 export const TYPOGRAPHY_TEXT_TOKENS = [
   'pc-64b',
   'pc-64sb',

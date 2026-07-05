@@ -1,8 +1,7 @@
 import { createTV } from 'tailwind-variants'
 import { TYPOGRAPHY_TEXT_TOKENS } from './utils'
 
-// Reuses the same typography-token merge fix as cn() (see utils.ts) so variant-driven
-// components resolve text-*/color conflicts the same way as the rest of the app.
+// cn()(utils.ts)과 동일한 typography 토큰 merge 수정을 재사용한다.
 export const tv = createTV({
   twMergeConfig: {
     extend: {
