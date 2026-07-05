@@ -10,6 +10,7 @@
 
 - `src/components/index.ts`
 - `src/components/<domain>/index.ts`
+- `src/components/<domain>/<ComponentName>/index.ts` (컴포넌트별 폴더 구조를 쓰는 경우)
 - `src/hooks/index.ts`
 - `src/hooks/<domain>/index.ts`
 
