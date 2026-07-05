@@ -47,17 +47,20 @@ Figma 또는 스크린샷에서 아래 항목을 먼저 정리합니다.
 
 | 성격 | 위치 |
 | --- | --- |
-| 여러 페이지에서 재사용 | `src/components/{ComponentName}.tsx` |
-| 특정 페이지 전용 section | `src/pages/{domain}/` 구현 시 생성 |
-| API 연결 hook | `src/hooks/use{Domain}.ts` |
+| 전역 재사용 컴포넌트 | `src/components/common/{ComponentName}/{ComponentName}.tsx` |
+| 특정 도메인 재사용 컴포넌트 | `src/components/{domain}/{ComponentName}/{ComponentName}.tsx` |
+| 특정 페이지 전용 조합 | `src/pages/{domain}/` 구현 시 생성 |
+| API 연결 hook | `src/hooks/{domain}/use{Domain}.ts` |
 | 순수 유틸 | `src/lib` |
+
+재사용 컴포넌트는 컴포넌트별 폴더에 두고 `.test.tsx`/`.stories.tsx`를 co-locate합니다. 같은 도메인의 다른 컴포넌트를 참조할 때는 `../ComponentName` 상대 import를 사용합니다.
 
 ### 4단계: 구현
 
 - 데이터 표시 UI는 loading, empty, error 상태를 분리합니다.
 - form UI는 React Hook Form + Zod 사용 여부를 먼저 판단합니다.
-- 반복 UI는 설정 배열/맵으로 렌더링합니다.
-- variant는 `as const` tuple, 파생 union, `satisfies Record<...>` 패턴을 우선합니다.
+- variant, controlled component, slot props 같은 컴포넌트 패턴은 `.claude/rules/component-guide.md`를 따릅니다.
+- 컴포넌트 폴더를 새로 만들거나 파일을 추가했으면 `pnpm gen:index`를 실행해 barrel을 갱신합니다.
 
 ### 5단계: 결과 보고
 
@@ -83,7 +86,6 @@ Figma 또는 스크린샷에서 아래 항목을 먼저 정리합니다.
 - 복잡한 Figma SVG path를 컴포넌트 안에 직접 작성하지 않습니다.
 - `className`은 필요한 경우 노출합니다.
 - inline style은 사용하지 않습니다.
-- variant는 문자열 union과 `satisfies Record<...>` 패턴을 우선 고려합니다.
 - 접근성 있는 button, input, label, dialog primitive를 사용합니다.
 - 텍스트 overflow가 가능한 flex/grid 자식에는 `min-w-0`와 `truncate` 필요성을 확인합니다.
 - 복잡한 SVG path를 직접 재작성하지 말고 에셋 또는 아이콘 패키지 사용을 우선합니다.
