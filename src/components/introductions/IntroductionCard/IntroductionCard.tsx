@@ -1,6 +1,6 @@
 import { Button } from '@components/common/Button'
-import { ImageBoxThumbnail } from './ImageBoxThumbnail'
-import { Inputfield } from './Inputfield'
+import { ImageBoxThumbnail } from '../ImageBoxThumbnail'
+import { Inputfield } from '../Inputfield'
 import { cn } from '@lib/utils'
 
 interface IntroductionCardProps {
