@@ -5,6 +5,7 @@
 1. 적절한 컴포넌트가 있으면 `@kusitms.com/ui`를 사용합니다.
 2. 접근성 있는 저수준 동작이 필요하면 Base UI primitive를 사용합니다.
 3. 프로젝트 라이브러리로 해결되지 않을 때만 커스텀 컴포넌트를 만듭니다.
+4. 아이콘은 `@kusitms.com/icons`를 우선하고, 없으면 `src/assets/icons/generated`(프로젝트 전용 아이콘)를 확인하고, 그래도 없을 때만 `lucide-react`를 사용합니다.
 
 ## 관리자 UI 기본값
 
@@ -52,9 +53,9 @@ interface ButtonProps extends ComponentPropsWithRef<'button'> {
   size?: 'sm' | 'md' | 'lg'
 }
 
-export const Button = ({ variant, size, className, ref, ...props }: ButtonProps) => {
+export const Button = ({ variant, size, className, ref, type = 'button', ...props }: ButtonProps) => {
   return (
-    <button ref={ref} className={buttonVariants({ variant, size, className })} {...props} />
+    <button ref={ref} type={type} className={buttonVariants({ variant, size, className })} {...props} />
   )
 }
 ```
