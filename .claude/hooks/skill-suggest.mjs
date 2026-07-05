@@ -1,4 +1,14 @@
-const prompt = process.env.CLAUDE_USER_PROMPT
+import { readFileSync } from 'node:fs'
+
+let payload
+
+try {
+  payload = JSON.parse(readFileSync(0, 'utf8'))
+} catch {
+  process.exit(0)
+}
+
+const prompt = payload.prompt ?? ''
 
 if (!prompt) {
   process.exit(0)

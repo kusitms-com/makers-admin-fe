@@ -1,23 +1,22 @@
-import { execSync } from 'node:child_process'
+import { readFileSync } from 'node:fs'
+import { execFileSync } from 'node:child_process'
 
-const toolInput = process.env.TOOL_INPUT
-
-if (!toolInput) {
-  process.exit(0)
-}
-
-let filePath = ''
+let payload
 
 try {
-  const json = JSON.parse(toolInput)
-  filePath = json.file_path ?? ''
+  payload = JSON.parse(readFileSync(0, 'utf8'))
 } catch {
   process.exit(0)
 }
 
+const filePath = payload.tool_input?.file_path ?? ''
+
 if (filePath && (filePath.endsWith('.ts') || filePath.endsWith('.tsx'))) {
   try {
-    const output = execSync(`pnpm exec eslint --quiet "${filePath}"`, { encoding: 'utf8' })
+    const output = execFileSync('pnpm', ['exec', 'eslint', '--quiet', filePath], {
+      encoding: 'utf8',
+      timeout: 30_000,
+    })
     console.log(output.trimEnd().split('\n').slice(-5).join('\n'))
   } catch (error) {
     const output = `${error.stdout ?? ''}${error.stderr ?? ''}`

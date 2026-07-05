@@ -1,27 +1,16 @@
-const inputText = process.env.CLAUDE_TOOL_INPUT
+import { readFileSync } from 'node:fs'
 
-if (!inputText) {
+let payload
+
+try {
+  payload = JSON.parse(readFileSync(0, 'utf8'))
+} catch {
   process.exit(0)
 }
 
-let filePath = ''
-let content = inputText
-
-try {
-  const parsed = JSON.parse(inputText)
-  if (parsed.file_path) {
-    filePath = parsed.file_path
-  }
-  if (parsed.new_string) {
-    content = parsed.new_string
-  } else if (parsed.content) {
-    content = parsed.content
-  } else if (parsed.command) {
-    content = parsed.command
-  }
-} catch {
-  // inputText가 JSON이 아니면 원본 텍스트를 그대로 검사한다.
-}
+const toolInput = payload.tool_input ?? {}
+const filePath = toolInput.file_path ?? ''
+const content = toolInput.new_string ?? toolInput.content ?? toolInput.command ?? ''
 
 const isCodeFile = /\.(ts|tsx|js|jsx)$/.test(filePath)
 
