@@ -31,7 +31,7 @@ export function PartnerImageBox({
       {imageUrl ? (
         <>
           <img src={imageUrl} alt={alt} className="h-[109px] w-[187px] object-cover" />
-          <div className="bg-fill-transparent-black absolute inset-0 hidden items-center justify-center gap-1.5 group-hover:flex">
+          <div className="bg-fill-transparent-black pointer-events-none absolute inset-0 flex items-center justify-center gap-1.5 opacity-0 transition-opacity group-focus-within:pointer-events-auto group-focus-within:opacity-100 group-hover:pointer-events-auto group-hover:opacity-100">
             <button
               type="button"
               onClick={onChange}
