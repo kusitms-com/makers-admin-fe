@@ -6,33 +6,27 @@
 
 ## 파일 배치
 
-- API 클라이언트와 요청 함수는 `src/api`에 둡니다.
-- 재사용 UI 컴포넌트는 `src/components`에 둡니다.
-- 커스텀 훅은 `src/hooks`에 둡니다.
-- 페이지 단위 컴포넌트는 `src/pages`에 둡니다.
-- 공통 유틸리티는 `src/lib`에 둡니다.
-- 공통 타입은 `src/types.ts`에 둘 수 있고, 특정 도메인에만 쓰이면 해당 도메인 파일 근처에 둡니다.
-- E2E 테스트는 `e2e`에 둡니다.
+| 위치 | 용도 |
+| --- | --- |
+| `src/api` | API 클라이언트, 요청 함수 |
+| `src/components` | 재사용 UI 컴포넌트 (`common` 또는 `{domain}`) |
+| `src/hooks` | 커스텀 훅 (`common` 또는 `{domain}`) |
+| `src/pages` | 라우트 진입점, 페이지 조립 |
+| `src/routes` | 라우터 설정, 라우트 정의 |
+| `src/layout` | Sidebar/PageHeader를 조합한 공통 레이아웃 셸 |
+| `src/lib` | 공통 유틸리티 |
+| `src/types.ts` | 공통 타입 (도메인 전용이면 해당 도메인 파일 근처) |
+| `e2e` | E2E 테스트 |
 
-## 도메인 폴더 생성 기준
+## 도메인 폴더
 
-- `src/api`, `src/hooks`, `src/pages`, `src/components`는 루트 위치로 유지합니다.
-- `src/pages/{domain}` 같은 도메인 폴더는 해당 기능 구현을 시작할 때 생성합니다.
+- 위 표의 루트 폴더는 항상 유지하고, `{domain}` 하위 폴더는 해당 기능 구현을 시작할 때 생성합니다.
 - 빈 도메인 폴더를 미리 만들지 않습니다.
-- 도메인별 예상 위치는 `.claude/references/domain/{domain}.md`의 `주요 위치`를 기준으로 합니다.
-- 구현 중 실제 구조가 달라지면 code와 domain reference를 함께 업데이트합니다.
+- 예상 위치는 `.claude/references/domain/{domain}.md`의 `주요 위치`를 기준으로 하고, 실제 구조가 달라지면 함께 업데이트합니다.
 
 ## Import 규칙
 
-가독성이 좋아지는 경우 설정된 alias를 사용합니다.
-
-- `@` -> `src`
-- `@api` -> `src/api`
-- `@components` -> `src/components`
-- `@hooks` -> `src/hooks`
-- `@pages` -> `src/pages`
-
-같은 폴더 안의 파일은 상대 import를 우선합니다.
+가독성이 좋아지는 경우 alias(`@`, `@api`, `@components`, `@hooks`, `@pages`)를 사용하고, 같은 폴더 안의 파일은 상대 import를 우선합니다.
 
 ## 경계
 
@@ -42,28 +36,22 @@
 - 훅은 API 함수를 TanStack Query로 감쌀 수 있습니다.
 - 도메인 모델이 명확해지기 전에는 도메인 간 결합을 피합니다.
 
-## 도메인 구조
+## 컴포넌트/훅 폴더 구조
 
 ```text
-src/pages/
-└── MembersPage.tsx
-
 src/components/
 ├── common/
+│   └── Button/
+│       ├── Button.tsx
+│       ├── Button.test.tsx
+│       └── Button.stories.tsx
 └── members/
 
 src/hooks/
 ├── common/
 └── members/
-
-src/api/
-└── members.ts
 ```
 
-- `src/pages`는 라우트 진입점과 페이지 조립 책임을 우선합니다.
-- 공용 UI는 `src/components/common`에 둡니다.
-- 특정 도메인 UI는 `src/components/{domain}`에 둡니다.
-- 공용 hook은 `src/hooks/common`에 둡니다.
-- 특정 도메인 hook은 `src/hooks/{domain}`에 둡니다.
-- `src/pages/{domain}/hooks`, `model`, `ui`처럼 FSD식 page-local 세그먼트는 기본으로 만들지 않습니다.
-- 도메인 폴더는 실제 파일이 생길 때 만들고, 빈 도메인 폴더를 미리 만들지 않습니다.
+- 재사용 컴포넌트는 `src/components/{domain}/{ComponentName}/{ComponentName}.tsx`처럼 컴포넌트별 폴더에 두고, `.test.tsx`/`.stories.tsx`를 co-locate합니다. `pnpm gen:index`가 이 구조를 재귀적으로 인식해 barrel `index.ts`를 생성합니다.
+- 같은 도메인의 다른 컴포넌트를 참조할 때는 `../ComponentName` 상대 import를 사용합니다.
+- `src/pages/{domain}/hooks`, `model`, `ui`처럼 FSD식 page-local 세그먼트는 만들지 않습니다.
