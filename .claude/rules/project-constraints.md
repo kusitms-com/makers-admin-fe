@@ -30,4 +30,4 @@
 ## 의존성
 
 - production dependency 추가 전에는 확인을 받습니다.
-- UI 라이브러리는 `@kusitms.com/ui` -> shadcn/ui -> Base UI 순으로 우선합니다.
+- UI 라이브러리는 `@kusitms.com/ui` -> Base UI 순으로 우선합니다.
