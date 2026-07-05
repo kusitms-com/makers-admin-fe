@@ -8,7 +8,7 @@ import {
   ReviewIcon,
 } from '@/assets/icons/generated'
 import { cn } from '@lib/utils'
-import { Logo } from './Logo'
+import { Logo } from '../Logo'
 
 export type SidebarNavKey =
   | 'introduction'
