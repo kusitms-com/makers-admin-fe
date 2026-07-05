@@ -5,11 +5,13 @@ import reactRefresh from 'eslint-plugin-react-refresh'
 import tseslint from 'typescript-eslint'
 import { defineConfig, globalIgnores } from 'eslint/config'
 import prettierConfig from 'eslint-config-prettier'
+import storybook from 'eslint-plugin-storybook'
 
 export default defineConfig([
   globalIgnores([
     'dist',
     'build',
+    'storybook-static',
     'node_modules',
     'coverage',
     'playwright-report',
@@ -26,7 +28,7 @@ export default defineConfig([
   reactHooks.configs.flat.recommended,
   reactRefresh.configs.vite,
   {
-    files: ['*.config.{ts,js}', 'e2e/**/*.ts'],
+    files: ['*.config.{ts,js}', 'e2e/**/*.ts', '.storybook/**/*.{ts,tsx}'],
     languageOptions: {
       globals: {
         ...globals.node,
@@ -46,7 +48,7 @@ export default defineConfig([
     },
   },
   {
-    files: ['src/**/*.{ts,tsx}', 'scripts/**/*.ts'],
+    files: ['src/**/*.{ts,tsx}', 'scripts/**/*.ts', '.storybook/**/*.{ts,tsx}'],
     extends: [...tseslint.configs.strictTypeChecked, ...tseslint.configs.stylisticTypeChecked],
     languageOptions: {
       globals: {
@@ -71,4 +73,5 @@ export default defineConfig([
     },
   },
   prettierConfig,
+  ...storybook.configs['flat/recommended'],
 ])
