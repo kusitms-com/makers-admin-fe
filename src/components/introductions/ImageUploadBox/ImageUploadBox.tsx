@@ -1,5 +1,5 @@
-import { useId, useRef, type ChangeEvent } from 'react'
 import { Button } from '@components/common/Button'
+import { useImageFileInput } from '@hooks/introductions/useImageFileInput'
 import UploadIcon from '@/assets/icons/generated/UploadIcon'
 import { cn } from '@lib/utils'
 
@@ -18,27 +18,11 @@ export function ImageUploadBox({
   onDelete,
   className,
 }: ImageUploadBoxProps) {
-  const inputId = useId()
-  const inputRef = useRef<HTMLInputElement>(null)
-
-  const handleFileChange = (event: ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0]
-    if (file) {
-      onFileChange?.(file)
-    }
-    event.target.value = ''
-  }
+  const { inputId, inputProps, openFilePicker } = useImageFileInput({ onFileChange })
 
   return (
     <div className={cn('flex w-[492px] flex-col gap-3', className)}>
-      <input
-        ref={inputRef}
-        id={inputId}
-        type="file"
-        accept="image/*"
-        onChange={handleFileChange}
-        className="sr-only"
-      />
+      <input {...inputProps} />
       {imageUrl ? (
         <>
           <div className="border-brand-tertiary h-[318px] w-full overflow-hidden rounded-lg border border-dashed">
@@ -48,12 +32,7 @@ export function ImageUploadBox({
             <Button variant="error" size="m" className="w-[120px]" onClick={onDelete}>
               삭제하기
             </Button>
-            <Button
-              variant="primary"
-              size="m"
-              className="w-[120px]"
-              onClick={() => inputRef.current?.click()}
-            >
+            <Button variant="primary" size="m" className="w-[120px]" onClick={openFilePicker}>
               교체하기
             </Button>
           </div>
