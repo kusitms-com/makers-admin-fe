@@ -6,11 +6,13 @@ import jsxA11y from 'eslint-plugin-jsx-a11y'
 import tseslint from 'typescript-eslint'
 import { defineConfig, globalIgnores } from 'eslint/config'
 import prettierConfig from 'eslint-config-prettier'
+import storybook from 'eslint-plugin-storybook'
 
 export default defineConfig([
   globalIgnores([
     'dist',
     'build',
+    'storybook-static',
     'node_modules',
     'coverage',
     'playwright-report',
@@ -31,7 +33,12 @@ export default defineConfig([
     files: ['**/*.{jsx,tsx}'],
   },
   {
-    files: ['*.config.{ts,js}', 'e2e/**/*.ts', '.claude/hooks/**/*.mjs'],
+    files: [
+      '*.config.{ts,js}',
+      'e2e/**/*.ts',
+      '.claude/hooks/**/*.mjs',
+      '.storybook/**/*.{ts,tsx}',
+    ],
     languageOptions: {
       globals: {
         ...globals.node,
@@ -51,7 +58,7 @@ export default defineConfig([
     },
   },
   {
-    files: ['src/**/*.{ts,tsx}', 'scripts/**/*.ts'],
+    files: ['src/**/*.{ts,tsx}', 'scripts/**/*.ts', '.storybook/**/*.{ts,tsx}'],
     extends: [...tseslint.configs.strictTypeChecked, ...tseslint.configs.stylisticTypeChecked],
     languageOptions: {
       globals: {
@@ -76,4 +83,5 @@ export default defineConfig([
     },
   },
   prettierConfig,
+  ...storybook.configs['flat/recommended'],
 ])

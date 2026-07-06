@@ -66,41 +66,47 @@ const renderIndex = (exportPaths: string[]) => {
   return `${GENERATED_TAG}\n\n${exportPaths.map((exportPath) => `export * from '${exportPath}'`).join('\n')}\n`
 }
 
-const collectFileExports = async (dir: string) => {
-  const entries = await readEntries(dir)
-
-  return entries
-    .filter((entry) => entry.isFile() && isExportableSourceFile(entry.name))
-    .map((entry) => sourceExportPath(entry.name))
-    .sort()
+interface DirExports {
+  exportPaths: string[]
+  targets: IndexTarget[]
 }
 
-const collectSegmentTargets = async (rootDir: string): Promise<IndexTarget[]> => {
-  const entries = await readEntries(rootDir)
-  const segmentDirs = entries
+const collectDirExports = async (dir: string): Promise<DirExports> => {
+  const entries = await readEntries(dir)
+  const targets: IndexTarget[] = []
+
+  const exportPaths = entries
+    .filter((entry) => entry.isFile() && isExportableSourceFile(entry.name))
+    .map((entry) => sourceExportPath(entry.name))
+
+  const subdirs = entries
     .filter((entry) => entry.isDirectory() && !entry.name.startsWith('.'))
     .map((entry) => entry.name)
     .sort()
 
-  const targets: IndexTarget[] = []
-  const rootExports = await collectFileExports(rootDir)
+  for (const subdir of subdirs) {
+    const subdirPath = join(dir, subdir)
+    const nested = await collectDirExports(subdirPath)
 
-  for (const segmentDir of segmentDirs) {
-    const dirPath = join(rootDir, segmentDir)
-    const exportPaths = await collectFileExports(dirPath)
-
+    targets.push(...nested.targets)
     targets.push({
-      content: renderIndex(exportPaths),
-      filePath: join(dirPath, 'index.ts'),
+      content: renderIndex(nested.exportPaths.sort()),
+      filePath: join(subdirPath, 'index.ts'),
     })
 
-    if (exportPaths.length > 0) {
-      rootExports.push(`./${segmentDir}`)
+    if (nested.exportPaths.length > 0) {
+      exportPaths.push(`./${subdir}`)
     }
   }
 
+  return { exportPaths, targets }
+}
+
+const collectRootTargets = async (rootDir: string): Promise<IndexTarget[]> => {
+  const { exportPaths, targets } = await collectDirExports(rootDir)
+
   targets.push({
-    content: renderIndex(rootExports.sort()),
+    content: renderIndex(exportPaths.sort()),
     filePath: join(rootDir, 'index.ts'),
   })
 
@@ -111,11 +117,11 @@ const collectTargets = async () => {
   const targets: IndexTarget[] = []
 
   if (await isDirectory(COMPONENTS_DIR)) {
-    targets.push(...(await collectSegmentTargets(COMPONENTS_DIR)))
+    targets.push(...(await collectRootTargets(COMPONENTS_DIR)))
   }
 
   if (await isDirectory(HOOKS_DIR)) {
-    targets.push(...(await collectSegmentTargets(HOOKS_DIR)))
+    targets.push(...(await collectRootTargets(HOOKS_DIR)))
   }
 
   return targets

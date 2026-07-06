@@ -1,5 +1,5 @@
 import { Button } from '@components/common/Button'
-import { ImageBoxThumbnail } from './ImageBoxThumbnail'
+import { ImageBoxThumbnail } from '../ImageBoxThumbnail'
 import { cn } from '@lib/utils'
 
 interface PartImageCardProps {
