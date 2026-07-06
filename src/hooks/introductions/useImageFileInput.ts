@@ -30,6 +30,7 @@ export function useImageFileInput({ onFileChange }: UseImageFileInputOptions) {
       accept: 'image/*',
       onChange: handleChange,
       className: 'sr-only',
+      tabIndex: -1,
     },
   }
 }
