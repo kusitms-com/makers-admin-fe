@@ -26,5 +26,4 @@
 - Tailwind `className`을 사용합니다.
 - inline style은 피합니다.
 - 색상과 의미 값은 `@kusitms.com/tokens`의 디자인 토큰을 우선 사용합니다.
-- 컴포넌트는 `@kusitms.com/ui`를 우선하고, 그다음 shadcn/ui 또는 Base UI를 사용합니다.
-- 아이콘은 `@kusitms.com/icons`를 우선하고, 프로젝트 아이콘이 없을 때만 `lucide-react`를 사용합니다.
+- 컴포넌트/아이콘 라이브러리 우선순위는 `.claude/rules/component-guide.md`를 따릅니다.

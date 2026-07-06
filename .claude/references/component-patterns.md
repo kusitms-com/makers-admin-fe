@@ -15,9 +15,10 @@
 
 | 성격 | 위치 |
 | --- | --- |
-| 여러 페이지에서 재사용 | `src/components/{ComponentName}.tsx` |
+| 전역 재사용 컴포넌트 | `src/components/common/{ComponentName}/{ComponentName}.tsx` |
+| 특정 도메인 재사용 컴포넌트 | `src/components/{domain}/{ComponentName}/{ComponentName}.tsx` |
 | 특정 페이지 전용 | `src/pages/{domain}/` |
-| API 연결 hook | `src/hooks/use{Domain}.ts` |
+| API 연결 hook | `src/hooks/{domain}/use{Domain}.ts` |
 | API 함수와 타입 | `src/api/{domain}.ts` |
 | 순수 유틸 | `src/lib` |
 

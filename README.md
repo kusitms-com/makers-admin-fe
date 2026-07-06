@@ -6,7 +6,7 @@
 - **Package Manager**: pnpm
 - **State**: Zustand (global), TanStack Query (server)
 - **Form**: React Hook Form + Zod
-- **UI**: shadcn + Tailwind CSS v4 + [@kusitms.com/ui](https://github.com/kusitms-com/makers-design-system)
+- **UI**: Tailwind CSS v4 + [@kusitms.com/ui](https://github.com/kusitms-com/makers-design-system)
 - **Test**: Vitest + React Testing Library
 - **E2E**: Playwright
 
@@ -44,8 +44,10 @@ src/
 ├── assets/       # 이미지와 SVG 아이콘 원본/생성물
 ├── components/   # UI 컴포넌트. common 또는 domain 폴더로 구분
 ├── hooks/        # React hook. common 또는 domain 폴더로 구분
+├── layout/       # Sidebar/PageHeader를 조합한 공통 레이아웃 셸
 ├── lib/          # 유틸리티
 ├── pages/        # 라우트 진입점과 페이지 조립
+├── routes/       # 라우터 설정과 라우트 정의
 ├── test/         # 테스트 setup
 └── types.ts      # 공통 타입
 ```

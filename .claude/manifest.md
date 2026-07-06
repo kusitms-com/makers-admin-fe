@@ -51,9 +51,9 @@ Tier 1은 코드 변경, 리뷰, 리팩터링처럼 실제 작업이 시작될 �
 
 Claude Code 환경에서는 `.claude/settings.json`이 아래 hook을 사용합니다.
 
-- `guard-rules.ps1`: `console.log`, 명시적 `any`, `npm`/`yarn`, Tailwind v3 설정 생성을 차단합니다.
-- `lint-check.ps1`: TypeScript 파일 수정 후 가능한 경우 `pnpm exec eslint --quiet <file>`을 실행합니다.
-- `skill-suggest.ps1`: 사용자 프롬프트 키워드에 맞는 local skill을 제안합니다.
+- `guard-rules.mjs`: `console.log`, 명시적 `any`, `npm`/`yarn`/`npx`, Tailwind v3 설정 생성을 차단합니다.
+- `lint-check.mjs`: TypeScript 파일 수정 후 가능한 경우 `pnpm exec eslint --quiet <file>`을 실행합니다.
+- `skill-suggest.mjs`: 사용자 프롬프트 키워드에 맞는 local skill을 제안합니다.
 
 ## API Reference
 
@@ -85,7 +85,14 @@ Claude Code 환경에서는 `.claude/settings.json`이 아래 hook을 사용합�
 
 - 단순 구현, 오타 수정, 일회성 UI 조정은 기록하지 않습니다.
 - 새 decision을 만들기 전 `.claude/decisions/README.md`를 먼저 확인합니다.
-- 파일명은 `NNN-short-title.md` 형식을 사용합니다.
+- 실제 문서는 `.claude/decisions/records/`에 `NNN-short-title.md` 형식으로 작성합니다.
+
+## Known Issues
+
+우리 코드로 고칠 수 없는 외부 요인 이슈(디자인 시스템/서드파티 패키지 값 오류, API 스펙 불일치 등)는 `.claude/known-issues/`에 기록합니다.
+
+- 새로 만들기 전 `.claude/known-issues/README.md`를 먼저 확인합니다.
+- 실제 문서는 `.claude/known-issues/records/`에 `short-title.md` 형식으로 작성합니다.
 
 ## 금지 패턴
 
