@@ -18,6 +18,9 @@ allowed-tools: Bash, Read, Grep, Glob
 4. `.claude/rules/data-fetching.md`
 5. `.claude/rules/testing.md`
 6. `.claude/rules/verification.md`
+7. `.claude/rules/project-constraints.md`
+8. `.claude/rules/component-guide.md`
+9. `.claude/rules/generated-workflows.md`
 
 ## Workflow
 
@@ -52,6 +55,13 @@ git diff --staged
 - 접근성 결함
 - 과도한 추상화 또는 요청 범위 밖 변경
 - 테스트/검증 누락
+- 컴포넌트가 과도하게 커졌거나(한 파일에 여러 책임 혼재) 동일 구조의 JSX가 3회 이상 반복될 때, 분리 또는 배열+순회(map)로 정리할 수 있는지
+- `architecture.md`의 import/파일 배치 규칙 위반 (같은 폴더 상대경로 대신 alias 남용, `src/services`/`src/views` 등 금지된 새 구조 생성)
+- 디자인 토큰 대신 하드코딩된 색상/간격 값 사용 (`@kusitms.com/tokens` 토큰으로 대체 가능한 hex, rgba, 임의 px 등)
+- `// @generated` 표시된 생성 파일(barrel index, 아이콘 컴포넌트)을 스크립트 재실행 없이 직접 수정한 흔적
+- `@kusitms.com/ui`/`@kusitms.com/icons`로 해결 가능한데 커스텀 구현이나 `lucide-react`를 먼저 사용한 경우
+- 생성/수정/삭제/승인/반려 mutation의 `onSuccess`에서 관련 query invalidate 누락
+- 데이터 기반 화면에서 loading/empty/error 상태 중 일부 누락
 
 ## Severity
 

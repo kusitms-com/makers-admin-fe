@@ -19,22 +19,24 @@
 - 기존 규칙을 그대로 따르는 CRUD 구현
 - 한 번 쓰고 끝나는 페이지 내부 구현 세부사항
 
-## 파일명
+## 파일 위치와 이름
 
-```text
-NNN-short-title.md
-```
+실제 decision 문서는 `.claude/decisions/records/`에 `NNN-short-title.md` 형식으로 둡니다. `README.md`와 `template.md`는 `records/`에 넣지 않고 `.claude/decisions/` 최상위에 둡니다.
 
 예시:
 
 ```text
-001-admin-api-reference.md
-002-query-key-policy.md
-003-page-folder-boundary.md
+.claude/decisions/
+├── README.md
+├── template.md
+└── records/
+    ├── 001-admin-api-reference.md
+    ├── 002-query-key-policy.md
+    └── 003-page-folder-boundary.md
 ```
 
 ## 작성 형식
 
-새 decision은 `.claude/decisions/template.md`를 복사한 형식으로 작성합니다.
+새 decision은 `.claude/decisions/template.md`를 복사해 `.claude/decisions/records/`에 작성합니다.
 
 문서는 길게 쓰지 않습니다. 결정 이유, 버린 대안, 이후 수정자가 지켜야 할 점만 남깁니다.

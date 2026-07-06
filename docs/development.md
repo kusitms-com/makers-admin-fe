@@ -1,6 +1,6 @@
 # Development Guide
 
-새 팀원이 알아두어야 할 이 프로젝트 고유의 개발 규칙을 설명합니다.
+팀원이 알아두어야 할 이 프로젝트 고유의 개발 규칙을 설명합니다.
 기본 명령어와 기술 스택은 [README](../README.md)를 참고하세요.
 
 ## API 작업
@@ -15,11 +15,23 @@ endpoint 경로, request body, response 타입을 추측해서 작성하지 않�
 ## 컴포넌트 선택 우선순위
 
 1. `@kusitms.com/ui` — 프로젝트 공용 컴포넌트 라이브러리
-2. 이미 설치된 shadcn/ui 패턴
-3. Base UI primitive (접근성 있는 저수준 동작이 필요할 때)
-4. 커스텀 컴포넌트 (위 세 가지로 해결 안 될 때만)
+2. Base UI primitive (접근성 있는 저수준 동작이 필요할 때)
+3. 커스텀 컴포넌트 (위 두 가지로 해결 안 될 때만)
 
 아이콘은 `@kusitms.com/icons` 우선, 없으면 `lucide-react`를 사용합니다.
+
+## 컴포넌트 파일 구조
+
+재사용 컴포넌트는 `src/components/{domain}/{ComponentName}/{ComponentName}.tsx`처럼 컴포넌트별 폴더에 두고, 같은 폴더에 `.test.tsx`/`.stories.tsx`를 co-locate합니다.
+
+```text
+src/components/common/Button/
+├── Button.tsx
+├── Button.test.tsx
+└── Button.stories.tsx
+```
+
+같은 도메인의 다른 컴포넌트를 참조할 때는 `../ComponentName` 상대 import를 사용합니다. 자세한 배경은 `.claude/decisions/records/002-component-per-folder.md` 참고.
 
 ## 생성 파일 워크플로우
 
@@ -45,6 +57,10 @@ pnpm gen:index
 - `src/pages/`, `src/api/`는 대상이 아닙니다.
 
 이 두 가지를 빠뜨리면 CI의 Generated 항목이 실패합니다.
+
+## 커밋
+
+커밋 메시지는 `/commit-kr` agent skill로 작성하거나, `husky` + `commitlint`의 `commit-msg` 훅으로 자동 검사됩니다. type 종류와 subject 작성 기준은 `.claude/rules/commit-convention.md` 참고.
 
 ## 환경변수
 

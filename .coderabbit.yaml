@@ -2,10 +2,10 @@
 language: 'ko-KR'
 early_access: false
 
-tone_instructions: '한국어로 짧고 기술적으로 리뷰한다. 명확한 버그, 보안, 접근성, 타입 안정성, API 계약 위반, 회귀 위험만 인라인 코멘트로 남긴다. 취향, 네이밍 선호, 단순 스타일, 아직 구현 중인 스캐폴딩에는 코멘트를 남기지 않는다.'
+tone_instructions: '한국어로 짧고 기술적으로 리뷰한다. 버그/보안/접근성/타입/API 계약/회귀 위험과 함께 불필요한 추상화, 테스트 누락, 단순화 가능한 로직도 코멘트한다. lint가 막는 any·console.log·포맷팅은 중복 지적하지 않는다. 네이밍·취향 코멘트는 남기지 않는다.'
 
 reviews:
-  profile: 'chill'
+  profile: 'assertive'
   high_level_summary: true
   request_changes_workflow: false
   review_status: true
@@ -42,16 +42,19 @@ reviews:
     - path: 'src/**'
       instructions: |
         프로젝트의 기존 구조와 패턴을 우선한다.
-        불필요한 추상화, 관련 없는 리팩터링, 하드코딩된 색상, 명시적 any, console.log를 중점 확인한다.
-        단순 스타일 취향이나 대안 제안만으로 인라인 코멘트를 남기지 않는다.
+        불필요한 추상화, 관련 없는 리팩터링, 하드코딩된 색상, 과도하게 커진 컴포넌트, 반복되는 JSX를 중점 확인한다.
+        any, console.log, 포맷팅처럼 ESLint/Prettier가 이미 차단하는 항목은 지적하지 않는다.
     - path: 'src/api/**'
       instructions: |
         Swagger 기반 admin API 계약과 요청/응답 타입이 맞는지 우선 검토한다.
-        TanStack Query cache key, mutation invalidation, 에러 처리 누락처럼 실제 회귀 위험이 있을 때만 코멘트한다.
+        TanStack Query cache key, mutation invalidation, 에러 처리 누락, loading/empty/error 상태 누락을 확인한다.
     - path: '**/*.{ts,tsx}'
       instructions: |
         타입 안정성, React 상태/효과 사용, 접근성, 테스트 필요성을 검토한다.
         useState와 useEffect로 서버 데이터를 직접 fetch하는 패턴은 지적하고 TanStack Query 사용을 제안한다.
+    - path: '**/*.stories.tsx'
+      instructions: |
+        스토리 파일은 테스트 커버리지나 프로덕션 코드 품질 기준으로 검토하지 않는다.
 
   tools:
     gitleaks:
