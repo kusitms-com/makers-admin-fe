@@ -43,7 +43,7 @@ src/assets/icons/
 
 규칙:
 
-- 일반 아이콘은 `src/assets/icons/svg`에 둡니다.
+- 일반 아이콘은 `src/assets/icons/svg`에 둡니다. Figma export가 하위 폴더를 포함해도 `build-icons.ts`가 재귀적으로 인식하지만, 새 아이콘은 특별한 이유가 없으면 최상위에 평면으로 둡니다.
 - 로고, 브랜드, 멀티컬러 자산처럼 색상을 유지해야 하는 SVG는 `src/assets/icons/svg-preserve`에 둡니다.
 - 생성된 React 컴포넌트는 `src/assets/icons/generated`에 생깁니다.
 - generated 파일은 직접 수정하지 말고 원본 SVG 또는 `scripts/build-icons.ts`를 수정합니다.

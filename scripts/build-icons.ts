@@ -65,7 +65,7 @@ const readIconSources = async (
     return []
   }
 
-  return entries
+  const files = entries
     .filter((entry) => entry.isFile() && extname(entry.name).toLowerCase() === '.svg')
     .map((entry) => ({
       componentName: toComponentName(entry.name),
@@ -73,7 +73,15 @@ const readIconSources = async (
       filePath: join(sourceDir, entry.name),
       preserveColors,
     }))
-    .sort((left, right) => left.componentName.localeCompare(right.componentName))
+
+  const subdirs = entries.filter((entry) => entry.isDirectory())
+  const nested = await Promise.all(
+    subdirs.map((entry) => readIconSources(join(sourceDir, entry.name), preserveColors)),
+  )
+
+  return [...files, ...nested.flat()].sort((left, right) =>
+    left.componentName.localeCompare(right.componentName),
+  )
 }
 
 const renderComponent = async (source: IconSource) => {
