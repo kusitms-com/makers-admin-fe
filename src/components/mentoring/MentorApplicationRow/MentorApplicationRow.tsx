@@ -1,4 +1,5 @@
 import { Select } from '@base-ui/react/select'
+import { User } from 'lucide-react'
 import ChevronDownIcon from '@/assets/icons/generated/ChevronDownIcon'
 import DeleteIcon from '@/assets/icons/generated/DeleteIcon'
 import { FileChip } from '@components/common/FileChip/FileChip'
@@ -102,7 +103,12 @@ export function MentorApplicationRow({
         {avatarUrl ? (
           <img src={avatarUrl} alt="" className="size-7 shrink-0 rounded-full object-cover" />
         ) : (
-          <div className="bg-fill-alternative size-7 shrink-0 rounded-full" aria-hidden="true" />
+          <div
+            className="bg-fill-alternative flex size-7 shrink-0 items-center justify-center rounded-full"
+            aria-hidden="true"
+          >
+            <User className="text-label-assitive size-4" />
+          </div>
         )}
         <Field className="whitespace-nowrap">{name}</Field>
       </div>
@@ -119,15 +125,15 @@ export function MentorApplicationRow({
         <Field className="whitespace-nowrap">{phone}</Field>
       </div>
 
-      <div className="flex h-full w-[180px] shrink-0 items-center justify-center overflow-hidden px-3 py-[21px] pb-px">
+      <div className="flex h-full w-[180px] shrink-0 items-center justify-center overflow-hidden px-3 py-[21px]">
         <Field className="w-full truncate">{email}</Field>
       </div>
 
-      <div className="flex h-full w-[120px] shrink-0 items-center justify-center overflow-hidden px-3 py-[21px] pb-px">
+      <div className="flex h-full min-w-[120px] shrink-0 items-center justify-center overflow-hidden px-3 py-[21px]">
         <Field className="w-full truncate">{appliedAt}</Field>
       </div>
 
-      <div className="flex h-full w-[72px] shrink-0 items-center justify-center px-3 py-[21px] pb-px">
+      <div className="flex h-full w-[72px] shrink-0 items-center justify-center px-3 py-[21px]">
         <Field>{isApplied ? 'Y' : 'N'}</Field>
       </div>
 
