@@ -1,7 +1,15 @@
 // @generated
 
 export * from './Button'
+export * from './CohortBadge'
+export * from './FileChip'
 export * from './Logo'
 export * from './PageHeader'
+export * from './Pagination'
+export * from './PartBadge'
+export * from './ReviewTable'
+export * from './ReviewTableRow'
 export * from './SegmentedControl'
 export * from './Sidebar'
+export * from './StatusChip'
+export * from './TableFooter'
