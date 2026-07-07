@@ -18,7 +18,11 @@ interface ReviewTableRowProps {
 }
 
 function Label({ children, className }: { children: string; className?: string }) {
-  return <span className={cn('text-label-14m text-label-normal', className)}>{children}</span>
+  return (
+    <span className={cn('text-label-14m text-label-normal whitespace-nowrap', className)}>
+      {children}
+    </span>
+  )
 }
 
 export function ReviewTableRow({
@@ -49,14 +53,14 @@ export function ReviewTableRow({
         </div>
 
         {isMemberReview && fileName && (
-          <div className="flex h-full w-[161px] shrink-0 items-center justify-center px-3">
+          <div className="flex h-full w-[161px] shrink-0 flex-col items-center justify-center px-3">
             <FileChip fileName={fileName} className="w-full" />
           </div>
         )}
 
         <div
           className={cn(
-            'flex h-full w-[90px] shrink-0 items-start justify-center py-[14.5px]',
+            'flex h-full w-[90px] shrink-0 flex-col items-start justify-center py-[14.5px]',
             isMemberReview ? 'px-3' : 'pl-[18px]',
           )}
         >
@@ -65,7 +69,7 @@ export function ReviewTableRow({
 
         <div
           className={cn(
-            'flex h-full w-[100px] shrink-0 items-start justify-center py-[21px] pl-[18px]',
+            'flex h-full w-[100px] shrink-0 flex-col items-start justify-center py-[21px] pl-[18px]',
             isMemberReview && 'pr-[18px]',
           )}
         >
@@ -75,7 +79,7 @@ export function ReviewTableRow({
         {extraLabel && (
           <div
             className={cn(
-              'flex h-full shrink-0 items-start justify-center py-[21px]',
+              'flex h-full shrink-0 flex-col items-start justify-center py-[21px]',
               isMemberReview ? 'px-[18px]' : 'w-[90px] pr-9 pl-[18px]',
             )}
           >
@@ -85,7 +89,7 @@ export function ReviewTableRow({
 
         <div
           className={cn(
-            'flex h-full min-w-px flex-1 items-start justify-center overflow-hidden pb-px',
+            'flex h-full min-w-px flex-1 flex-col items-start justify-center overflow-hidden pb-px',
             isMemberReview ? 'px-[18px]' : 'pl-3',
           )}
         >
@@ -93,7 +97,7 @@ export function ReviewTableRow({
         </div>
       </div>
 
-      <div className="flex h-full shrink-0 items-end py-5 pr-[18px]">
+      <div className="flex h-full shrink-0 items-center py-5 pr-[18px]">
         <button
           type="button"
           onClick={onDelete}
