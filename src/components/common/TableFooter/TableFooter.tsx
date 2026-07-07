@@ -20,7 +20,7 @@ export function TableFooter({
   return (
     <div
       className={cn(
-        'bg-fill-netural border-line-alternative flex items-center justify-between border-t px-[18px] py-3.5',
+        'bg-fill-netural border-line-alternative flex h-16 items-center justify-between border-t px-[18px] pt-[17px] pb-[18px]',
         className,
       )}
     >
@@ -49,7 +49,9 @@ export function TableFooter({
               aria-current={isActive ? 'page' : undefined}
               className={cn(
                 'text-label-13sb flex size-[30px] items-center justify-center rounded-md',
-                isActive ? 'bg-fill-alternative text-label-normal' : 'text-label-alternative',
+                isActive
+                  ? 'bg-fill-alternative text-label-normal'
+                  : 'bg-fill-normal text-label-alternative',
               )}
             >
               {pageNumber}
