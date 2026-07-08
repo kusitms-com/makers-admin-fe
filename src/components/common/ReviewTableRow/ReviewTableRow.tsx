@@ -52,9 +52,9 @@ export function ReviewTableRow({
           <Label>{name}</Label>
         </div>
 
-        {isMemberReview && fileName && (
+        {isMemberReview && (
           <div className="flex h-full w-[161px] shrink-0 flex-col items-center justify-center px-3">
-            <FileChip fileName={fileName} className="w-full" />
+            {fileName && <FileChip fileName={fileName} className="w-full" />}
           </div>
         )}
 
@@ -76,16 +76,14 @@ export function ReviewTableRow({
           <PartBadge part={part} />
         </div>
 
-        {extraLabel && (
-          <div
-            className={cn(
-              'flex h-full shrink-0 flex-col items-start justify-center py-[21px]',
-              isMemberReview ? 'px-[18px]' : 'w-[90px] pr-9 pl-[18px]',
-            )}
-          >
-            <Label>{extraLabel}</Label>
-          </div>
-        )}
+        <div
+          className={cn(
+            'flex h-full shrink-0 flex-col items-start justify-center py-[21px]',
+            isMemberReview ? 'w-[140px] px-[18px]' : 'w-[90px] pr-9 pl-[18px]',
+          )}
+        >
+          {extraLabel && <Label>{extraLabel}</Label>}
+        </div>
 
         <div
           className={cn(
