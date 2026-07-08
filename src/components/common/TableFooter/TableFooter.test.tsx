@@ -43,4 +43,12 @@ describe('TableFooter', () => {
       true,
     )
   })
+
+  it('마지막 페이지에서는 다음 페이지 버튼이 비활성화된다', () => {
+    render(<TableFooter page={3} totalPages={3} onPageChange={vi.fn()} totalLabel="총 6개" />)
+
+    expect(screen.getByRole<HTMLButtonElement>('button', { name: '다음 페이지' }).disabled).toBe(
+      true,
+    )
+  })
 })
