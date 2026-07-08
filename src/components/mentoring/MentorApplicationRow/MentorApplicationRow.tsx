@@ -145,18 +145,17 @@ export function MentorApplicationRow({
         <button
           type="button"
           onClick={onDelete}
+          disabled={!onDelete}
           aria-label="삭제"
-          className="bg-fill-destructive flex size-9 shrink-0 items-center justify-center rounded-full"
+          className="bg-fill-destructive flex size-9 shrink-0 items-center justify-center rounded-full disabled:opacity-50"
         >
           <DeleteIcon className="text-status-negative size-6" aria-hidden="true" />
         </button>
       </div>
 
-      {fileName && (
-        <div className="flex h-full min-w-px flex-1 items-center justify-center px-3">
-          <FileChip fileName={fileName} className="w-full" />
-        </div>
-      )}
+      <div className="flex h-full min-w-px flex-1 items-center justify-center px-3">
+        {fileName && <FileChip fileName={fileName} className="w-full" />}
+      </div>
     </div>
   )
 }

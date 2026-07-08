@@ -113,6 +113,25 @@ describe('MentorApplicationRow', () => {
     expect(onDelete).toHaveBeenCalledTimes(1)
   })
 
+  it('onDelete가 없으면 삭제 버튼이 비활성화된다', () => {
+    render(
+      <MentorApplicationRow
+        name="이현진"
+        generation={33}
+        part="PLAN"
+        phone="010-1234-5678"
+        email="abc12345@gmail.com"
+        appliedAt="26.03.12 18:33"
+        isApplied
+        status="rejected"
+        statusOptions={STATUS_OPTIONS}
+        onStatusChange={vi.fn()}
+      />,
+    )
+
+    expect(screen.getByRole<HTMLButtonElement>('button', { name: '삭제' }).disabled).toBe(true)
+  })
+
   it('드롭다운에서 상태를 선택하면 onStatusChange가 호출된다', async () => {
     const user = userEvent.setup()
     const onStatusChange = vi.fn()
