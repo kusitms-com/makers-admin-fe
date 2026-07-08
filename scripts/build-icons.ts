@@ -79,9 +79,7 @@ const readIconSources = async (
     subdirs.map((entry) => readIconSources(join(sourceDir, entry.name), preserveColors)),
   )
 
-  return [...files, ...nested.flat()].sort((left, right) =>
-    left.componentName.localeCompare(right.componentName),
-  )
+  return [...files, ...nested.flat()]
 }
 
 const renderComponent = async (source: IconSource) => {
