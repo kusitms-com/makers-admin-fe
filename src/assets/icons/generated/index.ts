@@ -4,6 +4,7 @@ export type { SVGProps as IconProps } from 'react'
 
 export { default as AddIcon } from './AddIcon'
 export { default as AdminWordmark } from './AdminWordmark'
+export { default as AttachFileIcon } from './AttachFileIcon'
 export { default as BlogIcon } from './BlogIcon'
 export { default as CancelIcon } from './CancelIcon'
 export { default as CheckIcon } from './CheckIcon'
