@@ -1,16 +1,34 @@
-/* eslint-disable react-refresh/only-export-components -- compound component: ModalRoot/Title/Body/Footer merge into a single `Modal` export via Object.assign, which react-refresh's static analysis can't verify as HMR-safe. */
 import type { ReactNode } from 'react'
 import { Dialog } from '@base-ui/react/dialog'
 import { cn } from '@lib/utils'
 
-interface ModalRootProps {
+interface ModalProps {
   open: boolean
   onOpenChange: (open: boolean) => void
+  title?: string
+  header?: ReactNode
+  footer?: ReactNode
   children: ReactNode
   className?: string
 }
 
-function ModalRoot({ open, onOpenChange, children, className }: ModalRootProps) {
+export function Modal({
+  open,
+  onOpenChange,
+  title,
+  header,
+  footer,
+  children,
+  className,
+}: ModalProps) {
+  const headerContent =
+    header ??
+    (title && (
+      <Dialog.Title className="border-line-neutral text-body-18b text-label-normal shrink-0 border-b px-6 pt-5 pb-[18px]">
+        {title}
+      </Dialog.Title>
+    ))
+
   return (
     <Dialog.Root open={open} onOpenChange={onOpenChange}>
       <Dialog.Portal>
@@ -21,64 +39,15 @@ function ModalRoot({ open, onOpenChange, children, className }: ModalRootProps) 
             className,
           )}
         >
-          {children}
+          {headerContent}
+          <div className="flex flex-col gap-6 overflow-y-auto px-6 pt-[18px] pb-6">{children}</div>
+          {footer && (
+            <div className="border-line-alternative flex shrink-0 items-center justify-center gap-2.5 border-t px-6 pt-4 pb-5">
+              {footer}
+            </div>
+          )}
         </Dialog.Popup>
       </Dialog.Portal>
     </Dialog.Root>
   )
 }
-
-interface ModalTitleProps {
-  children: ReactNode
-  className?: string
-}
-
-function ModalTitle({ children, className }: ModalTitleProps) {
-  return (
-    <Dialog.Title
-      className={cn(
-        'border-line-neutral text-body-18b text-label-normal shrink-0 border-b px-6 pt-5 pb-[18px]',
-        className,
-      )}
-    >
-      {children}
-    </Dialog.Title>
-  )
-}
-
-interface ModalBodyProps {
-  children: ReactNode
-  className?: string
-}
-
-function ModalBody({ children, className }: ModalBodyProps) {
-  return (
-    <div className={cn('flex flex-col gap-6 overflow-y-auto px-6 pt-[18px] pb-6', className)}>
-      {children}
-    </div>
-  )
-}
-
-interface ModalFooterProps {
-  children: ReactNode
-  className?: string
-}
-
-function ModalFooter({ children, className }: ModalFooterProps) {
-  return (
-    <div
-      className={cn(
-        'border-line-alternative flex shrink-0 items-center justify-center gap-2.5 border-t px-6 pt-4 pb-5',
-        className,
-      )}
-    >
-      {children}
-    </div>
-  )
-}
-
-export const Modal = Object.assign(ModalRoot, {
-  Title: ModalTitle,
-  Body: ModalBody,
-  Footer: ModalFooter,
-})
