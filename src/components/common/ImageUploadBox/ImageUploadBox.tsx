@@ -4,6 +4,7 @@ import UploadIcon from '@/assets/icons/generated/UploadIcon'
 import { cn } from '@lib/utils'
 
 interface ImageUploadBoxProps {
+  id?: string
   imageUrl?: string
   alt?: string
   onFileChange?: (file: File) => void
@@ -12,13 +13,14 @@ interface ImageUploadBoxProps {
 }
 
 export function ImageUploadBox({
+  id,
   imageUrl,
   alt = '',
   onFileChange,
   onDelete,
   className,
 }: ImageUploadBoxProps) {
-  const { inputId, inputProps, openFilePicker } = useImageFileInput({ onFileChange })
+  const { inputId, inputProps, openFilePicker } = useImageFileInput({ id, onFileChange })
 
   return (
     <div className={cn('flex w-full flex-col gap-3', className)}>
