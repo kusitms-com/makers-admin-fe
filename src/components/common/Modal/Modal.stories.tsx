@@ -10,8 +10,14 @@ const meta = {
   args: {
     open: true,
     onOpenChange: () => {},
-    title: '기업 프로젝트 등록',
-    children: <p>모달 본문 영역입니다.</p>,
+    children: (
+      <>
+        <Modal.Title>기업 프로젝트 등록</Modal.Title>
+        <Modal.Body>
+          <p className="text-label-14m text-label-normal">모달 본문 영역입니다.</p>
+        </Modal.Body>
+      </>
+    ),
   },
 } satisfies Meta<typeof Modal>
 
@@ -32,29 +38,26 @@ function ModalDemo() {
       >
         모달 열기
       </Button>
-      <Modal
-        open={open}
-        onOpenChange={setOpen}
-        title="기업 프로젝트 등록"
-        footer={
-          <>
-            <Button
-              variant="error"
-              size="l"
-              className="w-[140px]"
-              onClick={() => {
-                setOpen(false)
-              }}
-            >
-              취소하기
-            </Button>
-            <Button variant="disable" size="l" className="w-[140px]">
-              저장하기
-            </Button>
-          </>
-        }
-      >
-        <p className="text-label-14m text-label-normal">모달 본문 영역입니다.</p>
+      <Modal open={open} onOpenChange={setOpen}>
+        <Modal.Title>기업 프로젝트 등록</Modal.Title>
+        <Modal.Body>
+          <p className="text-label-14m text-label-normal">모달 본문 영역입니다.</p>
+        </Modal.Body>
+        <Modal.Footer>
+          <Button
+            variant="error"
+            size="l"
+            className="w-[140px]"
+            onClick={() => {
+              setOpen(false)
+            }}
+          >
+            취소하기
+          </Button>
+          <Button variant="disable" size="l" className="w-[140px]">
+            저장하기
+          </Button>
+        </Modal.Footer>
       </Modal>
     </>
   )

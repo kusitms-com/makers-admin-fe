@@ -48,60 +48,56 @@ export function BlogReviewModal({
   className,
 }: BlogReviewModalProps) {
   return (
-    <Modal
-      open={open}
-      onOpenChange={onOpenChange}
-      title="블로그 후기 등록"
-      className={className}
-      footer={
-        <>
-          <Button variant="error" size="l" className="w-[140px]" onClick={onCancel}>
-            취소하기
-          </Button>
-          <Button
-            variant={saveDisabled ? 'disable' : 'strong'}
-            size="l"
-            className="w-[140px]"
-            disabled={saveDisabled}
-            onClick={onSave}
-          >
-            저장하기
-          </Button>
-        </>
-      }
-    >
-      <div className="flex items-stretch gap-3">
-        <FormField label="기수" className="flex-1">
-          <SelectField value={`${String(cardinal)}기`} options={[]} />
+    <Modal open={open} onOpenChange={onOpenChange} className={className}>
+      <Modal.Title>블로그 후기 등록</Modal.Title>
+      <Modal.Body>
+        <div className="flex items-stretch gap-3">
+          <FormField label="기수" className="flex-1">
+            <SelectField value={`${String(cardinal)}기`} options={[]} />
+          </FormField>
+          <FormField label="파트" className="flex-1">
+            <SelectField value={part} options={partOptions} onValueChange={onPartChange} />
+          </FormField>
+        </div>
+        <FormField label="활동">
+          <SelectField
+            value={activity}
+            options={activityOptions}
+            onValueChange={onActivityChange}
+            placeholder="활동을 선택해주세요"
+          />
         </FormField>
-        <FormField label="파트" className="flex-1">
-          <SelectField value={part} options={partOptions} onValueChange={onPartChange} />
+        <FormField label="제목">
+          <Inputfield
+            value={title}
+            onChange={(event: ChangeEvent<HTMLInputElement>) => {
+              onTitleChange(event.target.value)
+            }}
+            placeholder="제목을 입력해주세요"
+          />
         </FormField>
-      </div>
-      <FormField label="활동">
-        <SelectField
-          value={activity}
-          options={activityOptions}
-          onValueChange={onActivityChange}
-          placeholder="활동을 선택해주세요"
-        />
-      </FormField>
-      <FormField label="제목">
-        <Inputfield
-          value={title}
-          onChange={(event: ChangeEvent<HTMLInputElement>) => {
-            onTitleChange(event.target.value)
-          }}
-          placeholder="제목을 입력해주세요"
-        />
-      </FormField>
-      <FormField label="미리보기 이미지">
-        <ImageUploadBox
-          imageUrl={thumbnailUrl}
-          onFileChange={onThumbnailChange}
-          onDelete={onThumbnailDelete}
-        />
-      </FormField>
+        <FormField label="미리보기 이미지">
+          <ImageUploadBox
+            imageUrl={thumbnailUrl}
+            onFileChange={onThumbnailChange}
+            onDelete={onThumbnailDelete}
+          />
+        </FormField>
+      </Modal.Body>
+      <Modal.Footer>
+        <Button variant="error" size="l" className="w-[140px]" onClick={onCancel}>
+          취소하기
+        </Button>
+        <Button
+          variant={saveDisabled ? 'disable' : 'strong'}
+          size="l"
+          className="w-[140px]"
+          disabled={saveDisabled}
+          onClick={onSave}
+        >
+          저장하기
+        </Button>
+      </Modal.Footer>
     </Modal>
   )
 }

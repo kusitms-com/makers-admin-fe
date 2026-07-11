@@ -40,58 +40,54 @@ export function CompanyProjectModal({
   className,
 }: CompanyProjectModalProps) {
   return (
-    <Modal
-      open={open}
-      onOpenChange={onOpenChange}
-      title="기업 프로젝트 등록"
-      className={className}
-      footer={
-        <>
-          <Button variant="error" size="l" className="w-[140px]" onClick={onCancel}>
-            취소하기
-          </Button>
-          <Button
-            variant={saveDisabled ? 'disable' : 'strong'}
-            size="l"
-            className="w-[140px]"
-            disabled={saveDisabled}
-            onClick={onSave}
-          >
-            저장하기
-          </Button>
-        </>
-      }
-    >
-      <div className="flex items-stretch gap-3">
-        <FormField label="기수" className="w-[130px] shrink-0">
-          <SelectField value={`${String(cardinal)}기`} options={[]} />
-        </FormField>
-        <FormField label="기업 이름" className="flex-1">
+    <Modal open={open} onOpenChange={onOpenChange} className={className}>
+      <Modal.Title>기업 프로젝트 등록</Modal.Title>
+      <Modal.Body>
+        <div className="flex items-stretch gap-3">
+          <FormField label="기수" className="w-[130px] shrink-0">
+            <SelectField value={`${String(cardinal)}기`} options={[]} />
+          </FormField>
+          <FormField label="기업 이름" className="flex-1">
+            <Inputfield
+              value={name}
+              onChange={(event: ChangeEvent<HTMLInputElement>) => {
+                onNameChange(event.target.value)
+              }}
+              placeholder="기업 이름을 입력해주세요"
+            />
+          </FormField>
+        </div>
+        <FormField label="프로젝트 소개">
           <Inputfield
-            value={name}
+            value={content}
             onChange={(event: ChangeEvent<HTMLInputElement>) => {
-              onNameChange(event.target.value)
+              onContentChange(event.target.value)
             }}
-            placeholder="기업 이름을 입력해주세요"
+            placeholder="프로젝트 소개를 입력해주세요"
           />
         </FormField>
-      </div>
-      <FormField label="프로젝트 소개">
-        <Inputfield
-          value={content}
-          onChange={(event: ChangeEvent<HTMLInputElement>) => {
-            onContentChange(event.target.value)
-          }}
-          placeholder="프로젝트 소개를 입력해주세요"
-        />
-      </FormField>
-      <FormField label="배너">
-        <ImageUploadBox
-          imageUrl={bannerUrl}
-          onFileChange={onBannerChange}
-          onDelete={onBannerDelete}
-        />
-      </FormField>
+        <FormField label="배너">
+          <ImageUploadBox
+            imageUrl={bannerUrl}
+            onFileChange={onBannerChange}
+            onDelete={onBannerDelete}
+          />
+        </FormField>
+      </Modal.Body>
+      <Modal.Footer>
+        <Button variant="error" size="l" className="w-[140px]" onClick={onCancel}>
+          취소하기
+        </Button>
+        <Button
+          variant={saveDisabled ? 'disable' : 'strong'}
+          size="l"
+          className="w-[140px]"
+          disabled={saveDisabled}
+          onClick={onSave}
+        >
+          저장하기
+        </Button>
+      </Modal.Footer>
     </Modal>
   )
 }

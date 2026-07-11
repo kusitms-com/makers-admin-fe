@@ -90,160 +90,167 @@ export function MeetupProjectModal({
   }
 
   return (
-    <Modal
-      open={open}
-      onOpenChange={onOpenChange}
-      title="밋업 프로젝트 등록"
-      className={className ?? 'w-[540px]'}
-      footer={
-        <>
-          <Button variant="error" size="l" className="w-[140px]" onClick={onCancel}>
-            취소하기
-          </Button>
-          <Button
-            variant={saveDisabled ? 'disable' : 'strong'}
-            size="l"
-            className="w-[140px]"
-            disabled={saveDisabled}
-            onClick={onSave}
-          >
-            저장하기
-          </Button>
-        </>
-      }
-    >
-      <div className="flex items-stretch gap-3">
-        <FormField label="기수" className="w-[130px] shrink-0">
-          <SelectField value={`${String(cardinal)}기`} options={[]} />
-        </FormField>
-        <FormField label="유형" className="shrink-0">
-          <SelectField
-            value={type}
-            options={typeOptions}
-            onValueChange={onTypeChange}
-            className="w-24"
-          />
-        </FormField>
-        <FormField label="프로젝트 이름" className="flex-1">
-          <Inputfield
-            value={name}
-            onChange={(event: ChangeEvent<HTMLInputElement>) => {
-              onNameChange(event.target.value)
-            }}
-            placeholder="서비스 이름을 입력해주세요"
-          />
-        </FormField>
-      </div>
-      <FormField label="한 줄 소개">
-        <Inputfield
-          value={oneLineIntro}
-          onChange={(event: ChangeEvent<HTMLInputElement>) => {
-            onOneLineIntroChange(event.target.value)
-          }}
-          placeholder="한 줄 소개를 입력해주세요"
-        />
-      </FormField>
-      <FormField label="프로젝트 소개">
-        <Inputfield
-          value={intro}
-          onChange={(event: ChangeEvent<HTMLInputElement>) => {
-            onIntroChange(event.target.value)
-          }}
-          placeholder="프로젝트 소개를 입력해주세요"
-        />
-      </FormField>
-      <FormField label="팀원 관리">
-        <div className="flex flex-col items-stretch gap-3">
-          <div className="flex w-full items-center gap-2">
+    <Modal open={open} onOpenChange={onOpenChange} className={className ?? 'w-[540px]'}>
+      <Modal.Title>밋업 프로젝트 등록</Modal.Title>
+      <Modal.Body>
+        <div className="flex items-stretch gap-3">
+          <FormField label="기수" className="w-[130px] shrink-0">
+            <SelectField value={`${String(cardinal)}기`} options={[]} />
+          </FormField>
+          <FormField label="유형" className="shrink-0">
             <SelectField
-              value={draftPart}
-              options={partOptions}
-              onValueChange={setDraftPart}
-              className="w-[130px] shrink-0"
+              value={type}
+              options={typeOptions}
+              onValueChange={onTypeChange}
+              className="w-24"
             />
+          </FormField>
+          <FormField label="프로젝트 이름" className="flex-1">
             <Inputfield
-              value={draftName}
+              value={name}
               onChange={(event: ChangeEvent<HTMLInputElement>) => {
-                setDraftName(event.target.value)
+                onNameChange(event.target.value)
               }}
-              placeholder="이름"
-              className="flex-1"
+              placeholder="서비스 이름을 입력해주세요"
             />
-            <Button
-              variant={draftName.trim() ? 'primary' : 'disable'}
-              size="m"
-              className="w-[100px] shrink-0"
-              onClick={handleAddMember}
-            >
-              추가하기
-            </Button>
-          </div>
-          {members.map((member) => (
-            <div key={member.id} className="flex w-full items-center gap-2">
+          </FormField>
+        </div>
+        <FormField label="한 줄 소개">
+          <Inputfield
+            value={oneLineIntro}
+            onChange={(event: ChangeEvent<HTMLInputElement>) => {
+              onOneLineIntroChange(event.target.value)
+            }}
+            placeholder="한 줄 소개를 입력해주세요"
+          />
+        </FormField>
+        <FormField label="프로젝트 소개">
+          <Inputfield
+            value={intro}
+            onChange={(event: ChangeEvent<HTMLInputElement>) => {
+              onIntroChange(event.target.value)
+            }}
+            placeholder="프로젝트 소개를 입력해주세요"
+          />
+        </FormField>
+        <FormField label="팀원 관리">
+          <div className="flex flex-col items-stretch gap-3">
+            <div className="flex w-full items-center gap-2">
               <SelectField
-                value={member.part}
+                value={draftPart}
                 options={partOptions}
-                onValueChange={(value) => {
-                  onMemberPartChange(member.id, value)
-                }}
+                onValueChange={setDraftPart}
+                aria-label="추가할 팀원 파트"
                 className="w-[130px] shrink-0"
               />
-              <Inputfield value={member.name} readOnly className="flex-1" />
+              <Inputfield
+                value={draftName}
+                onChange={(event: ChangeEvent<HTMLInputElement>) => {
+                  setDraftName(event.target.value)
+                }}
+                placeholder="이름"
+                aria-label="추가할 팀원 이름"
+                className="flex-1"
+              />
               <Button
-                variant="error"
+                variant={draftName.trim() ? 'primary' : 'disable'}
                 size="m"
                 className="w-[100px] shrink-0"
-                onClick={() => {
-                  onMemberRemove(member.id)
-                }}
+                onClick={handleAddMember}
               >
-                삭제하기
+                추가하기
               </Button>
             </div>
-          ))}
-        </div>
-      </FormField>
-      <FormField label="포스터 이미지">
-        <ImageUploadBox
-          imageUrl={posterUrl}
-          onFileChange={onPosterChange}
-          onDelete={onPosterDelete}
-        />
-      </FormField>
-      <FormField label="링크">
-        <div className="flex items-center gap-3">
-          <div className="flex flex-1 flex-col gap-1.5">
-            <span className="text-caption-12sb text-label-alternative">깃허브 URL</span>
-            <Inputfield
-              value={githubUrl}
-              onChange={(event: ChangeEvent<HTMLInputElement>) => {
-                onGithubUrlChange(event.target.value)
-              }}
-              placeholder="링크를 붙여넣어주세요"
-            />
+            {members.map((member) => (
+              <div key={member.id} className="flex w-full items-center gap-2">
+                <SelectField
+                  value={member.part}
+                  options={partOptions}
+                  onValueChange={(value) => {
+                    onMemberPartChange(member.id, value)
+                  }}
+                  aria-label={`${member.name} 파트`}
+                  className="w-[130px] shrink-0"
+                />
+                <Inputfield
+                  value={member.name}
+                  readOnly
+                  aria-label={`${member.name} 이름`}
+                  className="flex-1"
+                />
+                <Button
+                  variant="error"
+                  size="m"
+                  className="w-[100px] shrink-0"
+                  onClick={() => {
+                    onMemberRemove(member.id)
+                  }}
+                >
+                  삭제하기
+                </Button>
+              </div>
+            ))}
           </div>
-          <div className="flex flex-1 flex-col gap-1.5">
-            <span className="text-caption-12sb text-label-alternative">비핸스 URL</span>
-            <Inputfield
-              value={behanceUrl}
-              onChange={(event: ChangeEvent<HTMLInputElement>) => {
-                onBehanceUrlChange(event.target.value)
-              }}
-              placeholder="링크를 붙여넣어주세요"
-            />
+        </FormField>
+        <FormField label="포스터 이미지">
+          <ImageUploadBox
+            imageUrl={posterUrl}
+            onFileChange={onPosterChange}
+            onDelete={onPosterDelete}
+          />
+        </FormField>
+        <FormField label="링크">
+          <div className="flex items-center gap-3">
+            <div className="flex flex-1 flex-col gap-1.5">
+              <span className="text-caption-12sb text-label-alternative">깃허브 URL</span>
+              <Inputfield
+                value={githubUrl}
+                onChange={(event: ChangeEvent<HTMLInputElement>) => {
+                  onGithubUrlChange(event.target.value)
+                }}
+                placeholder="링크를 붙여넣어주세요"
+                aria-label="깃허브 URL"
+              />
+            </div>
+            <div className="flex flex-1 flex-col gap-1.5">
+              <span className="text-caption-12sb text-label-alternative">비핸스 URL</span>
+              <Inputfield
+                value={behanceUrl}
+                onChange={(event: ChangeEvent<HTMLInputElement>) => {
+                  onBehanceUrlChange(event.target.value)
+                }}
+                placeholder="링크를 붙여넣어주세요"
+                aria-label="비핸스 URL"
+              />
+            </div>
+            <div className="flex flex-1 flex-col gap-1.5">
+              <span className="text-caption-12sb text-label-alternative">서비스 URL</span>
+              <Inputfield
+                value={appUrl}
+                onChange={(event: ChangeEvent<HTMLInputElement>) => {
+                  onAppUrlChange(event.target.value)
+                }}
+                placeholder="링크를 붙여넣어주세요"
+                aria-label="서비스 URL"
+              />
+            </div>
           </div>
-          <div className="flex flex-1 flex-col gap-1.5">
-            <span className="text-caption-12sb text-label-alternative">서비스 URL</span>
-            <Inputfield
-              value={appUrl}
-              onChange={(event: ChangeEvent<HTMLInputElement>) => {
-                onAppUrlChange(event.target.value)
-              }}
-              placeholder="링크를 붙여넣어주세요"
-            />
-          </div>
-        </div>
-      </FormField>
+        </FormField>
+      </Modal.Body>
+      <Modal.Footer>
+        <Button variant="error" size="l" className="w-[140px]" onClick={onCancel}>
+          취소하기
+        </Button>
+        <Button
+          variant={saveDisabled ? 'disable' : 'strong'}
+          size="l"
+          className="w-[140px]"
+          disabled={saveDisabled}
+          onClick={onSave}
+        >
+          저장하기
+        </Button>
+      </Modal.Footer>
     </Modal>
   )
 }

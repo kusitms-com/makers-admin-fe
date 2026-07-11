@@ -40,54 +40,50 @@ export function ReviewModal({
   className,
 }: ReviewModalProps) {
   return (
-    <Modal
-      open={open}
-      onOpenChange={onOpenChange}
-      title="후기 등록"
-      className={className}
-      footer={
-        <>
-          <Button variant="error" size="l" className="w-[140px]" onClick={onCancel}>
-            취소하기
-          </Button>
-          <Button
-            variant={saveDisabled ? 'disable' : 'strong'}
-            size="l"
-            className="w-[140px]"
-            disabled={saveDisabled}
-            onClick={onSave}
-          >
-            저장하기
-          </Button>
-        </>
-      }
-    >
-      <div className="flex items-stretch gap-3">
-        <FormField label="기수" className="flex-1">
-          <SelectField value={`${String(cardinal)}기`} options={[]} />
+    <Modal open={open} onOpenChange={onOpenChange} className={className}>
+      <Modal.Title>후기 등록</Modal.Title>
+      <Modal.Body>
+        <div className="flex items-stretch gap-3">
+          <FormField label="기수" className="flex-1">
+            <SelectField value={`${String(cardinal)}기`} options={[]} />
+          </FormField>
+          <FormField label="파트" className="flex-1">
+            <SelectField value={team} options={teamOptions} onValueChange={onTeamChange} />
+          </FormField>
+        </div>
+        <FormField label="이름">
+          <Inputfield
+            value={name}
+            onChange={(event: ChangeEvent<HTMLInputElement>) => {
+              onNameChange(event.target.value)
+            }}
+            placeholder="이름을 입력해주세요"
+          />
         </FormField>
-        <FormField label="파트" className="flex-1">
-          <SelectField value={team} options={teamOptions} onValueChange={onTeamChange} />
+        <FormField label="내용">
+          <TextareaField
+            value={review}
+            onChange={(event) => {
+              onReviewChange(event.target.value)
+            }}
+            placeholder="내용을 입력해주세요"
+          />
         </FormField>
-      </div>
-      <FormField label="이름">
-        <Inputfield
-          value={name}
-          onChange={(event: ChangeEvent<HTMLInputElement>) => {
-            onNameChange(event.target.value)
-          }}
-          placeholder="이름을 입력해주세요"
-        />
-      </FormField>
-      <FormField label="내용">
-        <TextareaField
-          value={review}
-          onChange={(event) => {
-            onReviewChange(event.target.value)
-          }}
-          placeholder="내용을 입력해주세요"
-        />
-      </FormField>
+      </Modal.Body>
+      <Modal.Footer>
+        <Button variant="error" size="l" className="w-[140px]" onClick={onCancel}>
+          취소하기
+        </Button>
+        <Button
+          variant={saveDisabled ? 'disable' : 'strong'}
+          size="l"
+          className="w-[140px]"
+          disabled={saveDisabled}
+          onClick={onSave}
+        >
+          저장하기
+        </Button>
+      </Modal.Footer>
     </Modal>
   )
 }

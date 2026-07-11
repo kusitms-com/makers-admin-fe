@@ -6,8 +6,11 @@ import { Modal } from './Modal'
 describe('Modal', () => {
   it('open이 true면 title과 children을 보여준다', () => {
     render(
-      <Modal open onOpenChange={vi.fn()} title="기업 프로젝트 등록">
-        <p>본문 내용</p>
+      <Modal open onOpenChange={vi.fn()}>
+        <Modal.Title>기업 프로젝트 등록</Modal.Title>
+        <Modal.Body>
+          <p>본문 내용</p>
+        </Modal.Body>
       </Modal>,
     )
 
@@ -17,8 +20,11 @@ describe('Modal', () => {
 
   it('open이 false면 렌더링하지 않는다', () => {
     render(
-      <Modal open={false} onOpenChange={vi.fn()} title="기업 프로젝트 등록">
-        <p>본문 내용</p>
+      <Modal open={false} onOpenChange={vi.fn()}>
+        <Modal.Title>기업 프로젝트 등록</Modal.Title>
+        <Modal.Body>
+          <p>본문 내용</p>
+        </Modal.Body>
       </Modal>,
     )
 
@@ -29,8 +35,11 @@ describe('Modal', () => {
     const user = userEvent.setup()
     const onOpenChange = vi.fn()
     render(
-      <Modal open onOpenChange={onOpenChange} title="기업 프로젝트 등록">
-        <p>본문 내용</p>
+      <Modal open onOpenChange={onOpenChange}>
+        <Modal.Title>기업 프로젝트 등록</Modal.Title>
+        <Modal.Body>
+          <p>본문 내용</p>
+        </Modal.Body>
       </Modal>,
     )
 
@@ -39,15 +48,33 @@ describe('Modal', () => {
     expect(onOpenChange).toHaveBeenCalledWith(false, expect.anything())
   })
 
-  it('footer를 전달하면 렌더링한다', () => {
+  it('backdrop을 클릭하면 onOpenChange(false)가 호출된다', async () => {
+    const user = userEvent.setup()
+    const onOpenChange = vi.fn()
     render(
-      <Modal
-        open
-        onOpenChange={vi.fn()}
-        title="기업 프로젝트 등록"
-        footer={<button type="button">저장하기</button>}
-      >
-        <p>본문 내용</p>
+      <Modal open onOpenChange={onOpenChange}>
+        <Modal.Title>기업 프로젝트 등록</Modal.Title>
+        <Modal.Body>
+          <p>본문 내용</p>
+        </Modal.Body>
+      </Modal>,
+    )
+
+    await user.click(screen.getByTestId('modal-backdrop'))
+
+    expect(onOpenChange).toHaveBeenCalledWith(false, expect.anything())
+  })
+
+  it('Modal.Footer를 전달하면 렌더링한다', () => {
+    render(
+      <Modal open onOpenChange={vi.fn()}>
+        <Modal.Title>기업 프로젝트 등록</Modal.Title>
+        <Modal.Body>
+          <p>본문 내용</p>
+        </Modal.Body>
+        <Modal.Footer>
+          <button type="button">저장하기</button>
+        </Modal.Footer>
       </Modal>,
     )
 
