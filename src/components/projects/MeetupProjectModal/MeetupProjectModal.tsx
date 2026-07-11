@@ -154,29 +154,6 @@ export function MeetupProjectModal({
       </FormField>
       <FormField label="팀원 관리">
         <div className="flex flex-col items-stretch gap-3">
-          {members.map((member) => (
-            <div key={member.id} className="flex w-full items-center gap-2">
-              <SelectField
-                value={member.part}
-                options={partOptions}
-                onValueChange={(value) => {
-                  onMemberPartChange(member.id, value)
-                }}
-                className="w-[130px] shrink-0"
-              />
-              <Inputfield value={member.name} readOnly className="flex-1" />
-              <Button
-                variant="error"
-                size="m"
-                className="w-[100px] shrink-0"
-                onClick={() => {
-                  onMemberRemove(member.id)
-                }}
-              >
-                삭제하기
-              </Button>
-            </div>
-          ))}
           <div className="flex w-full items-center gap-2">
             <SelectField
               value={draftPart}
@@ -201,6 +178,29 @@ export function MeetupProjectModal({
               추가하기
             </Button>
           </div>
+          {members.map((member) => (
+            <div key={member.id} className="flex w-full items-center gap-2">
+              <SelectField
+                value={member.part}
+                options={partOptions}
+                onValueChange={(value) => {
+                  onMemberPartChange(member.id, value)
+                }}
+                className="w-[130px] shrink-0"
+              />
+              <Inputfield value={member.name} readOnly className="flex-1" />
+              <Button
+                variant="error"
+                size="m"
+                className="w-[100px] shrink-0"
+                onClick={() => {
+                  onMemberRemove(member.id)
+                }}
+              >
+                삭제하기
+              </Button>
+            </div>
+          ))}
         </div>
       </FormField>
       <FormField label="포스터 이미지">
