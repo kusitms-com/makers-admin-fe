@@ -25,7 +25,7 @@ describe('Modal', () => {
     expect(screen.queryByText('본문 내용')).toBeNull()
   })
 
-  it('header를 전달하면 title 대신 header를 보여준다', () => {
+  it('header를 전달하면 title 대신 header를 화면에 보여주고, 접근 가능한 이름은 title로 유지한다', () => {
     render(
       <Modal open onOpenChange={vi.fn()} title="기업 프로젝트 등록" header={<div>커스텀 헤더</div>}>
         <p>본문 내용</p>
@@ -33,7 +33,7 @@ describe('Modal', () => {
     )
 
     expect(screen.getByText('커스텀 헤더')).toBeTruthy()
-    expect(screen.queryByText('기업 프로젝트 등록')).toBeNull()
+    expect(screen.getByRole('dialog', { name: '기업 프로젝트 등록' })).toBeTruthy()
   })
 
   it('Escape 키를 누르면 onOpenChange(false)가 호출된다', async () => {
