@@ -49,41 +49,43 @@ export function BlogReviewModal({
   className,
 }: BlogReviewModalProps) {
   return (
-    <Modal open={open} onOpenChange={onOpenChange} className={className}>
-      <Modal.Title>블로그 후기 등록</Modal.Title>
-      <Modal.Body>
-        <div className="flex items-stretch gap-3">
-          <CardinalField cardinal={cardinal} className="flex-1" />
-          <FormField label="파트" className="flex-1">
-            <SelectField value={part} options={partOptions} onValueChange={onPartChange} />
-          </FormField>
-        </div>
-        <FormField label="활동">
-          <SelectField
-            value={activity}
-            options={activityOptions}
-            onValueChange={onActivityChange}
-            placeholder="활동을 선택해주세요"
-          />
+    <Modal
+      open={open}
+      onOpenChange={onOpenChange}
+      title="블로그 후기 등록"
+      className={className}
+      footer={<ModalActions onCancel={onCancel} onSave={onSave} saveDisabled={saveDisabled} />}
+    >
+      <div className="flex items-stretch gap-3">
+        <CardinalField cardinal={cardinal} className="flex-1" />
+        <FormField label="파트" className="flex-1">
+          <SelectField value={part} options={partOptions} onValueChange={onPartChange} />
         </FormField>
-        <FormField label="제목">
-          <Inputfield
-            value={title}
-            onChange={(event: ChangeEvent<HTMLInputElement>) => {
-              onTitleChange(event.target.value)
-            }}
-            placeholder="제목을 입력해주세요"
-          />
-        </FormField>
-        <FormField label="미리보기 이미지">
-          <ImageUploadBox
-            imageUrl={thumbnailUrl}
-            onFileChange={onThumbnailChange}
-            onDelete={onThumbnailDelete}
-          />
-        </FormField>
-      </Modal.Body>
-      <ModalActions onCancel={onCancel} onSave={onSave} saveDisabled={saveDisabled} />
+      </div>
+      <FormField label="활동">
+        <SelectField
+          value={activity}
+          options={activityOptions}
+          onValueChange={onActivityChange}
+          placeholder="활동을 선택해주세요"
+        />
+      </FormField>
+      <FormField label="제목">
+        <Inputfield
+          value={title}
+          onChange={(event: ChangeEvent<HTMLInputElement>) => {
+            onTitleChange(event.target.value)
+          }}
+          placeholder="제목을 입력해주세요"
+        />
+      </FormField>
+      <FormField label="미리보기 이미지">
+        <ImageUploadBox
+          imageUrl={thumbnailUrl}
+          onFileChange={onThumbnailChange}
+          onDelete={onThumbnailDelete}
+        />
+      </FormField>
     </Modal>
   )
 }

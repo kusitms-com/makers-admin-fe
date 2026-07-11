@@ -40,39 +40,41 @@ export function CompanyProjectModal({
   className,
 }: CompanyProjectModalProps) {
   return (
-    <Modal open={open} onOpenChange={onOpenChange} className={className}>
-      <Modal.Title>기업 프로젝트 등록</Modal.Title>
-      <Modal.Body>
-        <div className="flex items-stretch gap-3">
-          <CardinalField cardinal={cardinal} className="w-[130px] shrink-0" />
-          <FormField label="기업 이름" className="flex-1">
-            <Inputfield
-              value={name}
-              onChange={(event: ChangeEvent<HTMLInputElement>) => {
-                onNameChange(event.target.value)
-              }}
-              placeholder="기업 이름을 입력해주세요"
-            />
-          </FormField>
-        </div>
-        <FormField label="프로젝트 소개">
+    <Modal
+      open={open}
+      onOpenChange={onOpenChange}
+      title="기업 프로젝트 등록"
+      className={className}
+      footer={<ModalActions onCancel={onCancel} onSave={onSave} saveDisabled={saveDisabled} />}
+    >
+      <div className="flex items-stretch gap-3">
+        <CardinalField cardinal={cardinal} className="w-[130px] shrink-0" />
+        <FormField label="기업 이름" className="flex-1">
           <Inputfield
-            value={content}
+            value={name}
             onChange={(event: ChangeEvent<HTMLInputElement>) => {
-              onContentChange(event.target.value)
+              onNameChange(event.target.value)
             }}
-            placeholder="프로젝트 소개를 입력해주세요"
+            placeholder="기업 이름을 입력해주세요"
           />
         </FormField>
-        <FormField label="배너">
-          <ImageUploadBox
-            imageUrl={bannerUrl}
-            onFileChange={onBannerChange}
-            onDelete={onBannerDelete}
-          />
-        </FormField>
-      </Modal.Body>
-      <ModalActions onCancel={onCancel} onSave={onSave} saveDisabled={saveDisabled} />
+      </div>
+      <FormField label="프로젝트 소개">
+        <Inputfield
+          value={content}
+          onChange={(event: ChangeEvent<HTMLInputElement>) => {
+            onContentChange(event.target.value)
+          }}
+          placeholder="프로젝트 소개를 입력해주세요"
+        />
+      </FormField>
+      <FormField label="배너">
+        <ImageUploadBox
+          imageUrl={bannerUrl}
+          onFileChange={onBannerChange}
+          onDelete={onBannerDelete}
+        />
+      </FormField>
     </Modal>
   )
 }
