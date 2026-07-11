@@ -1,3 +1,3 @@
 // @generated
 
-export * from './introductions'
+export * from './common'
