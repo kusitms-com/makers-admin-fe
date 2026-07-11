@@ -1,3 +1,4 @@
+/* eslint-disable react-refresh/only-export-components -- compound component: ModalRoot/Title/Body/Footer merge into a single `Modal` export via Object.assign, which react-refresh's static analysis can't verify as HMR-safe. */
 import type { ReactNode } from 'react'
 import { Dialog } from '@base-ui/react/dialog'
 import { cn } from '@lib/utils'
