@@ -1,5 +1,4 @@
-import type { ChangeEvent } from 'react'
-import AddIcon from '@/assets/icons/generated/AddIcon'
+import { useState, type ChangeEvent } from 'react'
 import { Button } from '@components/common/Button'
 import { FormField } from '@components/common/FormField'
 import { ImageUploadBox } from '@components/common/ImageUploadBox'
@@ -29,8 +28,8 @@ interface MeetupProjectModalProps {
   members: MeetupTeamMember[]
   partOptions: SelectFieldOption[]
   onMemberPartChange: (id: string, value: string) => void
-  onMemberNameChange: (id: string, value: string) => void
-  onMemberAdd: () => void
+  onMemberRemove: (id: string) => void
+  onMemberAdd: (member: { part: string; name: string }) => void
   posterUrl?: string
   onPosterChange?: (file: File) => void
   onPosterDelete?: () => void
@@ -62,7 +61,7 @@ export function MeetupProjectModal({
   members,
   partOptions,
   onMemberPartChange,
-  onMemberNameChange,
+  onMemberRemove,
   onMemberAdd,
   posterUrl,
   onPosterChange,
@@ -78,6 +77,18 @@ export function MeetupProjectModal({
   saveDisabled = true,
   className,
 }: MeetupProjectModalProps) {
+  const [draftPart, setDraftPart] = useState(partOptions[0]?.value ?? '')
+  const [draftName, setDraftName] = useState('')
+
+  const handleAddMember = () => {
+    const trimmedName = draftName.trim()
+    if (!trimmedName) return
+
+    onMemberAdd({ part: draftPart, name: trimmedName })
+    setDraftName('')
+    setDraftPart(partOptions[0]?.value ?? '')
+  }
+
   return (
     <Modal
       open={open}
@@ -142,7 +153,7 @@ export function MeetupProjectModal({
         />
       </FormField>
       <FormField label="팀원 관리">
-        <div className="flex flex-col items-center gap-3">
+        <div className="flex flex-col items-stretch gap-3">
           {members.map((member) => (
             <div key={member.id} className="flex w-full items-center gap-2">
               <SelectField
@@ -153,31 +164,43 @@ export function MeetupProjectModal({
                 }}
                 className="w-[130px] shrink-0"
               />
-              <Inputfield
-                value={member.name}
-                onChange={(event: ChangeEvent<HTMLInputElement>) => {
-                  onMemberNameChange(member.id, event.target.value)
-                }}
-                placeholder="이름"
-                className="flex-1"
-              />
+              <Inputfield value={member.name} readOnly className="flex-1" />
               <Button
-                variant={member.name.trim() ? 'strong' : 'disable'}
+                variant="error"
                 size="m"
                 className="w-[100px] shrink-0"
+                onClick={() => {
+                  onMemberRemove(member.id)
+                }}
               >
-                저장하기
+                삭제하기
               </Button>
             </div>
           ))}
-          <Button
-            variant="outlined"
-            size="s"
-            leftIcon={<AddIcon className="size-4" aria-hidden="true" />}
-            onClick={onMemberAdd}
-          >
-            추가하기
-          </Button>
+          <div className="flex w-full items-center gap-2">
+            <SelectField
+              value={draftPart}
+              options={partOptions}
+              onValueChange={setDraftPart}
+              className="w-[130px] shrink-0"
+            />
+            <Inputfield
+              value={draftName}
+              onChange={(event: ChangeEvent<HTMLInputElement>) => {
+                setDraftName(event.target.value)
+              }}
+              placeholder="이름"
+              className="flex-1"
+            />
+            <Button
+              variant={draftName.trim() ? 'primary' : 'disable'}
+              size="m"
+              className="w-[100px] shrink-0"
+              onClick={handleAddMember}
+            >
+              추가하기
+            </Button>
+          </div>
         </div>
       </FormField>
       <FormField label="포스터 이미지">

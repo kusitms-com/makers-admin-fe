@@ -22,7 +22,7 @@ const meta = {
     members: [],
     partOptions: [{ value: 'PLAN', label: '기획' }],
     onMemberPartChange: () => {},
-    onMemberNameChange: () => {},
+    onMemberRemove: () => {},
     onMemberAdd: () => {},
     githubUrl: '',
     onGithubUrlChange: () => {},
@@ -51,9 +51,9 @@ const PART_OPTIONS = [
 ]
 
 let memberSeq = 0
-function createMember(): MeetupTeamMember {
+function createMember(part: string, name: string): MeetupTeamMember {
   memberSeq += 1
-  return { id: `member-${String(memberSeq)}`, part: 'PLAN', name: '' }
+  return { id: `member-${String(memberSeq)}`, part, name }
 }
 
 function Demo() {
@@ -62,7 +62,7 @@ function Demo() {
   const [name, setName] = useState('')
   const [oneLineIntro, setOneLineIntro] = useState('')
   const [intro, setIntro] = useState('')
-  const [members, setMembers] = useState<MeetupTeamMember[]>([createMember()])
+  const [members, setMembers] = useState<MeetupTeamMember[]>([])
   const [githubUrl, setGithubUrl] = useState('')
   const [behanceUrl, setBehanceUrl] = useState('')
   const [appUrl, setAppUrl] = useState('')
@@ -86,11 +86,11 @@ function Demo() {
       onMemberPartChange={(id, value) => {
         setMembers((prev) => prev.map((m) => (m.id === id ? { ...m, part: value } : m)))
       }}
-      onMemberNameChange={(id, value) => {
-        setMembers((prev) => prev.map((m) => (m.id === id ? { ...m, name: value } : m)))
+      onMemberRemove={(id) => {
+        setMembers((prev) => prev.filter((m) => m.id !== id))
       }}
-      onMemberAdd={() => {
-        setMembers((prev) => [...prev, createMember()])
+      onMemberAdd={({ part, name: memberName }) => {
+        setMembers((prev) => [...prev, createMember(part, memberName)])
       }}
       githubUrl={githubUrl}
       onGithubUrlChange={setGithubUrl}

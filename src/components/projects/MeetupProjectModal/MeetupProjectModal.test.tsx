@@ -24,10 +24,10 @@ function renderModal(overrides: Partial<Parameters<typeof MeetupProjectModal>[0]
     onOneLineIntroChange: vi.fn(),
     intro: '',
     onIntroChange: vi.fn(),
-    members: [{ id: 'm1', part: 'PLAN', name: '' }],
+    members: [],
     partOptions: PART_OPTIONS,
     onMemberPartChange: vi.fn(),
-    onMemberNameChange: vi.fn(),
+    onMemberRemove: vi.fn(),
     onMemberAdd: vi.fn(),
     githubUrl: '',
     onGithubUrlChange: vi.fn(),
@@ -44,42 +44,56 @@ function renderModal(overrides: Partial<Parameters<typeof MeetupProjectModal>[0]
 }
 
 describe('MeetupProjectModal', () => {
-  it('팀원 행마다 저장하기 버튼을 보여준다', () => {
+  it('확정된 팀원마다 삭제하기 버튼을 보여준다', () => {
     renderModal({
       members: [
         { id: 'm1', part: 'PLAN', name: '홍길동' },
-        { id: 'm2', part: 'DE', name: '' },
+        { id: 'm2', part: 'PLAN', name: '김철수' },
       ],
     })
 
-    expect(screen.getAllByRole('button', { name: '저장하기' })).toHaveLength(3)
+    expect(screen.getAllByRole('button', { name: '삭제하기' })).toHaveLength(2)
   })
 
-  it('팀원 이름이 비어있으면 해당 행 저장하기 버튼이 비활성화된다', () => {
-    renderModal({ members: [{ id: 'm1', part: 'PLAN', name: '' }] })
-
-    const [memberSaveButton] = screen.getAllByRole<HTMLButtonElement>('button', {
-      name: '저장하기',
+  it('삭제하기 버튼 클릭 시 onMemberRemove가 해당 id로 호출된다', async () => {
+    const user = userEvent.setup()
+    const props = renderModal({
+      members: [{ id: 'm1', part: 'PLAN', name: '홍길동' }],
     })
-    expect(memberSaveButton.disabled).toBe(true)
+
+    await user.click(screen.getByRole('button', { name: '삭제하기' }))
+
+    expect(props.onMemberRemove).toHaveBeenCalledWith('m1')
   })
 
-  it('팀원 이름이 채워지면 해당 행 저장하기 버튼이 활성화된다', () => {
-    renderModal({ members: [{ id: 'm1', part: 'PLAN', name: '홍길동' }] })
+  it('빈 이름 입력행의 추가하기 버튼은 비활성화된다', () => {
+    renderModal()
 
-    const [memberSaveButton] = screen.getAllByRole<HTMLButtonElement>('button', {
-      name: '저장하기',
-    })
-    expect(memberSaveButton.disabled).toBe(false)
+    expect(screen.getByRole<HTMLButtonElement>('button', { name: '추가하기' }).disabled).toBe(true)
   })
 
-  it('추가하기 버튼 클릭 시 onMemberAdd가 호출된다', async () => {
+  it('이름을 입력하면 추가하기 버튼이 활성화되고, 클릭 시 onMemberAdd가 입력값으로 호출된다', async () => {
     const user = userEvent.setup()
     const props = renderModal()
 
+    await user.type(screen.getByPlaceholderText('이름'), '홍길동')
+    const addButton = screen.getByRole<HTMLButtonElement>('button', { name: '추가하기' })
+    expect(addButton.disabled).toBe(false)
+
+    await user.click(addButton)
+
+    expect(props.onMemberAdd).toHaveBeenCalledWith({ part: 'PLAN', name: '홍길동' })
+  })
+
+  it('추가 후 입력행이 초기화된다', async () => {
+    const user = userEvent.setup()
+    renderModal()
+
+    const nameInput = screen.getByPlaceholderText<HTMLInputElement>('이름')
+    await user.type(nameInput, '홍길동')
     await user.click(screen.getByRole('button', { name: '추가하기' }))
 
-    expect(props.onMemberAdd).toHaveBeenCalledTimes(1)
+    expect(nameInput.value).toBe('')
   })
 
   it('저장하기(전체) 버튼이 saveDisabled일 때 비활성화된다', () => {
