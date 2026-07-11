@@ -12,6 +12,8 @@ function renderModal(overrides: Partial<Parameters<typeof CompanyProjectModal>[0
     onNameChange: vi.fn(),
     content: '',
     onContentChange: vi.fn(),
+    onBannerChange: vi.fn(),
+    onBannerDelete: vi.fn(),
     onCancel: vi.fn(),
     onSave: vi.fn(),
     ...overrides,
@@ -64,5 +66,24 @@ describe('CompanyProjectModal', () => {
     await user.click(saveButton)
 
     expect(props.onSave).toHaveBeenCalledTimes(1)
+  })
+
+  it('배너 파일을 선택하면 onBannerChange가 호출된다', async () => {
+    const user = userEvent.setup()
+    const props = renderModal()
+
+    const file = new File(['content'], 'banner.png', { type: 'image/png' })
+    await user.upload(screen.getByLabelText('파일 선택'), file)
+
+    expect(props.onBannerChange).toHaveBeenCalledWith(file)
+  })
+
+  it('배너 삭제하기 클릭 시 onBannerDelete가 호출된다', async () => {
+    const user = userEvent.setup()
+    const props = renderModal({ bannerUrl: '/banner.png' })
+
+    await user.click(screen.getByRole('button', { name: '삭제하기' }))
+
+    expect(props.onBannerDelete).toHaveBeenCalledTimes(1)
   })
 })

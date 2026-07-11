@@ -23,6 +23,8 @@ function renderModal(overrides: Partial<Parameters<typeof BlogReviewModal>[0]> =
     onActivityChange: vi.fn(),
     title: '',
     onTitleChange: vi.fn(),
+    onThumbnailChange: vi.fn(),
+    onThumbnailDelete: vi.fn(),
     onCancel: vi.fn(),
     onSave: vi.fn(),
     ...overrides,
@@ -59,6 +61,36 @@ describe('BlogReviewModal', () => {
     await user.click(await screen.findByRole('option', { name: '디자인' }))
 
     expect(props.onPartChange).toHaveBeenCalledWith('DE')
+  })
+
+  it('활동 드롭다운에서 값을 선택하면 onActivityChange가 호출된다', async () => {
+    const user = userEvent.setup()
+    const props = renderModal()
+
+    const [, activityCombobox] = screen.getAllByRole('combobox')
+    await user.click(activityCombobox)
+    await user.click(await screen.findByRole('option', { name: '세미나' }))
+
+    expect(props.onActivityChange).toHaveBeenCalledWith('SEMINAR')
+  })
+
+  it('썸네일 파일을 선택하면 onThumbnailChange가 호출된다', async () => {
+    const user = userEvent.setup()
+    const props = renderModal()
+
+    const file = new File(['content'], 'thumbnail.png', { type: 'image/png' })
+    await user.upload(screen.getByLabelText('파일 선택'), file)
+
+    expect(props.onThumbnailChange).toHaveBeenCalledWith(file)
+  })
+
+  it('썸네일 삭제하기 클릭 시 onThumbnailDelete가 호출된다', async () => {
+    const user = userEvent.setup()
+    const props = renderModal({ thumbnailUrl: '/thumbnail.png' })
+
+    await user.click(screen.getByRole('button', { name: '삭제하기' }))
+
+    expect(props.onThumbnailDelete).toHaveBeenCalledTimes(1)
   })
 
   it('취소하기 클릭 시 onCancel이 호출된다', async () => {

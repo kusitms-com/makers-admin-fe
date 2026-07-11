@@ -29,6 +29,8 @@ function renderModal(overrides: Partial<Parameters<typeof MeetupProjectModal>[0]
     onMemberPartChange: vi.fn(),
     onMemberRemove: vi.fn(),
     onMemberAdd: vi.fn(),
+    onPosterChange: vi.fn(),
+    onPosterDelete: vi.fn(),
     githubUrl: '',
     onGithubUrlChange: vi.fn(),
     behanceUrl: '',
@@ -101,5 +103,54 @@ describe('MeetupProjectModal', () => {
 
     const saveButtons = screen.getAllByRole<HTMLButtonElement>('button', { name: '저장하기' })
     expect(saveButtons[saveButtons.length - 1].disabled).toBe(true)
+  })
+
+  it('유형 드롭다운에서 값을 선택하면 onTypeChange가 호출된다', async () => {
+    const user = userEvent.setup()
+    const props = renderModal()
+
+    const [typeCombobox] = screen.getAllByRole('combobox')
+    await user.click(typeCombobox)
+    await user.click(await screen.findByRole('option', { name: 'App' }))
+
+    expect(props.onTypeChange).toHaveBeenCalledWith('APP')
+  })
+
+  it('취소하기 클릭 시 onCancel이 호출된다', async () => {
+    const user = userEvent.setup()
+    const props = renderModal()
+
+    await user.click(screen.getByRole('button', { name: '취소하기' }))
+
+    expect(props.onCancel).toHaveBeenCalledTimes(1)
+  })
+
+  it('saveDisabled가 false면 저장하기 버튼 클릭 시 onSave가 호출된다', async () => {
+    const user = userEvent.setup()
+    const props = renderModal({ saveDisabled: false })
+
+    const saveButtons = screen.getAllByRole<HTMLButtonElement>('button', { name: '저장하기' })
+    await user.click(saveButtons[saveButtons.length - 1])
+
+    expect(props.onSave).toHaveBeenCalledTimes(1)
+  })
+
+  it('포스터 이미지 파일을 선택하면 onPosterChange가 호출된다', async () => {
+    const user = userEvent.setup()
+    const props = renderModal()
+
+    const file = new File(['content'], 'poster.png', { type: 'image/png' })
+    await user.upload(screen.getByLabelText('파일 선택'), file)
+
+    expect(props.onPosterChange).toHaveBeenCalledWith(file)
+  })
+
+  it('포스터 이미지 삭제하기 클릭 시 onPosterDelete가 호출된다', async () => {
+    const user = userEvent.setup()
+    const props = renderModal({ posterUrl: '/poster.png' })
+
+    await user.click(screen.getByRole('button', { name: '삭제하기' }))
+
+    expect(props.onPosterDelete).toHaveBeenCalledTimes(1)
   })
 })

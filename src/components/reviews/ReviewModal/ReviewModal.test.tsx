@@ -56,6 +56,16 @@ describe('ReviewModal', () => {
     expect(props.onReviewChange).toHaveBeenCalledWith('A')
   })
 
+  it('파트 드롭다운에서 값을 선택하면 onTeamChange가 호출된다', async () => {
+    const user = userEvent.setup()
+    const props = renderModal()
+
+    await user.click(screen.getByRole('combobox'))
+    await user.click(await screen.findByRole('option', { name: '디자인' }))
+
+    expect(props.onTeamChange).toHaveBeenCalledWith('DE')
+  })
+
   it('취소하기 클릭 시 onCancel이 호출된다', async () => {
     const user = userEvent.setup()
     const props = renderModal()
