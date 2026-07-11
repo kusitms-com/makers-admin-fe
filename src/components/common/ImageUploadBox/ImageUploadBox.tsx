@@ -1,5 +1,5 @@
 import { Button } from '@components/common/Button'
-import { useImageFileInput } from '@hooks/introductions/useImageFileInput'
+import { useImageFileInput } from '@hooks/common/useImageFileInput'
 import UploadIcon from '@/assets/icons/generated/UploadIcon'
 import { cn } from '@lib/utils'
 
@@ -21,7 +21,7 @@ export function ImageUploadBox({
   const { inputId, inputProps, openFilePicker } = useImageFileInput({ onFileChange })
 
   return (
-    <div className={cn('flex w-[492px] flex-col gap-3', className)}>
+    <div className={cn('flex w-full flex-col gap-3', className)}>
       <input {...inputProps} />
       {imageUrl ? (
         <>
