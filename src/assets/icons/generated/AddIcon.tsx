@@ -2,8 +2,7 @@
 import type { SVGProps } from 'react'
 const AddIcon = (props: SVGProps<SVGSVGElement>) => (
   <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 16 16" {...props}>
-    <g clipPath="url(#a)">
-      <path fill="currentColor" d="M8 2.429v11.143zM2.429 8H13.57z" />
+    <g clipPath="url(#AddIcon__a)">
       <path
         stroke="currentColor"
         strokeLinecap="round"
@@ -12,7 +11,7 @@ const AddIcon = (props: SVGProps<SVGSVGElement>) => (
       />
     </g>
     <defs>
-      <clipPath id="a">
+      <clipPath id="AddIcon__a">
         <path fill="currentColor" d="M1.5 1.5h13v13h-13z" />
       </clipPath>
     </defs>
