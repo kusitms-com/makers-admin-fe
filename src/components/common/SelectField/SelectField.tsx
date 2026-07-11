@@ -14,6 +14,8 @@ interface SelectFieldProps {
   placeholder?: string
   disabled?: boolean
   className?: string
+  id?: string
+  'aria-label'?: string
 }
 
 const fieldClassName =
@@ -26,12 +28,14 @@ export function SelectField({
   placeholder,
   disabled,
   className,
+  id,
+  'aria-label': ariaLabel,
 }: SelectFieldProps) {
   const selectedLabel = options.find((option) => option.value === value)?.label ?? value
 
   if (!onValueChange) {
     return (
-      <div className={cn(fieldClassName, className)}>
+      <div id={id} aria-label={ariaLabel} className={cn(fieldClassName, className)}>
         <span className="text-label-14m text-label-normal">{selectedLabel}</span>
       </div>
     )
@@ -48,7 +52,11 @@ export function SelectField({
       items={options}
       disabled={disabled}
     >
-      <Select.Trigger className={cn(fieldClassName, 'justify-between', className)}>
+      <Select.Trigger
+        id={id}
+        aria-label={ariaLabel}
+        className={cn(fieldClassName, 'justify-between', className)}
+      >
         <Select.Value
           placeholder={placeholder}
           className="text-label-14m text-label-normal data-[placeholder]:text-label-assitive"

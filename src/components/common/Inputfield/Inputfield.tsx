@@ -9,7 +9,7 @@ export function Inputfield({ className, ...props }: InputfieldProps) {
   return (
     <div
       className={cn(
-        'bg-fill-netural border-line-normal flex h-10 items-center rounded-lg border px-3 py-1.5',
+        'bg-fill-netural border-line-normal focus-within:ring-brand-primary flex h-10 items-center rounded-lg border px-3 py-1.5 focus-within:ring-2 focus-within:ring-offset-1',
         className,
       )}
     >
