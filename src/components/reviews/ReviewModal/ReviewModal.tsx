@@ -1,8 +1,9 @@
 import type { ChangeEvent } from 'react'
-import { Button } from '@components/common/Button'
+import { CardinalField } from '@components/common/CardinalField'
 import { FormField } from '@components/common/FormField'
 import { Inputfield } from '@components/common/Inputfield'
 import { Modal } from '@components/common/Modal'
+import { ModalActions } from '@components/common/ModalActions'
 import { SelectField, type SelectFieldOption } from '@components/common/SelectField'
 import { TextareaField } from '@components/common/TextareaField'
 
@@ -44,9 +45,7 @@ export function ReviewModal({
       <Modal.Title>후기 등록</Modal.Title>
       <Modal.Body>
         <div className="flex items-stretch gap-3">
-          <FormField label="기수" className="flex-1">
-            <SelectField value={`${String(cardinal)}기`} options={[]} />
-          </FormField>
+          <CardinalField cardinal={cardinal} className="flex-1" />
           <FormField label="파트" className="flex-1">
             <SelectField value={team} options={teamOptions} onValueChange={onTeamChange} />
           </FormField>
@@ -70,20 +69,7 @@ export function ReviewModal({
           />
         </FormField>
       </Modal.Body>
-      <Modal.Footer>
-        <Button variant="error" size="l" className="w-[140px]" onClick={onCancel}>
-          취소하기
-        </Button>
-        <Button
-          variant={saveDisabled ? 'disable' : 'strong'}
-          size="l"
-          className="w-[140px]"
-          disabled={saveDisabled}
-          onClick={onSave}
-        >
-          저장하기
-        </Button>
-      </Modal.Footer>
+      <ModalActions onCancel={onCancel} onSave={onSave} saveDisabled={saveDisabled} />
     </Modal>
   )
 }

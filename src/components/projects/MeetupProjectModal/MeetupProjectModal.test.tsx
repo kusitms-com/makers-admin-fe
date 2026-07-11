@@ -46,7 +46,7 @@ function renderModal(overrides: Partial<Parameters<typeof MeetupProjectModal>[0]
 }
 
 describe('MeetupProjectModal', () => {
-  it('확정된 팀원마다 삭제하기 버튼을 보여준다', () => {
+  it('확정된 팀원마다 각자 구분되는 삭제 버튼을 보여준다', () => {
     renderModal({
       members: [
         { id: 'm1', part: 'PLAN', name: '홍길동' },
@@ -54,16 +54,17 @@ describe('MeetupProjectModal', () => {
       ],
     })
 
-    expect(screen.getAllByRole('button', { name: '삭제하기' })).toHaveLength(2)
+    expect(screen.getByRole('button', { name: '홍길동 삭제' })).toBeTruthy()
+    expect(screen.getByRole('button', { name: '김철수 삭제' })).toBeTruthy()
   })
 
-  it('삭제하기 버튼 클릭 시 onMemberRemove가 해당 id로 호출된다', async () => {
+  it('삭제 버튼 클릭 시 onMemberRemove가 해당 id로 호출된다', async () => {
     const user = userEvent.setup()
     const props = renderModal({
       members: [{ id: 'm1', part: 'PLAN', name: '홍길동' }],
     })
 
-    await user.click(screen.getByRole('button', { name: '삭제하기' }))
+    await user.click(screen.getByRole('button', { name: '홍길동 삭제' }))
 
     expect(props.onMemberRemove).toHaveBeenCalledWith('m1')
   })
@@ -101,8 +102,7 @@ describe('MeetupProjectModal', () => {
   it('저장하기(전체) 버튼이 saveDisabled일 때 비활성화된다', () => {
     renderModal({ saveDisabled: true })
 
-    const saveButtons = screen.getAllByRole<HTMLButtonElement>('button', { name: '저장하기' })
-    expect(saveButtons[saveButtons.length - 1].disabled).toBe(true)
+    expect(screen.getByRole<HTMLButtonElement>('button', { name: '저장하기' }).disabled).toBe(true)
   })
 
   it('유형 드롭다운에서 값을 선택하면 onTypeChange가 호출된다', async () => {
@@ -129,8 +129,7 @@ describe('MeetupProjectModal', () => {
     const user = userEvent.setup()
     const props = renderModal({ saveDisabled: false })
 
-    const saveButtons = screen.getAllByRole<HTMLButtonElement>('button', { name: '저장하기' })
-    await user.click(saveButtons[saveButtons.length - 1])
+    await user.click(screen.getByRole('button', { name: '저장하기' }))
 
     expect(props.onSave).toHaveBeenCalledTimes(1)
   })

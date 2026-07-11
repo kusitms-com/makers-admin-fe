@@ -1,10 +1,10 @@
 import type { ChangeEvent } from 'react'
-import { Button } from '@components/common/Button'
+import { CardinalField } from '@components/common/CardinalField'
 import { FormField } from '@components/common/FormField'
 import { ImageUploadBox } from '@components/common/ImageUploadBox'
 import { Inputfield } from '@components/common/Inputfield'
 import { Modal } from '@components/common/Modal'
-import { SelectField } from '@components/common/SelectField'
+import { ModalActions } from '@components/common/ModalActions'
 
 interface CompanyProjectModalProps {
   open: boolean
@@ -44,9 +44,7 @@ export function CompanyProjectModal({
       <Modal.Title>기업 프로젝트 등록</Modal.Title>
       <Modal.Body>
         <div className="flex items-stretch gap-3">
-          <FormField label="기수" className="w-[130px] shrink-0">
-            <SelectField value={`${String(cardinal)}기`} options={[]} />
-          </FormField>
+          <CardinalField cardinal={cardinal} className="w-[130px] shrink-0" />
           <FormField label="기업 이름" className="flex-1">
             <Inputfield
               value={name}
@@ -74,20 +72,7 @@ export function CompanyProjectModal({
           />
         </FormField>
       </Modal.Body>
-      <Modal.Footer>
-        <Button variant="error" size="l" className="w-[140px]" onClick={onCancel}>
-          취소하기
-        </Button>
-        <Button
-          variant={saveDisabled ? 'disable' : 'strong'}
-          size="l"
-          className="w-[140px]"
-          disabled={saveDisabled}
-          onClick={onSave}
-        >
-          저장하기
-        </Button>
-      </Modal.Footer>
+      <ModalActions onCancel={onCancel} onSave={onSave} saveDisabled={saveDisabled} />
     </Modal>
   )
 }
