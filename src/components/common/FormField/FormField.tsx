@@ -9,13 +9,13 @@ interface FormFieldProps {
 
 export function FormField({ label, children, className }: FormFieldProps) {
   const fieldId = useId()
-  const field = isValidElement<{ id?: string }>(children)
-    ? cloneElement(children, { id: children.props.id ?? fieldId })
-    : children
+  const isElementChild = isValidElement<{ id?: string }>(children)
+  const resolvedId = isElementChild ? (children.props.id ?? fieldId) : fieldId
+  const field = isElementChild ? cloneElement(children, { id: resolvedId }) : children
 
   return (
     <div className={cn('flex flex-col gap-2', className)}>
-      <label htmlFor={fieldId} className="text-label-13b text-label-normal">
+      <label htmlFor={resolvedId} className="text-label-13b text-label-normal">
         {label}
       </label>
       {field}
