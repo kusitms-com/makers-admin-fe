@@ -1,6 +1,7 @@
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { describe, expect, it, vi } from 'vitest'
+import { FormField } from '@components/common/FormField'
 import { SelectField } from './SelectField'
 
 const OPTIONS = [
@@ -33,5 +34,15 @@ describe('SelectField', () => {
     )
 
     expect(screen.getByText('선택해주세요')).toBeTruthy()
+  })
+
+  it('FormField와 함께 쓰면 label이 정적 필드와 연결된다', () => {
+    render(
+      <FormField label="기수">
+        <SelectField value="33기" options={[]} />
+      </FormField>,
+    )
+
+    expect(screen.getByLabelText('기수').textContent).toContain('33기')
   })
 })

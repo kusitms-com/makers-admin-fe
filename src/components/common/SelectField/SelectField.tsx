@@ -35,9 +35,9 @@ export function SelectField({
 
   if (!onValueChange) {
     return (
-      <div id={id} aria-label={ariaLabel} className={cn(fieldClassName, className)}>
+      <output id={id} aria-label={ariaLabel} className={cn(fieldClassName, className)}>
         <span className="text-label-14m text-label-normal">{selectedLabel}</span>
-      </div>
+      </output>
     )
   }
 
