@@ -6,7 +6,7 @@ import ToastInfoIcon from '@/assets/icons/generated/ToastInfoIcon'
 import ToastWarningIcon from '@/assets/icons/generated/ToastWarningIcon'
 
 const toastVariants = tv({
-  base: 'relative isolate flex items-center gap-3 rounded-full py-2 pr-4 pl-4',
+  base: 'relative isolate flex items-center gap-2 rounded-full py-2 pr-4 pl-4',
 })
 
 export type ToastType = 'complete' | 'warning' | 'info' | 'error'
