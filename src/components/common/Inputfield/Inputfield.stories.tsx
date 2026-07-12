@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from '@storybook/react-vite'
 import { Inputfield } from './Inputfield'
 
 const meta = {
-  title: 'introductions/Inputfield',
+  title: 'common/Inputfield',
   component: Inputfield,
   parameters: { layout: 'centered' },
   args: {

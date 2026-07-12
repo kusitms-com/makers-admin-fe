@@ -1,5 +1,5 @@
 import { SwitchCamera } from 'lucide-react'
-import { useImageFileInput } from '@hooks/introductions/useImageFileInput'
+import { useImageFileInput } from '@hooks/common/useImageFileInput'
 import DeleteIcon from '@/assets/icons/generated/DeleteIcon'
 import UploadIcon from '@/assets/icons/generated/UploadIcon'
 import { cn } from '@lib/utils'

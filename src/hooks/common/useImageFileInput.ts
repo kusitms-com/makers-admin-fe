@@ -1,11 +1,13 @@
 import { useId, useRef, type ChangeEvent } from 'react'
 
 interface UseImageFileInputOptions {
+  id?: string
   onFileChange?: (file: File) => void
 }
 
-export function useImageFileInput({ onFileChange }: UseImageFileInputOptions) {
-  const inputId = useId()
+export function useImageFileInput({ id, onFileChange }: UseImageFileInputOptions) {
+  const generatedId = useId()
+  const inputId = id ?? generatedId
   const inputRef = useRef<HTMLInputElement>(null)
 
   const handleChange = (event: ChangeEvent<HTMLInputElement>) => {

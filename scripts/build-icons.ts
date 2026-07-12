@@ -104,6 +104,12 @@ const renderComponent = async (source: IconSource) => {
               },
             },
           },
+          {
+            name: 'prefixIds',
+            params: {
+              prefix: source.componentName,
+            },
+          },
           'removeDimensions',
         ],
       },
