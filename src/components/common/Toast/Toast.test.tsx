@@ -6,7 +6,11 @@ describe('Toast', () => {
   it('message를 렌더링한다', () => {
     render(<Toast type="complete" message="메시지를 입력해주세요" />)
 
-    expect(screen.getByText('메시지를 입력해주세요')).toBeTruthy()
+    const messageEl = screen.getByText('메시지를 입력해주세요')
+    expect(messageEl).toBeTruthy()
+    expect(messageEl.className).toContain('min-w-0')
+    expect(messageEl.className).toContain('flex-1')
+    expect(messageEl.className).toContain('truncate')
   })
 
   it.each<[ToastType, 'status' | 'alert']>([
