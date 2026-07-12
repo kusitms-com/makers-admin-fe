@@ -28,9 +28,9 @@ export function Toast({ type, message, className, ...props }: ToastProps) {
 
   return (
     <div
-      role={type === 'error' ? 'alert' : 'status'}
       className={toastVariants({ className })}
       {...props}
+      role={type === 'error' ? 'alert' : 'status'}
     >
       <span className="bg-label-normal/[0.52] absolute inset-0 -z-10 rounded-full backdrop-blur-[32px]" />
       <span className="bg-brand-primary/5 absolute inset-0 -z-10 rounded-full" />
