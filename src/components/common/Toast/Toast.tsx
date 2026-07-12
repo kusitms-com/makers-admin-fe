@@ -34,7 +34,7 @@ export function Toast({ type, message, className, ...props }: ToastProps) {
     >
       <span className="bg-label-normal/[0.52] absolute inset-0 -z-10 rounded-full backdrop-blur-[32px]" />
       <span className="bg-brand-primary/5 absolute inset-0 -z-10 rounded-full" />
-      <Icon className="size-6 shrink-0" />
+      <Icon className="size-6 shrink-0" aria-hidden="true" />
       <p className="text-label-14sb text-static-white/[0.88] min-w-0 flex-1 truncate">{message}</p>
     </div>
   )
