@@ -15,13 +15,13 @@ interface ToastStore {
 
 const TOAST_DURATION_MS = 4000
 
-export const useToastStore = create<ToastStore>((set) => ({
+export const useToastStore = create<ToastStore>((set, get) => ({
   toasts: [],
   addToast: (toast) => {
     const id = crypto.randomUUID()
     set((state) => ({ toasts: [...state.toasts, { ...toast, id }] }))
     setTimeout(() => {
-      set((state) => ({ toasts: state.toasts.filter((item) => item.id !== id) }))
+      get().removeToast(id)
     }, TOAST_DURATION_MS)
   },
   removeToast: (id) => {
