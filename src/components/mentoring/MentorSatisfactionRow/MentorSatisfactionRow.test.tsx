@@ -17,10 +17,22 @@ describe('MentorSatisfactionRow', () => {
     expect(screen.getByText('88%')).toBeTruthy()
   })
 
-  it('범위를 벗어난 만족도를 0~100으로 clamp한다', () => {
+  it('상한을 벗어난 만족도를 100으로 clamp한다', () => {
     render(<MentorSatisfactionRow name="정하늘" generation={28} part="FE" satisfactionRate={120} />)
 
     expect(screen.getByText('100%')).toBeTruthy()
+  })
+
+  it('하한을 벗어난 만족도를 0으로 clamp한다', () => {
+    render(<MentorSatisfactionRow name="정하늘" generation={28} part="FE" satisfactionRate={-1} />)
+
+    expect(screen.getByText('0%')).toBeTruthy()
+  })
+
+  it('만족도가 NaN이면 0으로 처리한다', () => {
+    render(<MentorSatisfactionRow name="정하늘" generation={28} part="FE" satisfactionRate={NaN} />)
+
+    expect(screen.getByText('0%')).toBeTruthy()
   })
 
   it('avatarUrl이 있으면 이미지를 렌더링한다', () => {

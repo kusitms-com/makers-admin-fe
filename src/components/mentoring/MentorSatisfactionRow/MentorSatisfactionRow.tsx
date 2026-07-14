@@ -17,7 +17,10 @@ export function MentorSatisfactionRow({
   avatarUrl,
   className,
 }: MentorSatisfactionRowProps) {
-  const clampedRate = Math.min(100, Math.max(0, satisfactionRate))
+  const clampedRate = Math.min(
+    100,
+    Math.max(0, Number.isFinite(satisfactionRate) ? satisfactionRate : 0),
+  )
 
   return (
     <div
