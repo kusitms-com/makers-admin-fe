@@ -63,7 +63,7 @@ export function Sidebar({ onLogout, className }: SidebarProps) {
   return (
     <aside
       className={cn(
-        'bg-fill-normal border-line-neutral flex h-full w-[220px] flex-col border-r',
+        'bg-fill-normal border-line-neutral w-sidebar flex h-full flex-col border-r',
         className,
       )}
     >
