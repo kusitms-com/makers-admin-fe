@@ -5,8 +5,8 @@ import { MentoringReviewRow } from './MentoringReviewRow'
 const baseProps = {
   title: '[워크숍] 디자인 트렌드, 사용자 경험 개선',
   relativeTime: '3일 전',
-  mentor: { name: '정하늘', role: '멘토', generation: 30, part: 'FE' },
-  mentee: { name: '이서준', role: '멘티', generation: 30, part: 'FE' },
+  mentor: { name: '정하늘', role: '멘토', generation: 30, part: 'FE' } as const,
+  mentee: { name: '이서준', role: '멘티', generation: 30, part: 'FE' } as const,
   keywords: ['🗂️ 준비성이 좋아요'],
   freeReview: '멘토링이 정말 도움이 되었습니다.',
 }

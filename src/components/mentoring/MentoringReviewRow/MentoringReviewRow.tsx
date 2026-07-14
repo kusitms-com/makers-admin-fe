@@ -2,7 +2,7 @@ import { cn } from '@lib/utils'
 
 interface ParticipantMeta {
   name: string
-  role: string
+  role: '멘토' | '멘티'
   generation: number
   part: string
 }
