@@ -14,7 +14,7 @@ export function PageHeader({ title, actionLabel, onAction, children, className }
   return (
     <div
       className={cn(
-        'border-line-neutral flex h-[84px] items-center justify-between border-b px-6 pb-1',
+        'bg-fill-normal border-line-neutral flex h-[84px] items-center justify-between border-b px-6 pb-1',
         className,
       )}
     >

@@ -12,6 +12,7 @@ p {
 
 @theme inline {
   --font-sans: 'Geist Variable', sans-serif;
+  --spacing-sidebar: 220px;
 }
 
 @layer base {
