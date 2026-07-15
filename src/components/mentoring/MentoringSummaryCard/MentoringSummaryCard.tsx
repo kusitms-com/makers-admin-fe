@@ -27,7 +27,9 @@ export function MentoringSummaryCard({
       </div>
       <div className="flex items-end justify-between">
         <p className="text-pc-36b text-label-normal">{count}</p>
-        <div className="size-[58px] shrink-0">{icon}</div>
+        <div className="size-[58px] shrink-0" aria-hidden="true">
+          {icon}
+        </div>
       </div>
     </div>
   )
