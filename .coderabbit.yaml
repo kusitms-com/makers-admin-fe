@@ -62,3 +62,15 @@ reviews:
 
 chat:
   auto_reply: true
+
+knowledge_base:
+  opt_out: false
+  code_guidelines:
+    enabled: true
+    filePatterns:
+      - 'AGENTS.md'
+      - 'CLAUDE.md'
+      - '.claude/manifest.md'
+      - '.claude/rules/*.md'
+      - '.claude/references/**/*.md'
+      - 'docs/**/*.md'
