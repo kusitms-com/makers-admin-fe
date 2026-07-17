@@ -33,11 +33,14 @@ export function Modal({
   return (
     <Dialog.Root open={open} onOpenChange={onOpenChange}>
       <Dialog.Portal>
-        <Dialog.Backdrop data-testid="modal-backdrop" className="fixed inset-0 z-40 bg-black/40" />
+        <Dialog.Backdrop
+          data-testid="modal-backdrop"
+          className="fixed inset-0 z-40 bg-black/40 transition-opacity duration-200 data-ending-style:opacity-0 data-starting-style:opacity-0"
+        />
         <Dialog.Popup
           aria-label={ariaLabel}
           className={cn(
-            'border-line-neutral bg-fill-normal fixed top-1/2 left-1/2 z-50 flex max-h-[90vh] w-[460px] -translate-x-1/2 -translate-y-1/2 flex-col rounded-xl border shadow-[0px_16px_24px_-6px_rgba(23,23,23,0.08),0px_6px_10px_-4px_rgba(23,23,23,0.08)]',
+            'border-line-neutral bg-fill-normal fixed top-1/2 left-1/2 z-50 flex max-h-[90vh] w-[460px] -translate-x-1/2 -translate-y-1/2 flex-col rounded-xl border shadow-[0px_16px_24px_-6px_rgba(23,23,23,0.08),0px_6px_10px_-4px_rgba(23,23,23,0.08)] transition-all duration-200 data-ending-style:scale-95 data-ending-style:opacity-0 data-starting-style:scale-95 data-starting-style:opacity-0',
             className,
           )}
         >
