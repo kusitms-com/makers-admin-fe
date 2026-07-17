@@ -59,7 +59,7 @@ export function SelectField({
       >
         <Select.Value
           placeholder={placeholder}
-          className="text-label-14m text-label-normal data-[placeholder]:text-label-assitive"
+          className="text-label-14m text-label-normal data-placeholder:text-label-assitive"
         />
         <Select.Icon>
           <ChevronDownIcon className="text-label-assitive size-3 shrink-0" aria-hidden="true" />
