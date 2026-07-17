@@ -29,13 +29,13 @@ jobs:
             const isWorkInProgress = /- \[x\] 작업 진행 중/i.test(pr.body || '');
 
             const labelMap = {
-              feat: '✨Feature',
-              fix: '🐛Fix',
-              hotfix: '🚨Hotfix',
-              refactor: '♻️Refactor',
-              test: '✅Test',
-              docs: '📝Docs',
-              chore: '🛠️Chore',
+              feat: '✨ Feature',
+              fix: '🐛 Fix',
+              hotfix: '🚨 Hotfix',
+              refactor: '♻️ Refactor',
+              test: '✅ Test',
+              docs: '📝 Docs',
+              chore: '🛠️ Chore',
             };
 
             const formatType = (type) => type.charAt(0).toUpperCase() + type.slice(1);
