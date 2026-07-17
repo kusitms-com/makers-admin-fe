@@ -67,7 +67,7 @@ export function SelectField({
       </Select.Trigger>
       <Select.Portal>
         <Select.Positioner sideOffset={4} className="z-50">
-          <Select.Popup className="border-line-normal bg-fill-normal text-label-14m text-label-normal min-w-[var(--anchor-width)] rounded-lg border py-1 shadow-md">
+          <Select.Popup className="border-line-normal bg-fill-normal text-label-14m text-label-normal min-w-(--anchor-width) rounded-lg border py-1 shadow-md">
             {options.map((option) => (
               <Select.Item
                 key={option.value}
