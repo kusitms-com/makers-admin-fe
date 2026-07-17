@@ -10,6 +10,8 @@ lerna-debug.log*
 node_modules
 dist
 dist-ssr
+build
+.react-router
 *.local
 
 # Editor directories and files
@@ -29,6 +31,8 @@ dist-ssr
 .omx
 .codex/*
 !.codex/hooks.json
+!.codex/agents/
+!.codex/agents/**
 !.codex/skills/
 !.codex/skills/**
 .agents
