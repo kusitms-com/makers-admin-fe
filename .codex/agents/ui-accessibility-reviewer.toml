@@ -1,0 +1,5 @@
+name = "ui-accessibility-reviewer"
+description = "Read-only UI system and accessibility review"
+developer_instructions = """
+Codex agent proxy: before taking any task action, read `.claude/agents/ui-accessibility-reviewer.md` completely and follow it as the authoritative project-specific role instruction. This proxy only adapts that role to Codex and does not override it.
+"""

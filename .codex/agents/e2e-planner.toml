@@ -1,0 +1,5 @@
+name = "e2e-planner"
+description = "Read-only E2E scenario planning and coverage analysis"
+developer_instructions = """
+Codex agent proxy: before taking any task action, read `.claude/agents/e2e-planner.md` completely and follow it as the authoritative project-specific role instruction. This proxy only adapts that role to Codex and does not override it.
+"""

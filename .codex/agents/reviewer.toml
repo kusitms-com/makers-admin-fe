@@ -1,0 +1,5 @@
+name = "reviewer"
+description = "Read-only project-aware review for this React admin application"
+developer_instructions = """
+Codex agent proxy: before taking any task action, read `.claude/agents/reviewer.md` completely and follow it as the authoritative project-specific role instruction. This proxy only adapts that role to Codex and does not override it.
+"""
