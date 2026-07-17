@@ -23,7 +23,7 @@
 
 `src/pages/**`의 페이지 컴포넌트와 `src/layout/RootLayout.tsx`는 named export와 함께 **`export default`가 필수**입니다. `src/routes.ts`가 파일 경로로 참조하는 파일 기반 라우팅 관례라, 빠뜨리면 타입체크/테스트는 통과해도 실제 화면에는 아무것도 렌더링되지 않습니다.
 
-`src/routes/(group)/`는 접근 권한 그룹(`(auth)`, `(main)`)을 시각적으로 표시하는 라우트 진입 파일 전용 폴더입니다. 실제 페이지 구현은 `src/pages/{domain}/`에 플랫하게 두고, `src/routes/(group)/{name}.tsx`는 `export { PageComponent as default } from '@pages/{domain}/PageComponent'`처럼 얇게 re-export만 합니다 — 페이지 컴포넌트가 자신이 어느 접근 그룹에 속하는지 몰라도 되게 하기 위해서입니다. `src/routes.ts`는 `src/pages/**`가 아니라 이 `src/routes/(group)/**` 파일을 참조합니다. 근거는 `.claude/decisions/records/005-auth-route-layout-convention.md`.
+`src/routes/(group)/`는 접근 권한 그룹(`(auth)`, `(main)`)을 시각적으로 표시하는 라우트 진입 파일 전용 폴더입니다. 실제 페이지 구현은 `src/pages/{domain}/`에 플랫하게 두고, `src/routes/(group)/{name}.tsx`는 기본적으로 `export { PageComponent as default } from '@pages/{domain}/PageComponent'`처럼 얇게 re-export합니다 — 페이지 컴포넌트가 자신이 어느 접근 그룹에 속하는지 몰라도 되게 하기 위해서입니다. 단, `index.tsx`처럼 페이지 콘텐츠 없이 기본 경로로 이동시키는 경우에는 route-local redirect를 직접 정의할 수 있습니다. `src/routes.ts`는 `src/pages/**`가 아니라 이 `src/routes/(group)/**` 파일을 참조합니다. 근거는 `.claude/decisions/records/005-auth-route-layout-convention.md`.
 
 에러 화면은 페이지(콘텐츠)와 바운더리(메커니즘)를 분리합니다. React Router의 `ErrorBoundary`는 `root.tsx`(또는 필요한 라우트 모듈)의 export 관례라 다른 곳에 둘 수 없지만, `root.tsx`는 `src/pages/errors/GlobalErrorPage.tsx`를 얇게 감싸기만 하고 실제 판별 로직(`useRouteError`/`isRouteErrorResponse`)과 화면 마크업은 각각 `src/pages/errors/`와 `src/components/common/ErrorFallback`에 둡니다. `NotFoundPage`(정상 라우트 매치, `*` catch-all)도 같은 `src/pages/errors/`에 함께 둡니다.
 

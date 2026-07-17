@@ -6,12 +6,12 @@
 
 ## 맥락
 
-로그인 기능은 아직 구현되지 않았지만(`.claude/references/api/admin-auth.md` 참고), 나중에 다른 작업자가 구현할 때 라우트 구조를 다시 논쟁하지 않도록 미리 컨벤션을 정해둔다. `Leets-Official/LOOPIT-FE`를 참고했는데, `(auth)`/`(main)` 같은 괄호 폴더명은 React Router의 fs-routes 기능이 아니라(`@react-router/fs-routes` 미설치, `routes.ts` config 방식 사용) 순수 시각적 그룹핑이었다. 실제 페이지 구현(`src/pages`)은 플랫하게 두고, `src/app/routes/(group)/*.tsx`는 `import { X } from '@pages/...'; export default X`처럼 페이지를 얇게 re-export만 하는 라우트 진입 파일이었다.
+로그인 기능은 아직 구현되지 않았지만(`.claude/references/api/admin-auth.md` 참고), 나중에 다른 작업자가 구현할 때 라우트 구조를 다시 논쟁하지 않도록 미리 컨벤션을 정해둔다. `Leets-Official/LOOPIT-FE`를 참고했는데, `(auth)`/`(main)` 같은 괄호 폴더명은 React Router의 fs-routes 기능이 아니라(`@react-router/fs-routes` 미설치, `routes.ts` config 방식 사용) 순수 시각적 그룹핑이었다. 실제 페이지 구현(`src/pages`)은 플랫하게 두고, `src/routes/(group)/*.tsx`는 `import { X } from '@pages/...'; export default X`처럼 페이지를 얇게 re-export만 하는 라우트 진입 파일이었다.
 
 ## 결정
 
 - **`src/pages/{domain}/`는 접근 그룹을 모른다.** 도메인 기준으로만 플랫하게 나눈다(`pages/reviews/`, `pages/errors/`, 나중에 `pages/auth/LoginPage.tsx`). `(auth)`/`(main)` 폴더를 `src/pages` 아래에 만들지 않는다 — 도메인 축과 접근 권한 축, 두 분류 기준이 같은 트리에서 경쟁하는 걸 피하기 위해서다.
-- **`src/routes/(group)/`가 접근 그룹을 표시한다.** 실제 페이지 컴포넌트를 얇게 re-export만 하는 라우트 진입 파일을 둔다. 이미 있음: `src/routes/(main)/index.tsx`, `src/routes/(main)/review.tsx`, `src/routes/(main)/notFound.tsx`. `src/routes/(auth)/`는 아직 `.gitkeep`만 있다(로그인 페이지가 없어서).
+- **`src/routes/(group)/`가 접근 그룹을 표시한다.** 기본적으로 실제 페이지 컴포넌트를 얇게 re-export만 하는 라우트 진입 파일을 둔다. 다만 `index.tsx`처럼 페이지 콘텐츠 없이 접근 가능한 기본 경로로 이동시키는 경우에는 route-local redirect를 직접 정의할 수 있다. 이미 있음: `src/routes/(main)/index.tsx`, `src/routes/(main)/introduction.tsx`, `src/routes/(main)/review.tsx`, `src/routes/(main)/notFound.tsx`. `src/routes/(auth)/`는 아직 `.gitkeep`만 있다(로그인 페이지가 없어서).
 - **네이밍**: 라우트 진입 파일은 camelCase(`notFound.tsx`) — 컴포넌트를 정의하지 않는 re-export 파일이라 컴포넌트 파일의 PascalCase 규칙과 구분한다. 근거는 `.claude/rules/code-style.md`.
 - **레이아웃 3단, 셋 다 아직 만들지 않는다.** 로그인 라우트가 실제로 생길 때 함께 만든다 — 지금 만들면 어떤 라우트도 참조하지 않는 미사용 코드로 남는다(`src/pages/(auth)`를 미리 만들지 않기로 한 것과 같은 이유).
   - `src/layout/PublicLayout.tsx` — Sidebar 없이 `Outlet`만 감싼다. `login`/`signup` 라우트가 생길 때 함께 만든다.

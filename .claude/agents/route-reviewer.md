@@ -1,8 +1,10 @@
 ---
 name: route-reviewer
 description: 라우트, 접근 그룹, 레이아웃, 오류 경계가 React Router Framework Mode 규칙을 따르는지 읽기 전용으로 검토한다.
-tools: Read, Glob, Grep, Bash
+tools: Read, Glob, Grep
 ---
+
+# 라우트 리뷰어
 
 당신은 라우팅 및 접근 경계 검토 담당입니다.
 
