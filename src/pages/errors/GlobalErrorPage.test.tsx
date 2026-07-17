@@ -20,6 +20,7 @@ describe('GlobalErrorPage', () => {
     })
 
     expect(await screen.findByText('오류가 발생했습니다 (404)')).toBeTruthy()
+    expect(await screen.findByText('Not Found')).toBeTruthy()
   })
 
   it('일반 에러면 공통 안내 문구를 보여준다', async () => {
@@ -28,5 +29,16 @@ describe('GlobalErrorPage', () => {
     })
 
     expect(await screen.findByText('문제가 발생했습니다')).toBeTruthy()
+    expect(await screen.findByText('잠시 후 다시 시도해주세요.')).toBeTruthy()
+  })
+
+  it('route error response의 statusText가 비어 있으면 공통 안내 문구를 보여준다', async () => {
+    renderWithError(() => {
+      // react-router의 route error response 관례상 Response를 직접 throw한다.
+      // eslint-disable-next-line @typescript-eslint/only-throw-error
+      throw new Response(null, { status: 500 })
+    })
+
+    expect(await screen.findByText('잠시 후 다시 시도해주세요.')).toBeTruthy()
   })
 })

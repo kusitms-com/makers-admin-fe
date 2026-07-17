@@ -13,8 +13,12 @@ export function GlobalErrorPage() {
             ? `오류가 발생했습니다 (${String(error.status)})`
             : '문제가 발생했습니다'
         }
-        description={isKnownRouteError ? error.statusText : '잠시 후 다시 시도해주세요.'}
+        description={
+          isKnownRouteError && error.statusText ? error.statusText : '잠시 후 다시 시도해주세요.'
+        }
       />
     </div>
   )
 }
+
+export default GlobalErrorPage

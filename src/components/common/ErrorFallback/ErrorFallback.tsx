@@ -11,7 +11,7 @@ export function ErrorFallback({ title, description, className }: ErrorFallbackPr
   return (
     <div className={cn('flex flex-col items-center gap-3', className)}>
       <ErrorIcon className="text-red-60 size-10" aria-hidden="true" />
-      <p className="text-headline-20b text-label-normal">{title}</p>
+      <h1 className="text-headline-20b text-label-normal">{title}</h1>
       {description && <p className="text-label-14r text-label-alternative">{description}</p>}
     </div>
   )

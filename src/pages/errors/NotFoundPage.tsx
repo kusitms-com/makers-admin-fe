@@ -1,7 +1,7 @@
 import { Link } from 'react-router'
 import { ErrorFallback } from '@components/common/ErrorFallback'
 
-export default function NotFoundPage() {
+export function NotFoundPage() {
   return (
     <div className="flex flex-1 flex-col items-center justify-center gap-4 py-20">
       <ErrorFallback
@@ -14,3 +14,5 @@ export default function NotFoundPage() {
     </div>
   )
 }
+
+export default NotFoundPage
