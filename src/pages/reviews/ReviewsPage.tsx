@@ -19,12 +19,16 @@ const PART_OPTIONS: SelectFieldOption[] = Object.entries(PART_LABELS).map(([valu
 
 const PAGE_SIZE = 7
 
+function isPartBadgeType(value: string): value is PartBadgeType {
+  return Object.prototype.hasOwnProperty.call(PART_LABELS, value)
+}
+
 export function ReviewsPage() {
   const [rows, setRows] = useState<ReviewRow[]>(INITIAL_ROWS)
   const [page, setPage] = useState(1)
 
   const [modalOpen, setModalOpen] = useState(false)
-  const [part, setPart] = useState<string>('PLAN')
+  const [part, setPart] = useState<PartBadgeType>('PLAN')
   const [name, setName] = useState('')
   const [review, setReview] = useState('')
 
@@ -38,7 +42,18 @@ export function ReviewsPage() {
   }
 
   function handleDeleteRow(id: string) {
-    setRows((prev) => prev.filter((row) => row.id !== id))
+    const nextRows = rows.filter((row) => row.id !== id)
+
+    setRows(nextRows)
+    setPage((currentPage) =>
+      Math.min(currentPage, Math.max(1, Math.ceil(nextRows.length / PAGE_SIZE))),
+    )
+  }
+
+  function handlePartChange(value: string) {
+    if (isPartBadgeType(value)) {
+      setPart(value)
+    }
   }
 
   function handleSave() {
@@ -48,7 +63,7 @@ export function ReviewsPage() {
         id: crypto.randomUUID(),
         name,
         generation: CURRENT_GENERATION,
-        part: part as PartBadgeType,
+        part,
         category: CATEGORY_LABEL,
         title: review,
       },
@@ -100,7 +115,7 @@ export function ReviewsPage() {
         cardinal={CURRENT_GENERATION}
         team={part}
         teamOptions={PART_OPTIONS}
-        onTeamChange={setPart}
+        onTeamChange={handlePartChange}
         name={name}
         onNameChange={setName}
         review={review}
