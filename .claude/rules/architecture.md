@@ -11,7 +11,7 @@
 | `src/api` | API 클라이언트, 요청 함수 |
 | `src/components` | 재사용 UI 컴포넌트 (`common` 또는 `{domain}`) |
 | `src/hooks` | 커스텀 훅 (`common` 또는 `{domain}`) |
-| `src/pages` | 라우트 진입점, 페이지 조립 (`errors/` 같은 cross-cutting pseudo-domain도 이 아래) |
+| `src/pages` | 페이지 구현·조립 (`errors/` 같은 cross-cutting pseudo-domain도 이 아래) |
 | `src/routes.ts` | 라우트 설정 (`@react-router/dev/routes`) |
 | `src/routes/(group)` | 접근 그룹별 라우트 진입 파일 (`(auth)`, `(main)`) — 아래 설명 참고 |
 | `src/root.tsx` | 문서 셸(`<html>`)과 앱 전역 Provider 트리 |

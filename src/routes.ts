@@ -1,6 +1,6 @@
 import { type RouteConfig, index, layout, route } from '@react-router/dev/routes'
 
-// 구현된 페이지가 /review뿐이라 나머지는 임시로 not-found로 빠진다.
+// /는 /introduction으로 이동하고, /introduction·/review 외 경로는 not-found로 처리한다.
 export default [
   layout('layout/RootLayout.tsx', [
     index('routes/(main)/index.tsx'),
