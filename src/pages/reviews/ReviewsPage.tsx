@@ -79,7 +79,7 @@ export function ReviewsPage() {
 
   return (
     <div className="flex min-h-screen flex-col">
-      <PageHeader title="후기 관리" />
+      <PageHeader title="활동 후기 관리" />
 
       <div className="flex flex-col gap-8 px-8 pt-7 pb-15">
         <section className="flex flex-col items-start gap-3">
