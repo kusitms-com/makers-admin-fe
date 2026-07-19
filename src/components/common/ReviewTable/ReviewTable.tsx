@@ -60,7 +60,7 @@ export function ReviewTable({
   return (
     <div
       className={cn(
-        'bg-fill-normal border-line-alternative w-full overflow-hidden rounded-xl border',
+        'bg-fill-normal w-full overflow-hidden rounded-xl shadow-[inset_0_0_0_1px_var(--line-alternative)]',
         className,
       )}
     >
