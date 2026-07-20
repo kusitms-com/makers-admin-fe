@@ -32,7 +32,7 @@ describe('ReviewModal', () => {
   it('제목과 필드를 보여준다', () => {
     renderModal()
 
-    expect(screen.getByText('후기 등록')).toBeTruthy()
+    expect(screen.getByText('활동 후기 등록')).toBeTruthy()
     expect(screen.getByText('33기')).toBeTruthy()
     expect(screen.getByPlaceholderText('이름을 입력해주세요')).toBeTruthy()
     expect(screen.getByPlaceholderText('내용을 입력해주세요')).toBeTruthy()

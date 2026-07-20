@@ -19,6 +19,7 @@
 - 컴포넌트 파일: PascalCase, 예: `UserTable.tsx`
 - 훅 파일: `use` 접두사의 camelCase, 예: `useUserList.ts`
 - API 파일: 도메인 중심 이름, 예: `members.ts`, `projects.ts`, `reviews.ts`
+- 라우트 진입 파일(`src/routes/(group)/*.tsx`): camelCase, 예: `notFound.tsx`. 컴포넌트를 정의하지 않는 얇은 re-export 파일이라 컴포넌트 파일의 PascalCase 규칙을 따르지 않습니다.
 - 테스트 파일: 대상 파일과 같은 위치에 `.test.ts` 또는 `.test.tsx`
 
 ## 스타일링

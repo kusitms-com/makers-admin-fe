@@ -59,7 +59,7 @@ export function SelectField({
       >
         <Select.Value
           placeholder={placeholder}
-          className="text-label-14m text-label-normal data-[placeholder]:text-label-assitive"
+          className="text-label-14m text-label-normal data-placeholder:text-label-assitive"
         />
         <Select.Icon>
           <ChevronDownIcon className="text-label-assitive size-3 shrink-0" aria-hidden="true" />
@@ -67,7 +67,7 @@ export function SelectField({
       </Select.Trigger>
       <Select.Portal>
         <Select.Positioner sideOffset={4} className="z-50">
-          <Select.Popup className="border-line-normal bg-fill-normal text-label-14m text-label-normal min-w-[var(--anchor-width)] rounded-lg border py-1 shadow-md">
+          <Select.Popup className="border-line-normal bg-fill-normal text-label-14m text-label-normal min-w-(--anchor-width) rounded-lg border py-1 shadow-md">
             {options.map((option) => (
               <Select.Item
                 key={option.value}

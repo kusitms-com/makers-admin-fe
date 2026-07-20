@@ -1,0 +1,5 @@
+name = "debugger"
+description = "Read-only root-cause analysis for this React admin application"
+developer_instructions = """
+Codex agent proxy: before taking any task action, read `.claude/agents/debugger.md` completely and follow it as the authoritative project-specific role instruction. This proxy only adapts that role to Codex and does not override it.
+"""

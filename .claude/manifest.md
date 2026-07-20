@@ -47,6 +47,20 @@ Tier 1은 코드 변경, 리뷰, 리팩터링처럼 실제 작업이 시작될 �
 | `/figma-to-component` | Figma 디자인을 프로젝트 컴포넌트로 구현 |
 | `/refactor` | 동작 변경 없는 리팩터링 후보 분석과 적용 |
 
+## Project Agents
+
+Claude Code와 Codex 모두 아래 역할을 프로젝트 전용 읽기 전용 에이전트로 제공합니다. 일반 구현은 메인 세션이 담당하고, 에이전트는 조사·검토·검증 결과를 보고합니다.
+
+| 역할 | 파일 | 용도 |
+| --- | --- | --- |
+| 디버거 | `.claude/agents/debugger.md`, `.codex/agents/debugger.toml` | 버그 원인 조사 |
+| 리뷰어 | `.claude/agents/reviewer.md`, `.codex/agents/reviewer.toml` | 변경 사항 검토 |
+| 검증기 | `.claude/agents/verifier.md`, `.codex/agents/verifier.toml` | 검증 명령 선택·실행 |
+| API 계약 리뷰어 | `.claude/agents/api-contract-reviewer.md`, `.codex/agents/api-contract-reviewer.toml` | Swagger·TanStack Query 계약 검토 |
+| 라우트 리뷰어 | `.claude/agents/route-reviewer.md`, `.codex/agents/route-reviewer.toml` | 라우팅·접근 경계 검토 |
+| UI 접근성 리뷰어 | `.claude/agents/ui-accessibility-reviewer.md`, `.codex/agents/ui-accessibility-reviewer.toml` | UI 시스템·접근성 검토 |
+| E2E 플래너 | `.claude/agents/e2e-planner.md`, `.codex/agents/e2e-planner.toml` | 브라우저 흐름·E2E 범위 제안 |
+
 ## Hooks
 
 Claude Code 환경에서는 `.claude/settings.json`이 아래 hook을 사용합니다.

@@ -1,5 +1,6 @@
 import type { VariantProps } from 'tailwind-variants'
 import { tv } from '@lib/tv'
+import { PART_LABELS } from './partLabels'
 
 const partBadgeVariants = tv({
   base: 'text-caption-12sb flex h-7 items-center justify-center rounded-md border px-[9px] py-[5px]',
@@ -15,13 +16,6 @@ const partBadgeVariants = tv({
 
 type PartBadgeVariants = VariantProps<typeof partBadgeVariants>
 export type PartBadgeType = NonNullable<PartBadgeVariants['part']>
-
-const PART_LABELS: Record<PartBadgeType, string> = {
-  PLAN: '기획',
-  DE: '디자인',
-  FE: '프론트엔드',
-  BE: '백엔드',
-}
 
 interface PartBadgeProps {
   part: PartBadgeType

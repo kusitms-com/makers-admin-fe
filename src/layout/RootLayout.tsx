@@ -11,3 +11,6 @@ export function RootLayout() {
     </div>
   )
 }
+
+// src/routes.ts가 파일 기반 라우팅으로 참조하려면 default export가 필요하다.
+export default RootLayout

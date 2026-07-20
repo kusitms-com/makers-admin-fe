@@ -100,7 +100,7 @@ export function ReviewTableRow({
           type="button"
           onClick={onDelete}
           aria-label="삭제"
-          className="bg-fill-netural border-line-neutral flex size-[26px] items-center justify-center rounded-full border"
+          className="bg-fill-netural border-line-neutral flex size-[26px] cursor-pointer items-center justify-center rounded-full border"
         >
           <CancelIcon className="text-label-alternative size-4" aria-hidden="true" />
         </button>

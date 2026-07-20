@@ -44,7 +44,7 @@ export function ReviewModal({
     <Modal
       open={open}
       onOpenChange={onOpenChange}
-      title="후기 등록"
+      title="활동 후기 등록"
       className={className}
       footer={<ModalActions onCancel={onCancel} onSave={onSave} saveDisabled={saveDisabled} />}
     >

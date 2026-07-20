@@ -71,13 +71,13 @@ jobs:
           script: |
             const branchType = process.env.BRANCH_TYPE;
             const labelMap = {
-              feat: '✨Feature',
-              fix: '🐛Fix',
-              hotfix: '🚨Hotfix',
-              refactor: '♻️Refactor',
-              test: '✅Test',
-              docs: '📝Docs',
-              chore: '🛠️Chore',
+              feat: '✨ Feature',
+              fix: '🐛 Fix',
+              hotfix: '🚨 Hotfix',
+              refactor: '♻️ Refactor',
+              test: '✅ Test',
+              docs: '📝 Docs',
+              chore: '🛠️ Chore',
             };
 
             await github.rest.issues.update({

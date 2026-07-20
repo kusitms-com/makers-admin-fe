@@ -12,6 +12,7 @@ export default defineConfig([
   globalIgnores([
     'dist',
     'build',
+    '.react-router',
     'storybook-static',
     'node_modules',
     'coverage',
@@ -58,7 +59,7 @@ export default defineConfig([
     },
   },
   {
-    files: ['src/**/*.{ts,tsx}', 'scripts/**/*.ts', '.storybook/**/*.{ts,tsx}'],
+    files: ['src/**/*.{ts,tsx}', 'scripts/**/*.ts', '.storybook/**/*.{ts,tsx}', '*.config.ts'],
     extends: [...tseslint.configs.strictTypeChecked, ...tseslint.configs.stylisticTypeChecked],
     languageOptions: {
       globals: {

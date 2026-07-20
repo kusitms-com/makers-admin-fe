@@ -3,7 +3,7 @@ import type { VariantProps } from 'tailwind-variants'
 import { tv } from '@lib/tv'
 
 const buttonVariants = tv({
-  base: 'flex items-center justify-center gap-1 text-center transition-colors',
+  base: 'flex cursor-pointer items-center justify-center gap-1 text-center transition-colors',
   variants: {
     variant: {
       primary: 'bg-blue-5 text-brand-primary',
