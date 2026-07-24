@@ -42,6 +42,7 @@ export function IntroductionCard({
         <Inputfield
           value={title}
           placeholder={titlePlaceholder}
+          aria-label="타이틀"
           onChange={(event: ChangeEvent<HTMLInputElement>) => {
             onTitleChange?.(event.target.value)
           }}
@@ -54,6 +55,7 @@ export function IntroductionCard({
           <Inputfield
             value={description}
             placeholder={descriptionPlaceholder}
+            aria-label="설명"
             onChange={(event: ChangeEvent<HTMLInputElement>) => {
               onDescriptionChange?.(event.target.value)
             }}
