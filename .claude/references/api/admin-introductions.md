@@ -59,7 +59,7 @@ Swagger 출처: `https://kusitms.herokuapp.com/api-docs/json`
 
 - API 함수는 `src/api/introductions.ts`에 둔다.
 - query key는 `['admin', 'introductions']`를 우선한다. 수정은 `multipart/form-data`이고, 수정 이후 조회 query를 invalidate한다.
-- Swagger schema에 `required` 목록이 없어 모든 요청 필드가 optional이다. 생략한 필드를 서버가 "기존 값 유지"로 처리하는지 확인되지 않았다 — 구현 시 실제 호출로 확인한다.
+- Swagger schema에 `required` 목록이 없어 요청 필드의 필수 여부가 불명확하다(optional이라고 단정할 수 없음 — Swagger에 없다고 실제 서버가 안 요구하는 건 아니다). 구현 시 실제 admin PUT 호출로 어떤 필드가 필수인지, 생략한 필드를 서버가 "기존 값 유지"로 처리하는지 확인하고 그 결과를 계약으로 문서화한다.
 - multipart로 중첩 배열(`teams`, `activities`, `expertLecture`, `obLecture`)을 직렬화하는 방식이 Swagger에 없다 — 구현 시 실제 서버로 확인한다.
 - `teams`/`activities`/`sponsors`는 항목에 id가 없어 부분 갱신이 안 될 수 있다(서버가 배열을 전체 교체로 처리하면, 안 바꾼 이미지도 다시 보내야 함). 구현 시 서버 동작을 확인하고 필요하면 URL→File 재업로드 또는 백엔드에 id 추가를 요청한다.
 - `IntroductionsPage` UI는 슬로건/배너 이미지, 회원·프로젝트·대학 수, 파트별 이미지 4종, 큐시즘 활동(이미지 1개만), 운영진, 후원사만 다룬다. `bannerStatus`, `introYoutubeLink`, `expertLecture`, `obLecture`, `meetupImages`, `partnerLogoFiles`, `activities[].imageFile2`는 편집 UI가 없다 — 연동 시 값을 보내거나 보여줄 수 없다.

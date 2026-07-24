@@ -1,4 +1,4 @@
-# `GET /api/introductions`가 Swagger 문서와 다르게 500을 반환함
+# `GET /api/introductions`가 HTTP 200이지만 응답 본문의 code는 500임(Swagger 문서와 다름)
 
 ## 무엇이 다른지
 
@@ -6,7 +6,7 @@ Swagger는 `GET /api/introductions`(공개, 인증 불필요)가 200과 `IntroRe
 
 ## 어디서 확인했는지
 
-```
+```bash
 curl -s -w "\nHTTP_STATUS:%{http_code}\n" "https://kusitms.herokuapp.com/api/introductions"
 ```
 
