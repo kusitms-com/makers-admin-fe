@@ -67,7 +67,7 @@ export function IntroductionCard({
             <ImageBoxThumbnail imageUrl={thumbnailUrl} />
             <div className="flex flex-col justify-center gap-1.5">
               <Button variant={isActive ? 'primary' : 'disable'} size="s" onClick={openFilePicker}>
-                {isActive ? '교체하기' : '추가하기'}
+                {thumbnailUrl ? '교체하기' : '추가하기'}
               </Button>
               <Button variant="error" size="s" onClick={onDelete}>
                 삭제하기

@@ -28,6 +28,12 @@ describe('IntroductionCard', () => {
     expect(screen.getByRole<HTMLButtonElement>('button', { name: '교체하기' }).disabled).toBe(false)
   })
 
+  it('active variant인데 썸네일이 아직 없으면 추가하기로 표시된다', () => {
+    render(<IntroductionCard variant="active" title="내용" />)
+
+    expect(screen.getByRole<HTMLButtonElement>('button', { name: '추가하기' }).disabled).toBe(false)
+  })
+
   it('타이틀을 입력하면 onTitleChange가 호출된다', async () => {
     const user = userEvent.setup()
     const onTitleChange = vi.fn()
