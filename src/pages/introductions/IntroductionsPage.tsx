@@ -1,4 +1,4 @@
-import { useState, type ChangeEvent } from 'react'
+import { useState, type ChangeEvent, type Dispatch, type SetStateAction } from 'react'
 import { AddCircleButton } from '@components/introductions/AddCircleButton'
 import { Button } from '@components/common/Button'
 import { CardinalField } from '@components/common/CardinalField'
@@ -62,6 +62,57 @@ function revokeIfBlobUrl(url: string | undefined) {
   }
 }
 
+interface CardListSectionProps {
+  title: string
+  addLabel: string
+  items: IntroductionItem[]
+  setItems: Dispatch<SetStateAction<IntroductionItem[]>>
+}
+
+function CardListSection({ title, addLabel, items, setItems }: CardListSectionProps) {
+  function updateItem(id: string, patch: Partial<IntroductionItem>) {
+    setItems((prev) => prev.map((item) => (item.id === id ? { ...item, ...patch } : item)))
+  }
+
+  return (
+    <IntroductionSection title={title}>
+      <div className="flex flex-col gap-4">
+        {items.map((item) => (
+          <IntroductionCard
+            key={item.id}
+            variant={item.title.trim() ? 'active' : 'default'}
+            title={item.title}
+            onTitleChange={(value) => {
+              updateItem(item.id, { title: value })
+            }}
+            description={item.description}
+            onDescriptionChange={(value) => {
+              updateItem(item.id, { description: value })
+            }}
+            thumbnailUrl={item.thumbnailUrl}
+            onThumbnailChange={(file) => {
+              revokeIfBlobUrl(item.thumbnailUrl)
+              updateItem(item.id, { thumbnailUrl: URL.createObjectURL(file) })
+            }}
+            onDelete={() => {
+              revokeIfBlobUrl(item.thumbnailUrl)
+              setItems((prev) => prev.filter((existing) => existing.id !== item.id))
+            }}
+          />
+        ))}
+      </div>
+      <div className="flex justify-center">
+        <AddCircleButton
+          aria-label={addLabel}
+          onClick={() => {
+            setItems((prev) => [...prev, createEmptyItem()])
+          }}
+        />
+      </div>
+    </IntroductionSection>
+  )
+}
+
 export function IntroductionsPage() {
   const [slogan, setSlogan] = useState('')
   const [bannerImageUrl, setBannerImageUrl] = useState<string | undefined>()
@@ -119,14 +170,6 @@ export function IntroductionsPage() {
       revokeIfBlobUrl(prev[key])
       return { ...prev, [key]: undefined }
     })
-  }
-
-  function updateActivity(id: string, patch: Partial<IntroductionItem>) {
-    setActivities((prev) => prev.map((item) => (item.id === id ? { ...item, ...patch } : item)))
-  }
-
-  function updateTeam(id: string, patch: Partial<IntroductionItem>) {
-    setTeams((prev) => prev.map((item) => (item.id === id ? { ...item, ...patch } : item)))
   }
 
   function handlePartnerReplace(id: string, file: File) {
@@ -247,77 +290,19 @@ export function IntroductionsPage() {
           </div>
         </IntroductionSection>
 
-        <IntroductionSection title="큐시즘 활동 소개">
-          <div className="flex flex-col gap-4">
-            {activities.map((item) => (
-              <IntroductionCard
-                key={item.id}
-                variant={item.title.trim() ? 'active' : 'default'}
-                title={item.title}
-                onTitleChange={(value) => {
-                  updateActivity(item.id, { title: value })
-                }}
-                description={item.description}
-                onDescriptionChange={(value) => {
-                  updateActivity(item.id, { description: value })
-                }}
-                thumbnailUrl={item.thumbnailUrl}
-                onThumbnailChange={(file) => {
-                  revokeIfBlobUrl(item.thumbnailUrl)
-                  updateActivity(item.id, { thumbnailUrl: URL.createObjectURL(file) })
-                }}
-                onDelete={() => {
-                  revokeIfBlobUrl(item.thumbnailUrl)
-                  setActivities((prev) => prev.filter((activity) => activity.id !== item.id))
-                }}
-              />
-            ))}
-          </div>
-          <div className="flex justify-center">
-            <AddCircleButton
-              aria-label="큐시즘 활동 추가"
-              onClick={() => {
-                setActivities((prev) => [...prev, createEmptyItem()])
-              }}
-            />
-          </div>
-        </IntroductionSection>
+        <CardListSection
+          title="큐시즘 활동 소개"
+          addLabel="큐시즘 활동 추가"
+          items={activities}
+          setItems={setActivities}
+        />
 
-        <IntroductionSection title="운영진 소개">
-          <div className="flex flex-col gap-4">
-            {teams.map((item) => (
-              <IntroductionCard
-                key={item.id}
-                variant={item.title.trim() ? 'active' : 'default'}
-                title={item.title}
-                onTitleChange={(value) => {
-                  updateTeam(item.id, { title: value })
-                }}
-                description={item.description}
-                onDescriptionChange={(value) => {
-                  updateTeam(item.id, { description: value })
-                }}
-                thumbnailUrl={item.thumbnailUrl}
-                onThumbnailChange={(file) => {
-                  revokeIfBlobUrl(item.thumbnailUrl)
-                  updateTeam(item.id, { thumbnailUrl: URL.createObjectURL(file) })
-                }}
-                onDelete={() => {
-                  revokeIfBlobUrl(item.thumbnailUrl)
-                  setTeams((prev) => prev.filter((team) => team.id !== item.id))
-                }}
-              />
-            ))}
-          </div>
-          <div className="flex justify-center">
-            <AddCircleButton
-              aria-label="운영진 추가"
-              onClick={() => {
-                setTeams((prev) => [...prev, createEmptyItem()])
-              }}
-            />
-          </div>
-        </IntroductionSection>
+        <CardListSection
+          title="운영진 소개"
+          addLabel="운영진 추가"
+          items={teams}
+          setItems={setTeams}
+        />
 
         <IntroductionSection title="후원사">
           <div className="flex flex-wrap gap-3">
