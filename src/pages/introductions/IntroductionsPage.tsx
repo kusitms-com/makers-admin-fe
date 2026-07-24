@@ -56,12 +56,21 @@ function createEmptyItem(): IntroductionItem {
   return { id: crypto.randomUUID(), title: '', description: '' }
 }
 
+function revokeIfBlobUrl(url: string | undefined) {
+  if (url?.startsWith('blob:')) {
+    URL.revokeObjectURL(url)
+  }
+}
+
 export function IntroductionsPage() {
   const [slogan, setSlogan] = useState('')
   const [bannerImageUrl, setBannerImageUrl] = useState<string | undefined>()
   const bannerImageInput = useImageFileInput({
     onFileChange: (file) => {
-      setBannerImageUrl(URL.createObjectURL(file))
+      setBannerImageUrl((prev) => {
+        revokeIfBlobUrl(prev)
+        return URL.createObjectURL(file)
+      })
     },
   })
 
@@ -99,11 +108,17 @@ export function IntroductionsPage() {
   }
 
   function handlePartFileChange(key: PartKey, file: File) {
-    setPartImages((prev) => ({ ...prev, [key]: URL.createObjectURL(file) }))
+    setPartImages((prev) => {
+      revokeIfBlobUrl(prev[key])
+      return { ...prev, [key]: URL.createObjectURL(file) }
+    })
   }
 
   function handlePartDelete(key: PartKey) {
-    setPartImages((prev) => ({ ...prev, [key]: undefined }))
+    setPartImages((prev) => {
+      revokeIfBlobUrl(prev[key])
+      return { ...prev, [key]: undefined }
+    })
   }
 
   function updateActivity(id: string, patch: Partial<IntroductionItem>) {
@@ -116,14 +131,19 @@ export function IntroductionsPage() {
 
   function handlePartnerReplace(id: string, file: File) {
     setPartners((prev) =>
-      prev.map((partner) =>
-        partner.id === id ? { ...partner, imageUrl: URL.createObjectURL(file) } : partner,
-      ),
+      prev.map((partner) => {
+        if (partner.id !== id) return partner
+        revokeIfBlobUrl(partner.imageUrl)
+        return { ...partner, imageUrl: URL.createObjectURL(file) }
+      }),
     )
   }
 
   function handlePartnerDelete(id: string) {
-    setPartners((prev) => prev.filter((partner) => partner.id !== id))
+    setPartners((prev) => {
+      revokeIfBlobUrl(prev.find((partner) => partner.id === id)?.imageUrl)
+      return prev.filter((partner) => partner.id !== id)
+    })
   }
 
   return (
@@ -161,7 +181,10 @@ export function IntroductionsPage() {
                   variant="error"
                   size="s"
                   onClick={() => {
-                    setBannerImageUrl(undefined)
+                    setBannerImageUrl((prev) => {
+                      revokeIfBlobUrl(prev)
+                      return undefined
+                    })
                   }}
                 >
                   삭제하기
@@ -240,9 +263,11 @@ export function IntroductionsPage() {
                 }}
                 thumbnailUrl={item.thumbnailUrl}
                 onThumbnailChange={(file) => {
+                  revokeIfBlobUrl(item.thumbnailUrl)
                   updateActivity(item.id, { thumbnailUrl: URL.createObjectURL(file) })
                 }}
                 onDelete={() => {
+                  revokeIfBlobUrl(item.thumbnailUrl)
                   setActivities((prev) => prev.filter((activity) => activity.id !== item.id))
                 }}
               />
@@ -274,9 +299,11 @@ export function IntroductionsPage() {
                 }}
                 thumbnailUrl={item.thumbnailUrl}
                 onThumbnailChange={(file) => {
+                  revokeIfBlobUrl(item.thumbnailUrl)
                   updateTeam(item.id, { thumbnailUrl: URL.createObjectURL(file) })
                 }}
                 onDelete={() => {
+                  revokeIfBlobUrl(item.thumbnailUrl)
                   setTeams((prev) => prev.filter((team) => team.id !== item.id))
                 }}
               />
