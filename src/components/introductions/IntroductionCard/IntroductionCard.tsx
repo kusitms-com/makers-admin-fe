@@ -65,7 +65,7 @@ export function IntroductionCard({
         <div className="flex flex-col justify-center gap-2.5">
           <span className="text-caption-12sb text-label-alternative">썸네일</span>
           <div className="flex items-center gap-2.5">
-            <input {...inputProps} />
+            <input {...inputProps} aria-label="썸네일" />
             <ImageBoxThumbnail imageUrl={thumbnailUrl} />
             <div className="flex flex-col justify-center gap-1.5">
               <Button variant={isActive ? 'primary' : 'disable'} size="s" onClick={openFilePicker}>
