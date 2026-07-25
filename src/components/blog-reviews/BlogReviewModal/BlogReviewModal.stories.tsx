@@ -18,6 +18,8 @@ const meta = {
     onActivityChange: () => {},
     title: '',
     onTitleChange: () => {},
+    link: '',
+    onLinkChange: () => {},
     onCancel: () => {},
     onSave: () => {},
   },
@@ -43,6 +45,7 @@ function Demo() {
   const [part, setPart] = useState('PLAN')
   const [activity, setActivity] = useState('')
   const [title, setTitle] = useState('')
+  const [link, setLink] = useState('')
 
   return (
     <BlogReviewModal
@@ -57,13 +60,15 @@ function Demo() {
       onActivityChange={setActivity}
       title={title}
       onTitleChange={setTitle}
+      link={link}
+      onLinkChange={setLink}
       onCancel={() => {
         setOpen(false)
       }}
       onSave={() => {
         setOpen(false)
       }}
-      saveDisabled={!activity || !title}
+      saveDisabled={!activity || !title || !link}
     />
   )
 }
