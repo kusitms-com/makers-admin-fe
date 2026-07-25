@@ -10,6 +10,17 @@ test('/review 진입 시 사이드바 메뉴가 활성화되고 페이지 제목
   await expect(page.getByRole('heading', { name: '활동 후기 관리', exact: true })).toBeVisible()
 })
 
+test('/blog-review 진입 시 블로그 후기 메뉴와 별도 페이지가 보인다', async ({ page }) => {
+  await page.goto('/blog-review')
+
+  await expect(page.getByRole('link', { name: '블로그 후기', exact: true })).toHaveAttribute(
+    'aria-current',
+    'page',
+  )
+  await expect(page.getByRole('heading', { name: '블로그 후기 관리', exact: true })).toBeVisible()
+  await expect(page.getByText('프론트엔드 파트 활동 후기')).toBeVisible()
+})
+
 test('/ 진입 시 학회 소개 페이지로 이동한다', async ({ page }) => {
   await page.goto('/')
 
