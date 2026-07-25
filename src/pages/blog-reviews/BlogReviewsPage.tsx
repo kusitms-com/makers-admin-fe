@@ -59,23 +59,26 @@ export function BlogReviewsPage() {
 
   function handleSave() {
     const activityLabel = ACTIVITY_OPTIONS.find((option) => option.value === activity)?.label
+    const trimmedTitle = title.trim()
+    const trimmedLink = link.trim()
 
-    if (!activityLabel) {
+    if (!activityLabel || !trimmedTitle || !trimmedLink) {
       return
     }
 
     setRows((previousRows) => [
-      ...previousRows,
       {
         id: crypto.randomUUID(),
         name: '관리자',
         generation: CURRENT_GENERATION,
         part,
         activity: activityLabel,
-        title,
-        link,
+        title: trimmedTitle,
+        link: trimmedLink,
       },
+      ...previousRows,
     ])
+    setPage(1)
     resetForm()
     setModalOpen(false)
   }
@@ -133,7 +136,7 @@ export function BlogReviewsPage() {
         onLinkChange={setLink}
         onCancel={handleCancel}
         onSave={handleSave}
-        saveDisabled={!activity || !title || !link}
+        saveDisabled={!activity || !title.trim() || !link.trim()}
       />
     </div>
   )

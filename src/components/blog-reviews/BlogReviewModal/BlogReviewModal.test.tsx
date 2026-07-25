@@ -43,7 +43,7 @@ describe('BlogReviewModal', () => {
     expect(screen.getByText('33기')).toBeTruthy()
     expect(screen.getByText('활동을 선택해주세요')).toBeTruthy()
     expect(screen.getByPlaceholderText('제목을 입력해주세요')).toBeTruthy()
-    expect(screen.getByPlaceholderText('링크를 업로드해주세요')).toBeTruthy()
+    expect(screen.getByPlaceholderText('링크를 입력해주세요')).toBeTruthy()
   })
 
   it('제목을 입력하면 onTitleChange가 호출된다', async () => {
@@ -59,7 +59,7 @@ describe('BlogReviewModal', () => {
     const user = userEvent.setup()
     const props = renderModal()
 
-    await user.type(screen.getByPlaceholderText('링크를 업로드해주세요'), 'h')
+    await user.type(screen.getByPlaceholderText('링크를 입력해주세요'), 'h')
 
     expect(props.onLinkChange).toHaveBeenCalledWith('h')
   })

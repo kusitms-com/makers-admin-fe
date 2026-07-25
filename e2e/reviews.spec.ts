@@ -21,6 +21,28 @@ test('/blog-review 진입 시 블로그 후기 메뉴와 별도 페이지가 보
   await expect(page.getByText('프론트엔드 파트 활동 후기')).toBeVisible()
 })
 
+test('블로그 후기는 필수값 입력 후 저장하면 첫 페이지 목록에 표시된다', async ({ page }) => {
+  await page.goto('/blog-review')
+  await page.getByRole('button', { name: '추가하기' }).click()
+
+  const saveButton = page.getByRole('button', { name: '저장하기' })
+  await expect(saveButton).toBeDisabled()
+
+  await page.getByRole('combobox').nth(1).click()
+  await page.getByRole('option', { name: '활동 후기' }).click()
+  await page.getByLabel('블로그 제목').fill('   ')
+  await page.getByLabel('링크').fill('   ')
+  await expect(saveButton).toBeDisabled()
+
+  await page.getByLabel('블로그 제목').fill('새 블로그 활동 후기')
+  await page.getByLabel('링크').fill('https://example.com/review')
+  await expect(saveButton).toBeEnabled()
+  await saveButton.click()
+
+  await expect(page.getByRole('dialog', { name: '블로그 후기 등록' })).not.toBeVisible()
+  await expect(page.getByText('새 블로그 활동 후기')).toBeVisible()
+})
+
 test('/ 진입 시 학회 소개 페이지로 이동한다', async ({ page }) => {
   await page.goto('/')
 

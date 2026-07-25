@@ -89,7 +89,7 @@ export function BlogReviewModal({
           onChange={(event: ChangeEvent<HTMLInputElement>) => {
             onLinkChange(event.target.value)
           }}
-          placeholder="링크를 업로드해주세요"
+          placeholder="링크를 입력해주세요"
         />
       </FormField>
       <FormField label="미리보기 이미지">
