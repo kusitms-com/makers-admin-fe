@@ -6,7 +6,7 @@ interface InputfieldProps extends InputHTMLAttributes<HTMLInputElement> {
 }
 
 export function Inputfield({ className, ...props }: InputfieldProps) {
-  const hasValue = typeof props.value === 'string' && props.value.length > 0
+  const hasValue = props.value != null && String(props.value).length > 0
 
   return (
     <div
