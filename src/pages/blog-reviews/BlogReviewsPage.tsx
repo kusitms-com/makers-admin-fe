@@ -36,26 +36,16 @@ export function BlogReviewsPage() {
   const totalPages = Math.max(1, Math.ceil(rows.length / PAGE_SIZE))
   const pagedRows = rows.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE)
 
-  function resetForm({ preserveThumbnail = false }: { preserveThumbnail?: boolean } = {}) {
+  function resetForm() {
     setPart('PLAN')
     setActivity('')
     setTitle('')
     setLink('')
-    setThumbnailUrl((currentThumbnailUrl) => {
-      if (currentThumbnailUrl && !preserveThumbnail) {
-        URL.revokeObjectURL(currentThumbnailUrl)
-      }
-      return undefined
-    })
+    setThumbnailUrl(undefined)
   }
 
   function handleDeleteRow(id: string) {
     const nextRows = rows.filter((row) => row.id !== id)
-    const deletedRow = rows.find((row) => row.id === id)
-
-    if (deletedRow?.thumbnailUrl?.startsWith('blob:')) {
-      URL.revokeObjectURL(deletedRow.thumbnailUrl)
-    }
 
     setRows(nextRows)
     setPage((currentPage) =>
@@ -70,23 +60,11 @@ export function BlogReviewsPage() {
   }
 
   function handleThumbnailChange(file: File) {
-    const nextThumbnailUrl = URL.createObjectURL(file)
-
-    setThumbnailUrl((currentThumbnailUrl) => {
-      if (currentThumbnailUrl) {
-        URL.revokeObjectURL(currentThumbnailUrl)
-      }
-      return nextThumbnailUrl
-    })
+    setThumbnailUrl(URL.createObjectURL(file))
   }
 
   function handleThumbnailDelete() {
-    setThumbnailUrl((currentThumbnailUrl) => {
-      if (currentThumbnailUrl) {
-        URL.revokeObjectURL(currentThumbnailUrl)
-      }
-      return undefined
-    })
+    setThumbnailUrl(undefined)
   }
 
   function handleSave() {
@@ -112,20 +90,13 @@ export function BlogReviewsPage() {
       ...previousRows,
     ])
     setPage(1)
-    resetForm({ preserveThumbnail: true })
+    resetForm()
     setModalOpen(false)
   }
 
   function handleCancel() {
     resetForm()
     setModalOpen(false)
-  }
-
-  function handleModalOpenChange(open: boolean) {
-    if (!open) {
-      resetForm()
-    }
-    setModalOpen(open)
   }
 
   return (
@@ -162,7 +133,7 @@ export function BlogReviewsPage() {
 
       <BlogReviewModal
         open={modalOpen}
-        onOpenChange={handleModalOpenChange}
+        onOpenChange={setModalOpen}
         cardinal={CURRENT_GENERATION}
         part={part}
         partOptions={PART_OPTIONS}
