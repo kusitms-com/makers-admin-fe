@@ -16,7 +16,7 @@ interface MemberListPresenterProps {
   onDelete: (id: string) => void
 }
 
-export function MemberListPresenter({
+export const MemberListPresenter = ({
   members,
   page,
   totalPages,
@@ -24,7 +24,7 @@ export function MemberListPresenter({
   onPageChange,
   onStatusChange,
   onDelete,
-}: MemberListPresenterProps) {
+}: MemberListPresenterProps) => {
   const navigate = useNavigate()
 
   return (
@@ -32,10 +32,6 @@ export function MemberListPresenter({
       <div className="flex h-10 items-center justify-between gap-4">
         <nav aria-label="현재 위치" className="text-body-18sb flex items-center gap-2">
           <span className="text-label-normal">회원 관리</span>
-          <span className="text-label-assitive" aria-hidden="true">
-            ›
-          </span>
-          <span className="text-label-alternative">회원가입 승인</span>
         </nav>
         <Button
           variant="strong"

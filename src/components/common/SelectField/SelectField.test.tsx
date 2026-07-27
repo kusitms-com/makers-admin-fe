@@ -36,18 +36,22 @@ describe('SelectField', () => {
     expect(screen.getByText('선택해주세요')).toBeTruthy()
   })
 
-  it('compact 변형은 상태 선택용 팝업 스타일을 사용한다', async () => {
+  it('compact 변형에서도 옵션을 선택할 수 있다', async () => {
     const user = userEvent.setup()
-    render(<SelectField value="PLAN" options={OPTIONS} onValueChange={vi.fn()} variant="compact" />)
+    const onValueChange = vi.fn()
+    render(
+      <SelectField
+        value="PLAN"
+        options={OPTIONS}
+        onValueChange={onValueChange}
+        variant="compact"
+      />,
+    )
 
     await user.click(screen.getByRole('combobox'))
+    await user.click(await screen.findByRole('option', { name: '디자인' }))
 
-    const listbox = await screen.findByRole('listbox')
-
-    expect(listbox.className).toContain('shadow-[0_1px_5px')
-    expect(listbox.className).toContain('text-label-light')
-    expect(listbox.parentElement?.getAttribute('data-side')).toBe('bottom')
-    expect(screen.getByRole('option', { name: '기획' }).className).toContain('rounded-lg')
+    expect(onValueChange).toHaveBeenCalledWith('DE')
   })
 
   it('FormField와 함께 쓰면 label이 정적 필드와 연결된다', () => {

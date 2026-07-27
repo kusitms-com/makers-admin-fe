@@ -151,7 +151,7 @@ const INITIAL_APPROVALS: MentoringMemberRow[] = [
   },
 ]
 
-export function MentoringMembersPage() {
+export const MentoringMembersPage = () => {
   const { pathname } = useLocation()
   const isApprovalPage = pathname === '/members/approval'
   const [members, setMembers] = useState(INITIAL_MEMBERS)

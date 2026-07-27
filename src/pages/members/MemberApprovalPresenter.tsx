@@ -16,7 +16,7 @@ interface MemberApprovalPresenterProps {
   onDelete: (id: string) => void
 }
 
-export function MemberApprovalPresenter({
+export const MemberApprovalPresenter = ({
   members,
   page,
   totalPages,
@@ -24,7 +24,7 @@ export function MemberApprovalPresenter({
   onPageChange,
   onStatusChange,
   onDelete,
-}: MemberApprovalPresenterProps) {
+}: MemberApprovalPresenterProps) => {
   return (
     <>
       <div className="flex h-10 items-center justify-between gap-4">

@@ -37,7 +37,7 @@ const STATUS_OPTIONS = [
 const COLUMNS = [
   ['이름', 'px-3'],
   ['기수', 'justify-center px-3'],
-  ['파트', 'justify-center px-[18px]'],
+  ['파트', 'justify-center px-3'],
   ['전화번호', 'px-3'],
   ['이메일', 'px-3'],
   ['가입일', 'px-3'],
@@ -61,27 +61,38 @@ function MentoringMemberTableRow({
 }) {
   return (
     <div
+      role="row"
       className={`border-line-alternative ${TABLE_GRID_CLASS} grid h-16 min-w-[1214px] items-center border-b px-1 last:border-b-0`}
     >
-      <div className="flex min-w-0 items-center gap-2 px-3">
+      <div role="cell" className="flex min-w-0 items-center gap-2 px-3">
         <img src={memberAvatar} alt="" className="size-7 rounded-full object-cover" />
         <span className="text-label-14m text-label-normal truncate">{member.name}</span>
       </div>
-      <span className="text-label-13m text-label-normal flex min-w-0 justify-center px-3">
+      <span
+        role="cell"
+        className="text-label-13m text-label-normal flex min-w-0 justify-center px-3"
+      >
         {member.generation}기
       </span>
-      <div className="flex min-w-0 justify-center px-[18px]">
+      <div role="cell" className="flex min-w-0 justify-center px-3">
         <PartBadge part={member.part} />
       </div>
-      <span className="text-label-14m text-label-normal min-w-0 truncate px-3">{member.phone}</span>
-      <span className="text-label-14m text-label-normal min-w-0 truncate px-3">{member.email}</span>
-      <span className="text-label-14m text-label-normal min-w-0 truncate px-3">
+      <span role="cell" className="text-label-14m text-label-normal min-w-0 truncate px-3">
+        {member.phone}
+      </span>
+      <span role="cell" className="text-label-14m text-label-normal min-w-0 truncate px-3">
+        {member.email}
+      </span>
+      <span role="cell" className="text-label-14m text-label-normal min-w-0 truncate px-3">
         {member.registeredAt}
       </span>
-      <span className="text-label-14m text-label-normal flex min-w-0 justify-center px-3">
+      <span
+        role="cell"
+        className="text-label-14m text-label-normal flex min-w-0 justify-center px-3"
+      >
         {member.isMentoringMember ? 'Y' : 'N'}
       </span>
-      <div className="min-w-0 px-3">
+      <div role="cell" className="min-w-0 px-3">
         <SelectField
           value={member.status}
           options={STATUS_OPTIONS}
@@ -95,7 +106,7 @@ function MentoringMemberTableRow({
           className="text-label-14sb border-fill-netural h-8 w-[84px] rounded-md py-1.5 pr-2"
         />
       </div>
-      <div className="flex min-w-0 justify-center px-3">
+      <div role="cell" className="flex min-w-0 justify-center px-3">
         <button
           type="button"
           onClick={onDelete}
@@ -105,14 +116,14 @@ function MentoringMemberTableRow({
           <DeleteIcon className="size-5" aria-hidden="true" />
         </button>
       </div>
-      <div className="flex min-w-0 px-3">
+      <div role="cell" className="flex min-w-0 px-3">
         {member.remark && <FileChip fileName={member.remark} className="w-full" />}
       </div>
     </div>
   )
 }
 
-export function MentoringMemberTable({
+export const MentoringMemberTable = ({
   members,
   page,
   totalPages,
@@ -120,16 +131,22 @@ export function MentoringMemberTable({
   onPageChange,
   onStatusChange,
   onDelete,
-}: MentoringMemberTableProps) {
+}: MentoringMemberTableProps) => {
   return (
-    <section className="bg-fill-normal w-full overflow-hidden rounded-xl shadow-[inset_0_0_0_1px_var(--line-alternative)]">
+    <section
+      role="table"
+      aria-label="멘토링 회원 목록"
+      className="bg-fill-normal w-full overflow-hidden rounded-xl shadow-[inset_0_0_0_1px_var(--line-alternative)]"
+    >
       <div className="overflow-x-auto">
         <div
+          role="row"
           className={`bg-fill-netural ${TABLE_GRID_CLASS} grid h-12 min-w-[1214px] items-center px-1`}
         >
           {COLUMNS.map(([label, className]) => (
             <span
               key={label}
+              role="columnheader"
               className={`text-label-13sb text-label-alternative flex min-w-0 ${className}`}
             >
               {label}
@@ -151,7 +168,10 @@ export function MentoringMemberTable({
             />
           ))
         ) : (
-          <div className="text-label-14m text-label-alternative flex h-16 min-w-[1214px] items-center justify-center">
+          <div
+            role="row"
+            className="text-label-14m text-label-alternative flex h-16 min-w-[1214px] items-center justify-center"
+          >
             표시할 회원이 없습니다.
           </div>
         )}

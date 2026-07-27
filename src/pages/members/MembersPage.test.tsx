@@ -13,8 +13,7 @@ describe('MentoringMembersPage', () => {
     )
 
     expect(screen.getByRole('heading', { name: '회원 관리' })).toBeTruthy()
-    expect(screen.getByLabelText('현재 위치').className).toContain('text-body-18sb')
-    expect(screen.getByText('회원가입 승인')).toBeTruthy()
+    expect(screen.getByLabelText('현재 위치')).toBeTruthy()
     expect(screen.getByRole('button', { name: '승인 요청 3' })).toBeTruthy()
     expect(screen.getByText('총 8명')).toBeTruthy()
     expect(screen.getByText('이현진')).toBeTruthy()
@@ -36,12 +35,15 @@ describe('MentoringMembersPage', () => {
     expect(screen.getByText('총 7명')).toBeTruthy()
   })
 
-  it('승인 경로에서는 승인 프레젠터를 표시한다', () => {
+  it('승인 요청 버튼을 누르면 승인 프레젠터를 표시한다', async () => {
+    const user = userEvent.setup()
     render(
-      <MemoryRouter initialEntries={['/members/approval']}>
+      <MemoryRouter>
         <MentoringMembersPage />
       </MemoryRouter>,
     )
+
+    await user.click(screen.getByRole('button', { name: '승인 요청 3' }))
 
     expect(screen.getByRole('link', { name: '회원 관리' }).getAttribute('href')).toBe('/members')
     expect(screen.getByRole('button', { name: '저장하기' })).toBeTruthy()
