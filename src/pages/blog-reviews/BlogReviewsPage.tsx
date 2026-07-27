@@ -31,19 +31,31 @@ export function BlogReviewsPage() {
   const [activity, setActivity] = useState('')
   const [title, setTitle] = useState('')
   const [link, setLink] = useState('')
+  const [thumbnailUrl, setThumbnailUrl] = useState<string>()
 
   const totalPages = Math.max(1, Math.ceil(rows.length / PAGE_SIZE))
   const pagedRows = rows.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE)
 
-  function resetForm() {
+  function resetForm({ preserveThumbnail = false }: { preserveThumbnail?: boolean } = {}) {
     setPart('PLAN')
     setActivity('')
     setTitle('')
     setLink('')
+    setThumbnailUrl((currentThumbnailUrl) => {
+      if (currentThumbnailUrl && !preserveThumbnail) {
+        URL.revokeObjectURL(currentThumbnailUrl)
+      }
+      return undefined
+    })
   }
 
   function handleDeleteRow(id: string) {
     const nextRows = rows.filter((row) => row.id !== id)
+    const deletedRow = rows.find((row) => row.id === id)
+
+    if (deletedRow?.thumbnailUrl?.startsWith('blob:')) {
+      URL.revokeObjectURL(deletedRow.thumbnailUrl)
+    }
 
     setRows(nextRows)
     setPage((currentPage) =>
@@ -55,6 +67,26 @@ export function BlogReviewsPage() {
     if (isPartBadgeType(value)) {
       setPart(value)
     }
+  }
+
+  function handleThumbnailChange(file: File) {
+    const nextThumbnailUrl = URL.createObjectURL(file)
+
+    setThumbnailUrl((currentThumbnailUrl) => {
+      if (currentThumbnailUrl) {
+        URL.revokeObjectURL(currentThumbnailUrl)
+      }
+      return nextThumbnailUrl
+    })
+  }
+
+  function handleThumbnailDelete() {
+    setThumbnailUrl((currentThumbnailUrl) => {
+      if (currentThumbnailUrl) {
+        URL.revokeObjectURL(currentThumbnailUrl)
+      }
+      return undefined
+    })
   }
 
   function handleSave() {
@@ -75,17 +107,25 @@ export function BlogReviewsPage() {
         activity: activityLabel,
         title: trimmedTitle,
         link: trimmedLink,
+        thumbnailUrl,
       },
       ...previousRows,
     ])
     setPage(1)
-    resetForm()
+    resetForm({ preserveThumbnail: true })
     setModalOpen(false)
   }
 
   function handleCancel() {
     resetForm()
     setModalOpen(false)
+  }
+
+  function handleModalOpenChange(open: boolean) {
+    if (!open) {
+      resetForm()
+    }
+    setModalOpen(open)
   }
 
   return (
@@ -122,7 +162,7 @@ export function BlogReviewsPage() {
 
       <BlogReviewModal
         open={modalOpen}
-        onOpenChange={setModalOpen}
+        onOpenChange={handleModalOpenChange}
         cardinal={CURRENT_GENERATION}
         part={part}
         partOptions={PART_OPTIONS}
@@ -134,6 +174,9 @@ export function BlogReviewsPage() {
         onTitleChange={setTitle}
         link={link}
         onLinkChange={setLink}
+        thumbnailUrl={thumbnailUrl}
+        onThumbnailChange={handleThumbnailChange}
+        onThumbnailDelete={handleThumbnailDelete}
         onCancel={handleCancel}
         onSave={handleSave}
         saveDisabled={!activity || !title.trim() || !link.trim()}

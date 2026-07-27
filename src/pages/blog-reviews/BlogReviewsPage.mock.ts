@@ -8,6 +8,7 @@ export interface BlogReviewRow {
   activity: string
   title: string
   link: string
+  thumbnailUrl?: string
 }
 
 // TODO: API 연동 시 GET /api/auth/current-cardinal의 data.currentCardinal로 교체한다.
