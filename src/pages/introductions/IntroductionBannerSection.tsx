@@ -42,7 +42,7 @@ export function IntroductionBannerSection({
       </div>
       <FormField label="배너 이미지">
         <div className="flex items-center gap-2.5">
-          <input {...bannerImageInput.inputProps} />
+          <input {...bannerImageInput.inputProps} aria-label="배너 이미지" />
           <ImageBoxThumbnail imageUrl={bannerImageUrl} size="m" />
           <div className="flex flex-col justify-center gap-1.5">
             <Button variant="primary" size="s" onClick={bannerImageInput.openFilePicker}>

@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import type { IntroductionItem, PartnerLogo } from '@pages/introductions/IntroductionsPage.mock'
 
 export type PartKey = 'plan' | 'design' | 'frontend' | 'backend'
@@ -52,6 +52,28 @@ export function useIntroductionsForm({
   })
   const [pristineSnapshot, setPristineSnapshot] = useState(formSnapshot)
   const isDirty = formSnapshot !== pristineSnapshot
+
+  const latestImagesRef = useRef({ bannerImageUrl, partImages, activities, teams, partners })
+  useEffect(() => {
+    latestImagesRef.current = { bannerImageUrl, partImages, activities, teams, partners }
+  }, [bannerImageUrl, partImages, activities, teams, partners])
+
+  useEffect(() => {
+    return () => {
+      const current = latestImagesRef.current
+      revokeIfBlobUrl(current.bannerImageUrl)
+      Object.values(current.partImages).forEach(revokeIfBlobUrl)
+      current.activities.forEach((item) => {
+        revokeIfBlobUrl(item.thumbnailUrl)
+      })
+      current.teams.forEach((item) => {
+        revokeIfBlobUrl(item.thumbnailUrl)
+      })
+      current.partners.forEach((partner) => {
+        revokeIfBlobUrl(partner.imageUrl)
+      })
+    }
+  }, [])
 
   function handleSave() {
     setPristineSnapshot(formSnapshot)

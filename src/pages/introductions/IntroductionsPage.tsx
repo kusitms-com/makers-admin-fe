@@ -41,7 +41,7 @@ function PartImageField({ label, imageUrl, onFileChange, onDelete }: PartImageFi
 
   return (
     <>
-      <input {...inputProps} />
+      <input {...inputProps} aria-label={label} />
       <PartImageCard
         partLabel={label}
         imageUrl={imageUrl}
