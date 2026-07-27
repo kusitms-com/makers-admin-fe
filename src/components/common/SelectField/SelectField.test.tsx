@@ -36,6 +36,20 @@ describe('SelectField', () => {
     expect(screen.getByText('선택해주세요')).toBeTruthy()
   })
 
+  it('compact 변형은 상태 선택용 팝업 스타일을 사용한다', async () => {
+    const user = userEvent.setup()
+    render(<SelectField value="PLAN" options={OPTIONS} onValueChange={vi.fn()} variant="compact" />)
+
+    await user.click(screen.getByRole('combobox'))
+
+    const listbox = await screen.findByRole('listbox')
+
+    expect(listbox.className).toContain('shadow-[0_1px_5px')
+    expect(listbox.className).toContain('text-label-light')
+    expect(listbox.parentElement?.getAttribute('data-side')).toBe('bottom')
+    expect(screen.getByRole('option', { name: '기획' }).className).toContain('rounded-lg')
+  })
+
   it('FormField와 함께 쓰면 label이 정적 필드와 연결된다', () => {
     render(
       <FormField label="기수">
