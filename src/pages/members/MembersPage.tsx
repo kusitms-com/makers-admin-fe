@@ -5,7 +5,7 @@ import { type MentoringMemberRow, type MentoringMemberStatus } from '@/component
 import { MemberApprovalPresenter } from './MemberApprovalPresenter'
 import { MemberListPresenter } from './MemberListPresenter'
 
-const PAGE_SIZE = 7
+const PAGE_SIZE = 8
 
 const INITIAL_MEMBERS: MentoringMemberRow[] = [
   {

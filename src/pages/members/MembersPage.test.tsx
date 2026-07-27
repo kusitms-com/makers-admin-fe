@@ -20,19 +20,16 @@ describe('MentoringMembersPage', () => {
     expect(screen.getByText('이현진')).toBeTruthy()
     expect(screen.getByText('비고')).toBeTruthy()
     expect(screen.getByText('수료증_김서연.pdf')).toBeTruthy()
-    expect(screen.queryByText('서지민')).toBeNull()
+    expect(screen.getByText('서지민')).toBeTruthy()
   })
 
-  it('다음 페이지로 이동하고 회원을 삭제할 수 있다', async () => {
+  it('회원 삭제 후 목록 수를 갱신한다', async () => {
     const user = userEvent.setup()
     render(
       <MemoryRouter>
         <MentoringMembersPage />
       </MemoryRouter>,
     )
-
-    await user.click(screen.getByRole('button', { name: '다음 페이지' }))
-    expect(screen.getByText('서지민')).toBeTruthy()
 
     await user.click(screen.getByRole('button', { name: '서지민 삭제' }))
     expect(screen.queryByText('서지민')).toBeNull()
