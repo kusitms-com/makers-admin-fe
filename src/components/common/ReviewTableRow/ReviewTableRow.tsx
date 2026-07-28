@@ -10,6 +10,7 @@ interface ReviewTableRowProps {
   generation: number
   part: PartBadgeType
   title: string
+  link?: string
   category?: string
   phone?: string
   fileName?: string
@@ -31,6 +32,7 @@ export function ReviewTableRow({
   generation,
   part,
   title,
+  link,
   category,
   phone,
   fileName,
@@ -91,7 +93,18 @@ export function ReviewTableRow({
             isMemberReview ? 'px-[18px]' : 'pl-3',
           )}
         >
-          <Label className="w-full truncate">{title}</Label>
+          {isMemberReview || !link ? (
+            <Label className="w-full truncate">{title}</Label>
+          ) : (
+            <a
+              href={link}
+              target="_blank"
+              rel="noreferrer"
+              className="text-label-14m text-label-normal w-full truncate hover:underline"
+            >
+              {title}
+            </a>
+          )}
         </div>
       </div>
 

@@ -11,6 +11,7 @@ const BLOG_REVIEW_ROWS = [
     part: 'PLAN' as const,
     category: '서류 후기',
     title: '큐시즘 34기 서류 합격 후기',
+    link: 'https://kusitms.com/review/1',
   },
   {
     id: '2',
@@ -69,6 +70,9 @@ describe('ReviewTable', () => {
     expect(screen.getByText('이현진')).toBeTruthy()
     expect(screen.getByText('김도윤')).toBeTruthy()
     expect(screen.getAllByText('34기')).toHaveLength(1)
+    expect(
+      screen.getByRole('link', { name: '큐시즘 34기 서류 합격 후기' }).getAttribute('href'),
+    ).toBe('https://kusitms.com/review/1')
   })
 
   it('총 개수 라벨과 페이지네이션을 렌더링한다', () => {
