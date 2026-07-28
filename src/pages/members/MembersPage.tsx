@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useLocation } from 'react-router'
-import { PageHeader } from '@/components/common'
+import { Button, Modal, PageHeader } from '@/components/common'
 import { type MentoringMemberRow, type MentoringMemberStatus } from '@/components/members'
 import { MemberApprovalPresenter } from './MemberApprovalPresenter'
 import { MemberListPresenter } from './MemberListPresenter'
@@ -158,6 +158,7 @@ export const MentoringMembersPage = () => {
   const [approvals, setApprovals] = useState(INITIAL_APPROVALS)
   const [membersPage, setMembersPage] = useState(1)
   const [approvalPage, setApprovalPage] = useState(1)
+  const [deleteTarget, setDeleteTarget] = useState<MentoringMemberRow | null>(null)
   const currentMembers = isApprovalPage ? approvals : members
   const setCurrentMembers = isApprovalPage ? setApprovals : setMembers
   const page = isApprovalPage ? approvalPage : membersPage
@@ -171,7 +172,20 @@ export const MentoringMembersPage = () => {
     )
   }
 
-  function handleDelete(id: string) {
+  function handleDeleteRequest(id: string) {
+    const target = currentMembers.find((member) => member.id === id)
+
+    if (target) {
+      setDeleteTarget(target)
+    }
+  }
+
+  function handleConfirmDelete() {
+    if (!deleteTarget) {
+      return
+    }
+
+    const { id } = deleteTarget
     setCurrentMembers((currentMembers) => {
       const nextMembers = currentMembers.filter((member) => member.id !== id)
       setPage((currentPage) =>
@@ -179,6 +193,7 @@ export const MentoringMembersPage = () => {
       )
       return nextMembers
     })
+    setDeleteTarget(null)
   }
 
   return (
@@ -194,7 +209,7 @@ export const MentoringMembersPage = () => {
             totalLabel={`총 ${String(approvals.length)}명`}
             onPageChange={setPage}
             onStatusChange={handleStatusChange}
-            onDelete={handleDelete}
+            onDelete={handleDeleteRequest}
           />
         ) : (
           <MemberListPresenter
@@ -204,10 +219,40 @@ export const MentoringMembersPage = () => {
             totalLabel={`총 ${String(members.length)}명`}
             onPageChange={setPage}
             onStatusChange={handleStatusChange}
-            onDelete={handleDelete}
+            onDelete={handleDeleteRequest}
           />
         )}
       </div>
+
+      <Modal
+        open={deleteTarget !== null}
+        onOpenChange={(open) => {
+          if (!open) {
+            setDeleteTarget(null)
+          }
+        }}
+        title="회원 삭제"
+        footer={
+          <>
+            <Button
+              variant="outlined"
+              size="m"
+              onClick={() => {
+                setDeleteTarget(null)
+              }}
+            >
+              취소
+            </Button>
+            <Button variant="error" size="m" onClick={handleConfirmDelete}>
+              삭제하기
+            </Button>
+          </>
+        }
+      >
+        <p className="text-label-14m text-label-normal">
+          {deleteTarget?.name} 회원을 삭제하시겠습니까? 삭제된 회원 정보는 복구할 수 없습니다.
+        </p>
+      </Modal>
     </div>
   )
 }

@@ -22,7 +22,7 @@ describe('MentoringMembersPage', () => {
     expect(screen.getByText('서지민')).toBeTruthy()
   })
 
-  it('회원 삭제 후 목록 수를 갱신한다', async () => {
+  it('삭제 확인 후 회원을 삭제한다', async () => {
     const user = userEvent.setup()
     render(
       <MemoryRouter>
@@ -31,6 +31,16 @@ describe('MentoringMembersPage', () => {
     )
 
     await user.click(screen.getByRole('button', { name: '서지민 삭제' }))
+    expect(screen.getByText('회원 삭제')).toBeTruthy()
+    expect(
+      screen.getByText('서지민 회원을 삭제하시겠습니까? 삭제된 회원 정보는 복구할 수 없습니다.'),
+    ).toBeTruthy()
+
+    await user.click(screen.getByRole('button', { name: '취소' }))
+    expect(screen.getByText('서지민')).toBeTruthy()
+
+    await user.click(screen.getByRole('button', { name: '서지민 삭제' }))
+    await user.click(screen.getByRole('button', { name: '삭제하기' }))
     expect(screen.queryByText('서지민')).toBeNull()
     expect(screen.getByText('총 7명')).toBeTruthy()
   })
