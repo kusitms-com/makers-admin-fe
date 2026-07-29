@@ -29,6 +29,12 @@ describe('PageHeader', () => {
     expect(onAction).toHaveBeenCalledTimes(1)
   })
 
+  it('actionDisabled가 true면 액션 버튼이 비활성화된다', () => {
+    render(<PageHeader title="기업 프로젝트 관리" actionLabel="저장하기" actionDisabled />)
+
+    expect(screen.getByRole<HTMLButtonElement>('button', { name: '저장하기' }).disabled).toBe(true)
+  })
+
   it('children을 제목 옆에 렌더링한다', () => {
     render(
       <PageHeader title="기업 프로젝트 관리">
