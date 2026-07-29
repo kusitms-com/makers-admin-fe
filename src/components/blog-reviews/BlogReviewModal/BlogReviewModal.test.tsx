@@ -23,6 +23,8 @@ function renderModal(overrides: Partial<Parameters<typeof BlogReviewModal>[0]> =
     onActivityChange: vi.fn(),
     title: '',
     onTitleChange: vi.fn(),
+    link: '',
+    onLinkChange: vi.fn(),
     onThumbnailChange: vi.fn(),
     onThumbnailDelete: vi.fn(),
     onCancel: vi.fn(),
@@ -41,6 +43,7 @@ describe('BlogReviewModal', () => {
     expect(screen.getByText('33기')).toBeTruthy()
     expect(screen.getByText('활동을 선택해주세요')).toBeTruthy()
     expect(screen.getByPlaceholderText('제목을 입력해주세요')).toBeTruthy()
+    expect(screen.getByPlaceholderText('링크를 입력해주세요')).toBeTruthy()
   })
 
   it('제목을 입력하면 onTitleChange가 호출된다', async () => {
@@ -50,6 +53,15 @@ describe('BlogReviewModal', () => {
     await user.type(screen.getByPlaceholderText('제목을 입력해주세요'), 'A')
 
     expect(props.onTitleChange).toHaveBeenCalledWith('A')
+  })
+
+  it('링크를 입력하면 onLinkChange가 호출된다', async () => {
+    const user = userEvent.setup()
+    const props = renderModal()
+
+    await user.type(screen.getByPlaceholderText('링크를 입력해주세요'), 'h')
+
+    expect(props.onLinkChange).toHaveBeenCalledWith('h')
   })
 
   it('파트 드롭다운에서 값을 선택하면 onPartChange가 호출된다', async () => {
