@@ -1,4 +1,4 @@
-import mentoringDeleteIcon from '@/assets/icons/svg-preserve/mentoring-delete.svg'
+import MentoringDeleteIcon from '@/assets/icons/generated/MentoringDeleteIcon'
 import memberAvatar from '@/assets/images/member-avatar.png'
 import { FileChip, PartBadge, SelectField, TableFooter } from '@/components/common'
 import type { PartBadgeType } from '@/components/common/PartBadge'
@@ -113,7 +113,7 @@ function MentoringMemberTableRow({
           aria-label={`${member.name} 삭제`}
           className="flex size-9 items-center justify-center rounded-full bg-[#fdf2f2]"
         >
-          <img src={mentoringDeleteIcon} alt="" className="size-6" aria-hidden="true" />
+          <MentoringDeleteIcon className="size-6" aria-hidden="true" />
         </button>
       </div>
       <div role="cell" className="flex min-w-0 px-3">
