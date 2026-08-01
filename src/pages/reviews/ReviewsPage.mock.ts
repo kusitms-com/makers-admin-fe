@@ -9,7 +9,7 @@ export interface ReviewRow {
   title: string
 }
 
-// 기수 선택 소스가 생기기 전까지 현재 활동 기수를 고정값으로 둔다.
+// TODO: API 연동 시 GET /api/auth/current-cardinal의 data.currentCardinal로 교체한다.
 export const CURRENT_GENERATION = 33
 // '활동' 컬럼은 ReviewRequest 스키마에 없는 필드라 API 연동 전까지 고정값으로 둔다.
 export const CATEGORY_LABEL = '서류 후기'

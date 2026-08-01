@@ -19,6 +19,8 @@ interface BlogReviewModalProps {
   onActivityChange: (value: string) => void
   title: string
   onTitleChange: (value: string) => void
+  link: string
+  onLinkChange: (value: string) => void
   thumbnailUrl?: string
   onThumbnailChange?: (file: File) => void
   onThumbnailDelete?: () => void
@@ -40,6 +42,8 @@ export function BlogReviewModal({
   onActivityChange,
   title,
   onTitleChange,
+  link,
+  onLinkChange,
   thumbnailUrl,
   onThumbnailChange,
   onThumbnailDelete,
@@ -70,13 +74,22 @@ export function BlogReviewModal({
           placeholder="활동을 선택해주세요"
         />
       </FormField>
-      <FormField label="제목">
+      <FormField label="블로그 제목">
         <Inputfield
           value={title}
           onChange={(event: ChangeEvent<HTMLInputElement>) => {
             onTitleChange(event.target.value)
           }}
           placeholder="제목을 입력해주세요"
+        />
+      </FormField>
+      <FormField label="링크">
+        <Inputfield
+          value={link}
+          onChange={(event: ChangeEvent<HTMLInputElement>) => {
+            onLinkChange(event.target.value)
+          }}
+          placeholder="링크를 입력해주세요"
         />
       </FormField>
       <FormField label="미리보기 이미지">

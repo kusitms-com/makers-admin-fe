@@ -6,11 +6,19 @@ interface PageHeaderProps {
   title: string
   actionLabel?: string
   onAction?: () => void
+  actionDisabled?: boolean
   children?: ReactNode
   className?: string
 }
 
-export function PageHeader({ title, actionLabel, onAction, children, className }: PageHeaderProps) {
+export function PageHeader({
+  title,
+  actionLabel,
+  onAction,
+  actionDisabled = false,
+  children,
+  className,
+}: PageHeaderProps) {
   return (
     <div
       className={cn(
@@ -23,7 +31,12 @@ export function PageHeader({ title, actionLabel, onAction, children, className }
         {children}
       </div>
       {actionLabel && (
-        <Button variant="strong" size="m" onClick={onAction} className="hover:brightness-95">
+        <Button
+          variant={actionDisabled ? 'disable' : 'strong'}
+          size="m"
+          onClick={onAction}
+          className="hover:brightness-95"
+        >
           {actionLabel}
         </Button>
       )}

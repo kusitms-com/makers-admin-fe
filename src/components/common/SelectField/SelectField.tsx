@@ -20,7 +20,7 @@ interface SelectFieldProps {
 }
 
 const fieldClassName =
-  'bg-fill-netural border-line-normal flex h-10 w-full items-center rounded-lg border px-3 py-1.5'
+  'border-line-normal flex h-10 w-full items-center rounded-lg border px-3 py-1.5'
 
 export function SelectField({
   value,
@@ -35,11 +35,17 @@ export function SelectField({
 }: SelectFieldProps) {
   const selectedLabel = options.find((option) => option.value === value)?.label ?? value
   const isCompact = variant === 'compact'
+  const hasValue = value.length > 0
+  const valueClassName = hasValue ? 'bg-fill-normal text-label-strong' : 'bg-fill-netural'
 
   if (!onValueChange) {
     return (
-      <output id={id} aria-label={ariaLabel} className={cn(fieldClassName, className)}>
-        <span className="text-label-14m text-label-normal">{selectedLabel}</span>
+      <output
+        id={id}
+        aria-label={ariaLabel}
+        className={cn(fieldClassName, valueClassName, className)}
+      >
+        <span className="text-label-14m text-label-strong">{selectedLabel}</span>
       </output>
     )
   }
@@ -58,12 +64,17 @@ export function SelectField({
       <Select.Trigger
         id={id}
         aria-label={ariaLabel}
-        className={cn(fieldClassName, 'justify-between', className)}
+        className={cn(
+          fieldClassName,
+          valueClassName,
+          'focus-visible:border-brand-primary focus-visible:bg-fill-normal justify-between outline-none',
+          className,
+        )}
       >
         <Select.Value
           placeholder={placeholder}
           className={cn(
-            isCompact ? 'text-label-14sb text-label-light' : 'text-label-14m text-label-normal',
+            isCompact ? 'text-label-14sb text-label-light' : 'text-label-14m text-label-strong',
             'data-placeholder:text-label-assitive',
           )}
         />

@@ -6,6 +6,7 @@ export default [
     index('routes/(main)/index.tsx'),
     route('introduction', 'routes/(main)/introduction.tsx'),
     route('review', 'routes/(main)/review.tsx'),
+    route('blog-review', 'routes/(main)/blogReview.tsx'),
     route('members', 'routes/(main)/members.tsx'),
     route('members/approval', 'routes/(main)/memberApprovals.tsx'),
     route('*', 'routes/(main)/notFound.tsx'),

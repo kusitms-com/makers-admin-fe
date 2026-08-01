@@ -9,6 +9,7 @@ interface ReviewTableRowData {
   generation: number
   part: PartBadgeType
   title: string
+  link?: string
   category?: string
   phone?: string
   fileName?: string
@@ -92,6 +93,7 @@ export function ReviewTable({
               phone={row.phone}
               fileName={row.fileName}
               title={row.title}
+              link={row.link}
               onDelete={() => onDeleteRow?.(row.id)}
               className="w-full"
             />
