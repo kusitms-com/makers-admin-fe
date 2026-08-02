@@ -10,7 +10,6 @@ import {
   CURRENT_GENERATION,
   INITIAL_MEETUP_PROJECTS,
   PART_OPTIONS,
-  PLACEHOLDER_THUMBNAIL_URL,
   TYPE_OPTIONS,
   type MeetupProjectCard,
 } from './MeetupProjectsPage.mock'
@@ -37,7 +36,7 @@ export function MeetupProjectsPage() {
           id: crypto.randomUUID(),
           cardinal: CURRENT_GENERATION,
           serviceName: values.name,
-          imageUrl: values.posterUrl || PLACEHOLDER_THUMBNAIL_URL,
+          imageUrl: values.posterUrl,
         },
       ])
       setModalOpen(false)
@@ -63,18 +62,24 @@ export function MeetupProjectsPage() {
         <section className="flex flex-col gap-6">
           <SegmentedControl items={COHORT_OPTIONS} value={cohort} onValueChange={setCohort} />
 
-          <div className="flex flex-wrap gap-x-3 gap-y-4">
-            {visibleProjects.map((project) => (
-              <ProjectThumbnailCard
-                key={project.id}
-                imageUrl={project.imageUrl}
-                serviceName={project.serviceName}
-                onDelete={() => {
-                  handleDelete(project.id)
-                }}
-              />
-            ))}
-          </div>
+          {visibleProjects.length === 0 ? (
+            <p className="text-body-16sb text-label-alternative py-10 text-center">
+              등록된 프로젝트가 없습니다
+            </p>
+          ) : (
+            <div className="flex flex-wrap gap-x-3 gap-y-4">
+              {visibleProjects.map((project) => (
+                <ProjectThumbnailCard
+                  key={project.id}
+                  imageUrl={project.imageUrl}
+                  serviceName={project.serviceName}
+                  onDelete={() => {
+                    handleDelete(project.id)
+                  }}
+                />
+              ))}
+            </div>
+          )}
         </section>
       </div>
 
