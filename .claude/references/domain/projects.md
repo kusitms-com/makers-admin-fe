@@ -16,10 +16,14 @@
 
 ```text
 src/pages/projects/
-  # 프로젝트 관리 화면 구현 시 생성
+  MeetupProjectsPage.tsx      # 밋업 프로젝트 관리 페이지 (구현 완료, mock 데이터 기반)
+  MeetupProjectsPage.mock.ts
+  # 기업 프로젝트 관리 화면은 미구현, 구현 시 CorporateProjectsPage.tsx로 생성
 
-src/api/projects.ts
-src/hooks/useProjects.ts
+src/hooks/projects/
+  useMeetupProjectForm.ts     # 밋업 프로젝트 등록 폼 상태 (RHF + Zod)
+
+src/api/projects.ts            # 미구현, API 연동 시 생성
 ```
 
 ## 주요 액션
