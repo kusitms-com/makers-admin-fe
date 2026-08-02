@@ -51,8 +51,8 @@ export function MeetupProjectsPage() {
     <div className="flex min-h-screen flex-col">
       <PageHeader title="밋업 프로젝트" />
 
-      <div className="flex flex-col gap-7 px-6 pt-6 pb-15">
-        <section className="flex items-center justify-between">
+      <div className="flex flex-col gap-7 pt-6 pr-8 pb-15 pl-6">
+        <section className="flex flex-col items-start gap-3">
           <h2 className="text-body-18sb text-label-normal">프로젝트 추가하기</h2>
           <Button variant="outlined" size="l" onClick={openModal}>
             추가하기
