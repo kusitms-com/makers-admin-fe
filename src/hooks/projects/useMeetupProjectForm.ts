@@ -17,21 +17,41 @@ const meetupProjectFormSchema = z.object({
 
 export type MeetupProjectFormValues = z.infer<typeof meetupProjectFormSchema>
 
+interface FieldErrorEntry {
+  type: string
+  message: string
+}
+
+// path 세그먼트를 따라 중첩 object/array를 만들어 RHF의 FieldErrors 구조에 맞춘다.
+function setNestedError(
+  target: Record<string, unknown>,
+  path: PropertyKey[],
+  error: FieldErrorEntry,
+) {
+  let cursor: Record<string, unknown> = target
+  path.forEach((segment, index) => {
+    const key = String(segment)
+    if (index === path.length - 1) {
+      cursor[key] ??= error
+      return
+    }
+    const nextSegment = path[index + 1]
+    cursor[key] ??= typeof nextSegment === 'number' ? [] : {}
+    cursor = cursor[key] as Record<string, unknown>
+  })
+}
+
 // @hookform/resolvers 의존성 없이 zod safeParse 결과를 RHF Resolver 형식으로 직접 변환한다.
-const meetupProjectFormResolver: Resolver<MeetupProjectFormValues> = (values) => {
+export const meetupProjectFormResolver: Resolver<MeetupProjectFormValues> = (values) => {
   const result = meetupProjectFormSchema.safeParse(values)
   if (result.success) {
     return { values: result.data, errors: {} }
   }
 
-  const errors = result.error.issues.reduce<Record<string, { type: string; message: string }>>(
-    (acc, issue) => {
-      const path = issue.path.join('.')
-      acc[path] ??= { type: issue.code, message: issue.message }
-      return acc
-    },
-    {},
-  )
+  const errors: Record<string, unknown> = {}
+  result.error.issues.forEach((issue) => {
+    setNestedError(errors, issue.path, { type: issue.code, message: issue.message })
+  })
   return { values: {}, errors }
 }
 
@@ -116,6 +136,11 @@ export function useMeetupProjectForm() {
     reset(createDefaultValues())
   }
 
+  // 저장 성공 후에는 posterUrl 소유권이 저장된 카드로 넘어가므로 revoke 없이 폼만 비운다.
+  function resetAfterSave() {
+    reset(createDefaultValues())
+  }
+
   return {
     type: values.type,
     setType: (value: string) => {
@@ -155,5 +180,6 @@ export function useMeetupProjectForm() {
     isValid: formState.isValid,
     handleSubmit,
     reset: resetForm,
+    resetAfterSave,
   }
 }

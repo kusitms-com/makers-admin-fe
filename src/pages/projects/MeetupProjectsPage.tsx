@@ -39,6 +39,7 @@ export function MeetupProjectsPage() {
           imageUrl: values.posterUrl,
         },
       ])
+      form.resetAfterSave()
       setModalOpen(false)
     })()
   }
