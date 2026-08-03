@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Button } from '@components/common/Button'
 import { PageHeader } from '@components/common/PageHeader'
 import { SegmentedControl } from '@components/common/SegmentedControl'
@@ -14,12 +14,30 @@ import {
   type MeetupProjectCard,
 } from './MeetupProjectsPage.mock'
 
+function revokeIfBlobUrl(url: string | undefined) {
+  if (url?.startsWith('blob:')) {
+    URL.revokeObjectURL(url)
+  }
+}
+
 export function MeetupProjectsPage() {
   const [projects, setProjects] = useState<MeetupProjectCard[]>(INITIAL_MEETUP_PROJECTS)
   const [cohort, setCohort] = useState(String(CURRENT_GENERATION))
   const [modalOpen, setModalOpen] = useState(false)
 
   const form = useMeetupProjectForm()
+
+  const latestProjectsRef = useRef(projects)
+  useEffect(() => {
+    latestProjectsRef.current = projects
+  }, [projects])
+  useEffect(() => {
+    return () => {
+      latestProjectsRef.current.forEach((project) => {
+        revokeIfBlobUrl(project.imageUrl)
+      })
+    }
+  }, [])
 
   const visibleProjects = projects.filter((project) => project.cardinal === Number(cohort))
 
@@ -45,7 +63,11 @@ export function MeetupProjectsPage() {
   }
 
   function handleDelete(id: string) {
-    setProjects((prev) => prev.filter((project) => project.id !== id))
+    setProjects((prev) => {
+      const target = prev.find((project) => project.id === id)
+      revokeIfBlobUrl(target?.imageUrl)
+      return prev.filter((project) => project.id !== id)
+    })
   }
 
   return (
