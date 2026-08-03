@@ -1,6 +1,6 @@
 import { render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
 import { MeetupProjectsPage } from './MeetupProjectsPage'
 
 describe('MeetupProjectsPage', () => {
@@ -108,5 +108,43 @@ describe('MeetupProjectsPage', () => {
 
     expect(screen.queryByText('모먼트')).toBeFalsy()
     expect(screen.getByText('등록된 프로젝트가 없습니다')).toBeTruthy()
+  })
+
+  it('저장 후 삭제하면 카드가 사용하던 poster blob URL을 해제한다', async () => {
+    const revokeSpy = vi.spyOn(URL, 'revokeObjectURL')
+    const user = userEvent.setup()
+    render(<MeetupProjectsPage />)
+
+    await user.click(screen.getByRole('button', { name: '추가하기' }))
+    const dialog = screen.getByRole('dialog')
+
+    await user.type(
+      within(dialog).getByPlaceholderText('서비스 이름을 입력해주세요'),
+      '삭제될 프로젝트',
+    )
+    await user.type(within(dialog).getByPlaceholderText('한 줄 소개를 입력해주세요'), '한 줄 소개')
+    await user.type(
+      within(dialog).getByPlaceholderText('프로젝트 소개를 입력해주세요'),
+      '프로젝트 소개',
+    )
+    await user.type(within(dialog).getByLabelText('추가할 팀원 이름'), '홍길동')
+    await user.click(within(dialog).getByRole('button', { name: '추가하기' }))
+
+    const fileInput = dialog.querySelector<HTMLInputElement>('input[type="file"]')
+    if (!fileInput) throw new Error('포스터 업로드 input을 찾을 수 없습니다')
+    const posterFile = new File(['poster'], 'poster.png', { type: 'image/png' })
+    await user.upload(fileInput, posterFile)
+
+    await user.click(within(dialog).getByRole<HTMLButtonElement>('button', { name: '저장하기' }))
+    expect(screen.getByText('삭제될 프로젝트')).toBeTruthy()
+
+    revokeSpy.mockClear()
+    const card = screen.getByText('삭제될 프로젝트').closest('.border-line-neutral')
+    if (!card) throw new Error('프로젝트 카드를 찾을 수 없습니다')
+    await user.hover(card)
+    await user.click(within(card as HTMLElement).getByRole('button', { name: '삭제하기' }))
+
+    expect(screen.queryByText('삭제될 프로젝트')).toBeFalsy()
+    expect(revokeSpy).toHaveBeenCalledTimes(1)
   })
 })
