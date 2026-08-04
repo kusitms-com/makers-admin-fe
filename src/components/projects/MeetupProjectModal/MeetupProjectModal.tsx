@@ -96,7 +96,7 @@ export function MeetupProjectModal({
       open={open}
       onOpenChange={onOpenChange}
       title="밋업 프로젝트 등록"
-      className={className ?? 'w-[540px]'}
+      className={className ?? 'left-[calc(50%+20px)] w-[540px]'}
       footer={<ModalActions onCancel={onCancel} onSave={onSave} saveDisabled={saveDisabled} />}
     >
       <div className="flex items-stretch gap-3">
