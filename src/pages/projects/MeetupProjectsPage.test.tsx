@@ -139,10 +139,9 @@ describe('MeetupProjectsPage', () => {
     expect(screen.getByText('삭제될 프로젝트')).toBeTruthy()
 
     revokeSpy.mockClear()
-    const card = screen.getByText('삭제될 프로젝트').closest('.border-line-neutral')
-    if (!card) throw new Error('프로젝트 카드를 찾을 수 없습니다')
+    const card = screen.getByRole('group', { name: '삭제될 프로젝트' })
     await user.hover(card)
-    await user.click(within(card as HTMLElement).getByRole('button', { name: '삭제하기' }))
+    await user.click(within(card).getByRole('button', { name: '삭제하기' }))
 
     expect(screen.queryByText('삭제될 프로젝트')).toBeFalsy()
     expect(revokeSpy).toHaveBeenCalledTimes(1)
