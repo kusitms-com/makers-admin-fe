@@ -16,6 +16,8 @@ export function ProjectThumbnailCard({
 }: ProjectThumbnailCardProps) {
   return (
     <div
+      role="group"
+      aria-label={serviceName}
       className={cn(
         'border-line-neutral group w-[282px] overflow-hidden rounded-xl border',
         className,
