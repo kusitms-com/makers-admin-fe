@@ -61,7 +61,7 @@ export function ReviewTable({
   return (
     <div
       className={cn(
-        'bg-fill-normal w-full overflow-hidden rounded-xl shadow-[inset_0_0_0_1px_var(--line-alternative)]',
+        "bg-fill-normal relative w-full overflow-hidden rounded-xl after:pointer-events-none after:absolute after:inset-0 after:rounded-xl after:shadow-[inset_0_0_0_1px_var(--line-alternative)] after:content-['']",
         className,
       )}
     >
