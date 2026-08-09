@@ -15,6 +15,7 @@ interface SelectFieldProps {
   disabled?: boolean
   className?: string
   id?: string
+  variant?: 'default' | 'compact'
   'aria-label'?: string
 }
 
@@ -29,9 +30,11 @@ export function SelectField({
   disabled,
   className,
   id,
+  variant = 'default',
   'aria-label': ariaLabel,
 }: SelectFieldProps) {
   const selectedLabel = options.find((option) => option.value === value)?.label ?? value
+  const isCompact = variant === 'compact'
   const hasValue = value.length > 0
   const valueClassName = hasValue ? 'bg-fill-normal text-label-strong' : 'bg-fill-netural'
 
@@ -70,20 +73,39 @@ export function SelectField({
       >
         <Select.Value
           placeholder={placeholder}
-          className="text-label-14m text-label-strong data-placeholder:text-label-assitive"
+          className={cn(
+            isCompact ? 'text-label-14sb text-label-light' : 'text-label-14m text-label-strong',
+            'data-placeholder:text-label-assitive',
+          )}
         />
         <Select.Icon>
           <ChevronDownIcon className="text-label-assitive size-3 shrink-0" aria-hidden="true" />
         </Select.Icon>
       </Select.Trigger>
       <Select.Portal>
-        <Select.Positioner sideOffset={4} className="z-50">
-          <Select.Popup className="border-line-normal bg-fill-normal text-label-14m text-label-normal min-w-(--anchor-width) rounded-lg border py-1 shadow-md">
+        <Select.Positioner
+          side={isCompact ? 'bottom' : undefined}
+          align={isCompact ? 'start' : undefined}
+          alignItemWithTrigger={isCompact ? false : undefined}
+          sideOffset={4}
+          className="z-50"
+        >
+          <Select.Popup
+            className={cn(
+              'bg-fill-normal min-w-(--anchor-width)',
+              isCompact
+                ? 'text-label-14m text-label-light rounded-lg p-1 shadow-[0_1px_5px_rgba(179,179,188,0.25)]'
+                : 'text-label-14m text-label-normal border-line-normal rounded-lg border py-1 shadow-md',
+            )}
+          >
             {options.map((option) => (
               <Select.Item
                 key={option.value}
                 value={option.value}
-                className="hover:bg-fill-netural cursor-pointer px-3 py-1.5 outline-none"
+                className={cn(
+                  'hover:bg-fill-netural cursor-pointer outline-none',
+                  isCompact ? 'rounded-lg p-2' : 'px-3 py-1.5',
+                )}
               >
                 <Select.ItemText>{option.label}</Select.ItemText>
               </Select.Item>

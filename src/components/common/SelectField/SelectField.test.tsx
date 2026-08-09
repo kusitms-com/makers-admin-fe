@@ -36,6 +36,24 @@ describe('SelectField', () => {
     expect(screen.getByText('선택해주세요')).toBeTruthy()
   })
 
+  it('compact 변형에서도 옵션을 선택할 수 있다', async () => {
+    const user = userEvent.setup()
+    const onValueChange = vi.fn()
+    render(
+      <SelectField
+        value="PLAN"
+        options={OPTIONS}
+        onValueChange={onValueChange}
+        variant="compact"
+      />,
+    )
+
+    await user.click(screen.getByRole('combobox'))
+    await user.click(await screen.findByRole('option', { name: '디자인' }))
+
+    expect(onValueChange).toHaveBeenCalledWith('DE')
+  })
+
   it('FormField와 함께 쓰면 label이 정적 필드와 연결된다', () => {
     render(
       <FormField label="기수">
