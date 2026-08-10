@@ -5,6 +5,7 @@ export default [
   layout('layout/RootLayout.tsx', [
     index('routes/(main)/index.tsx'),
     route('introduction', 'routes/(main)/introduction.tsx'),
+    route('company', 'routes/(main)/company.tsx'),
     route('review', 'routes/(main)/review.tsx'),
     route('blog-review', 'routes/(main)/blogReview.tsx'),
     route('*', 'routes/(main)/notFound.tsx'),
