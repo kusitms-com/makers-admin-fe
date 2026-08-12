@@ -71,6 +71,25 @@ describe('CompanyProjectsPage', () => {
     expect(screen.getByText('큐시즘 파트너스')).toBeTruthy()
   })
 
+  it('배너를 업로드한 뒤 취소하면 사용하던 banner blob URL을 해제한다', async () => {
+    const revokeSpy = vi.spyOn(URL, 'revokeObjectURL')
+    const user = userEvent.setup()
+    render(<CompanyProjectsPage />)
+
+    await user.click(screen.getByRole('button', { name: '추가하기' }))
+    const dialog = screen.getByRole('dialog')
+
+    const fileInput = dialog.querySelector<HTMLInputElement>('input[type="file"]')
+    if (!fileInput) throw new Error('배너 업로드 input을 찾을 수 없습니다')
+    const bannerFile = new File(['banner'], 'banner.png', { type: 'image/png' })
+    await user.upload(fileInput, bannerFile)
+
+    revokeSpy.mockClear()
+    await user.click(within(dialog).getByRole('button', { name: '취소하기' }))
+
+    expect(revokeSpy).toHaveBeenCalledTimes(1)
+  })
+
   it('기수의 마지막 프로젝트를 삭제하면 empty state 문구가 보인다', async () => {
     const user = userEvent.setup()
     render(<CompanyProjectsPage />)

@@ -52,6 +52,7 @@ export function CompanyProjectsPage() {
           id: crypto.randomUUID(),
           cardinal: CURRENT_GENERATION,
           serviceName: values.name,
+          content: values.content,
           imageUrl: values.bannerUrl,
         },
       ])
@@ -61,11 +62,14 @@ export function CompanyProjectsPage() {
   }
 
   function handleDelete(id: string) {
-    setProjects((prev) => {
-      const target = prev.find((project) => project.id === id)
-      revokeIfBlobUrl(target?.imageUrl)
-      return prev.filter((project) => project.id !== id)
-    })
+    const target = projects.find((project) => project.id === id)
+    revokeIfBlobUrl(target?.imageUrl)
+    setProjects((prev) => prev.filter((project) => project.id !== id))
+  }
+
+  function closeModal() {
+    form.reset()
+    setModalOpen(false)
   }
 
   return (
@@ -106,7 +110,11 @@ export function CompanyProjectsPage() {
 
       <CompanyProjectModal
         open={modalOpen}
-        onOpenChange={setModalOpen}
+        onOpenChange={(open) => {
+          if (!open) {
+            closeModal()
+          }
+        }}
         cardinal={CURRENT_GENERATION}
         name={form.name}
         onNameChange={form.setName}
@@ -115,9 +123,7 @@ export function CompanyProjectsPage() {
         bannerUrl={form.bannerUrl}
         onBannerChange={form.onBannerChange}
         onBannerDelete={form.onBannerDelete}
-        onCancel={() => {
-          setModalOpen(false)
-        }}
+        onCancel={closeModal}
         onSave={handleSave}
         saveDisabled={!form.isValid}
       />
