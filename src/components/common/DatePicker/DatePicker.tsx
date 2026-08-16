@@ -30,6 +30,12 @@ function getYearGrid(cursor: Dayjs) {
   return Array.from({ length: YEAR_GRID_SIZE }, (_, index) => rangeStart + index)
 }
 
+function withYearMonth(date: Dayjs, year: number, month: number) {
+  const daysInTargetMonth = dayjs().year(year).month(month).daysInMonth()
+  const day = Math.min(date.date(), daysInTargetMonth)
+  return dayjs().year(year).month(month).date(day)
+}
+
 const cellClassName =
   'text-label-13m flex items-center justify-center rounded-lg py-[9px] text-center transition-colors'
 
@@ -185,7 +191,9 @@ export function DatePicker({ value, onChange, className }: DatePickerProps) {
                         key={month}
                         type="button"
                         onClick={() => {
-                          setCursor((current) => current.month(month))
+                          const next = withYearMonth(selected, cursor.year(), month)
+                          setSelected(next)
+                          setCursor(next.date(1))
                           setView('day')
                         }}
                         className={cn(
@@ -215,7 +223,9 @@ export function DatePicker({ value, onChange, className }: DatePickerProps) {
                         type="button"
                         disabled={isDisabled}
                         onClick={() => {
-                          setCursor((current) => current.year(year))
+                          const next = withYearMonth(selected, year, selected.month())
+                          setSelected(next)
+                          setCursor(next.date(1))
                           setView('month')
                         }}
                         className={cn(
