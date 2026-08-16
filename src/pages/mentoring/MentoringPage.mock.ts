@@ -1,9 +1,11 @@
+import dayjs from 'dayjs'
 import type { StatusChipStatus } from '@components/common/StatusChip'
 
 export interface MentoringSession {
   id: string
   mentor: { name: string; role: string }
   mentee: { name: string; role: string }
+  date: string
   dateRange: string
   title: string
   status: StatusChipStatus
@@ -41,12 +43,25 @@ export const STAT_CARDS = {
   completedThisMonth: 13,
 }
 
-export const INITIAL_SESSIONS: MentoringSession[] = [
+interface SessionSeed {
+  id: string
+  mentor: { name: string; role: string }
+  mentee: { name: string; role: string }
+  offsetDays: number
+  startTime: string
+  endTime: string
+  title: string
+  status: StatusChipStatus
+}
+
+const SESSION_SEEDS: SessionSeed[] = [
   {
     id: 'mentoring-1',
     mentor: { name: '김도윤', role: '멘토' },
     mentee: { name: '이서준', role: '멘티' },
-    dateRange: '2026.06.19 14:00 - 2026.06.19 15:00',
+    offsetDays: 0,
+    startTime: '14:00',
+    endTime: '15:00',
     title: '[워크숍] 디자인 트렌드와 사용자 경험 개선',
     status: 'progress',
   },
@@ -54,7 +69,9 @@ export const INITIAL_SESSIONS: MentoringSession[] = [
     id: 'mentoring-2',
     mentor: { name: '박지훈', role: '멘토' },
     mentee: { name: '최유진', role: '멘티' },
-    dateRange: '2026.06.18 10:00 - 2026.06.18 11:00',
+    offsetDays: -1,
+    startTime: '10:00',
+    endTime: '11:00',
     title: '프론트엔드 성능 최적화 실습',
     status: 'progress',
   },
@@ -62,7 +79,9 @@ export const INITIAL_SESSIONS: MentoringSession[] = [
     id: 'mentoring-3',
     mentor: { name: '정하늘', role: '멘토' },
     mentee: { name: '윤지수', role: '멘티' },
-    dateRange: '2026.06.15 16:00 - 2026.06.15 17:00',
+    offsetDays: -4,
+    startTime: '16:00',
+    endTime: '17:00',
     title: '포트폴리오 피드백 세션',
     status: 'completed',
   },
@@ -70,7 +89,9 @@ export const INITIAL_SESSIONS: MentoringSession[] = [
     id: 'mentoring-4',
     mentor: { name: '한도윤', role: '멘토' },
     mentee: { name: '서지민', role: '멘티' },
-    dateRange: '2026.06.12 13:00 - 2026.06.12 14:00',
+    offsetDays: -7,
+    startTime: '13:00',
+    endTime: '14:00',
     title: '백엔드 아키텍처 설계 리뷰',
     status: 'completed',
   },
@@ -78,7 +99,9 @@ export const INITIAL_SESSIONS: MentoringSession[] = [
     id: 'mentoring-5',
     mentor: { name: '이현진', role: '멘토' },
     mentee: { name: '김서연', role: '멘티' },
-    dateRange: '2026.06.24 11:00 - 2026.06.24 12:00',
+    offsetDays: 5,
+    startTime: '11:00',
+    endTime: '12:00',
     title: '기획서 작성 가이드',
     status: 'waiting',
   },
@@ -86,7 +109,9 @@ export const INITIAL_SESSIONS: MentoringSession[] = [
     id: 'mentoring-6',
     mentor: { name: '최민준', role: '멘토' },
     mentee: { name: '박민준', role: '멘티' },
-    dateRange: '2026.06.10 15:00 - 2026.06.10 16:00',
+    offsetDays: -9,
+    startTime: '15:00',
+    endTime: '16:00',
     title: '유저 인터뷰 리서치 방법론',
     status: 'completed',
   },
@@ -94,7 +119,9 @@ export const INITIAL_SESSIONS: MentoringSession[] = [
     id: 'mentoring-7',
     mentor: { name: '강서연', role: '멘토' },
     mentee: { name: '조유진', role: '멘티' },
-    dateRange: '2026.06.09 09:30 - 2026.06.09 10:30',
+    offsetDays: -10,
+    startTime: '09:30',
+    endTime: '10:30',
     title: '데이터 시각화 라이브러리 비교',
     status: 'completed',
   },
@@ -102,7 +129,9 @@ export const INITIAL_SESSIONS: MentoringSession[] = [
     id: 'mentoring-8',
     mentor: { name: '윤서준', role: '멘토' },
     mentee: { name: '한지민', role: '멘티' },
-    dateRange: '2026.06.26 17:00 - 2026.06.26 18:00',
+    offsetDays: 7,
+    startTime: '17:00',
+    endTime: '18:00',
     title: '이력서 첨삭 및 커리어 상담',
     status: 'waiting',
   },
@@ -110,7 +139,9 @@ export const INITIAL_SESSIONS: MentoringSession[] = [
     id: 'mentoring-9',
     mentor: { name: '서지훈', role: '멘토' },
     mentee: { name: '임나연', role: '멘티' },
-    dateRange: '2026.06.05 14:00 - 2026.06.05 15:00',
+    offsetDays: -14,
+    startTime: '14:00',
+    endTime: '15:00',
     title: 'API 설계와 문서화 실습',
     status: 'completed',
   },
@@ -118,7 +149,9 @@ export const INITIAL_SESSIONS: MentoringSession[] = [
     id: 'mentoring-10',
     mentor: { name: '조하은', role: '멘토' },
     mentee: { name: '임도현', role: '멘티' },
-    dateRange: '2026.06.20 10:00 - 2026.06.20 11:00',
+    offsetDays: 0,
+    startTime: '10:00',
+    endTime: '11:00',
     title: '브랜드 아이덴티티 디자인 실습',
     status: 'progress',
   },
@@ -126,11 +159,28 @@ export const INITIAL_SESSIONS: MentoringSession[] = [
     id: 'mentoring-11',
     mentor: { name: '임수빈', role: '멘토' },
     mentee: { name: '오은우', role: '멘티' },
-    dateRange: '2026.06.02 16:00 - 2026.06.02 17:00',
+    offsetDays: -17,
+    startTime: '16:00',
+    endTime: '17:00',
     title: '테스트 자동화 전략 수립',
     status: 'completed',
   },
 ]
+
+export const INITIAL_SESSIONS: MentoringSession[] = SESSION_SEEDS.map((seed) => {
+  const sessionDate = dayjs().add(seed.offsetDays, 'day')
+  const displayDate = sessionDate.format('YYYY.MM.DD')
+
+  return {
+    id: seed.id,
+    mentor: seed.mentor,
+    mentee: seed.mentee,
+    date: sessionDate.format('YYYY-MM-DD'),
+    dateRange: `${displayDate} ${seed.startTime} - ${displayDate} ${seed.endTime}`,
+    title: seed.title,
+    status: seed.status,
+  }
+})
 
 export const INITIAL_REVIEWS: MentoringReview[] = [
   {

@@ -1,4 +1,5 @@
 import { useRef, useState } from 'react'
+import dayjs from 'dayjs'
 import { PageHeader } from '@components/common/PageHeader'
 import { DatePicker } from '@components/common/DatePicker'
 import { Pagination } from '@components/common/Pagination'
@@ -32,8 +33,16 @@ export function MentoringPage() {
   const [mentors] = useState(INITIAL_MENTORS)
   const [mentorPage, setMentorPage] = useState(1)
 
-  const totalPages = Math.max(1, Math.ceil(sessions.length / PAGE_SIZE))
-  const pagedSessions = sessions.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE)
+  const filteredSessions = sessions.filter((session) =>
+    dayjs(session.date).isSame(filterDate, 'day'),
+  )
+  const totalPages = Math.max(1, Math.ceil(filteredSessions.length / PAGE_SIZE))
+  const pagedSessions = filteredSessions.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE)
+
+  function handleFilterDateChange(date: Date) {
+    setFilterDate(date)
+    setPage(1)
+  }
 
   const reviewTotalPages = Math.max(1, Math.ceil(reviews.length / REVIEW_PAGE_SIZE))
   const pagedReviews = reviews.slice(
@@ -79,20 +88,30 @@ export function MentoringPage() {
         <div ref={listSectionRef} className="border-line-neutral bg-fill-normal rounded-2xl border">
           <div className="flex flex-col gap-4 px-6 pt-6 pb-3">
             <h2 className="text-body-18b text-label-normal pb-px">멘토링 현황</h2>
-            <DatePicker value={filterDate} onChange={setFilterDate} className="self-start" />
+            <DatePicker
+              value={filterDate}
+              onChange={handleFilterDateChange}
+              className="self-start"
+            />
           </div>
 
           <div className="flex flex-col px-6">
-            {pagedSessions.map((session) => (
-              <MentoringListItem
-                key={session.id}
-                mentor={session.mentor}
-                mentee={session.mentee}
-                dateRange={session.dateRange}
-                title={session.title}
-                status={session.status}
-              />
-            ))}
+            {pagedSessions.length > 0 ? (
+              pagedSessions.map((session) => (
+                <MentoringListItem
+                  key={session.id}
+                  mentor={session.mentor}
+                  mentee={session.mentee}
+                  dateRange={session.dateRange}
+                  title={session.title}
+                  status={session.status}
+                />
+              ))
+            ) : (
+              <p className="text-label-14m text-label-alternative flex h-16 items-center justify-center">
+                선택한 날짜에 표시할 멘토링이 없습니다.
+              </p>
+            )}
           </div>
 
           <div className="flex justify-center px-6 pt-[18px] pb-[22px]">
