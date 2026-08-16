@@ -23,7 +23,7 @@ const MENTOR_PAGE_SIZE = 7
 export function MentoringPage() {
   const [sessions] = useState(INITIAL_SESSIONS)
   const [page, setPage] = useState(1)
-  const [filterDate, setFilterDate] = useState(new Date('2026-06-19'))
+  const [filterDate, setFilterDate] = useState(() => new Date())
   const listSectionRef = useRef<HTMLDivElement>(null)
 
   const [reviews] = useState(INITIAL_REVIEWS)
