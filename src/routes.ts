@@ -8,6 +8,7 @@ export default [
     route('meetup', 'routes/(main)/meetup.tsx'),
     route('review', 'routes/(main)/review.tsx'),
     route('blog-review', 'routes/(main)/blogReview.tsx'),
+    route('mentoring', 'routes/(main)/mentoring.tsx'),
     route('members', 'routes/(main)/members.tsx'),
     route('members/approval', 'routes/(main)/memberApprovals.tsx'),
     route('*', 'routes/(main)/notFound.tsx'),
