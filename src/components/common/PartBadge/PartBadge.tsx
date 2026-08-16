@@ -3,7 +3,7 @@ import { tv } from '@lib/tv'
 import { PART_LABELS } from './partLabels'
 
 const partBadgeVariants = tv({
-  base: 'text-caption-12sb flex h-7 items-center justify-center rounded-md border px-[9px] py-[5px]',
+  base: 'text-caption-12sb flex h-7 shrink-0 items-center justify-center rounded-md border px-[9px] py-[5px] whitespace-nowrap',
   variants: {
     part: {
       PLAN: 'bg-orange-10 border-orange-30 text-orange-80',

@@ -1,0 +1,146 @@
+import { useEffect, useRef, useState } from 'react'
+import { Button } from '@components/common/Button'
+import { PageHeader } from '@components/common/PageHeader'
+import { SegmentedControl } from '@components/common/SegmentedControl'
+import { MeetupProjectModal } from '@components/projects/MeetupProjectModal'
+import { ProjectThumbnailCard } from '@components/projects/ProjectThumbnailCard'
+import { useMeetupProjectForm } from '@hooks/projects/useMeetupProjectForm'
+import {
+  COHORT_OPTIONS,
+  CURRENT_GENERATION,
+  INITIAL_MEETUP_PROJECTS,
+  PART_OPTIONS,
+  TYPE_OPTIONS,
+  type MeetupProjectCard,
+} from './MeetupProjectsPage.mock'
+
+function revokeIfBlobUrl(url: string | undefined) {
+  if (url?.startsWith('blob:')) {
+    URL.revokeObjectURL(url)
+  }
+}
+
+export function MeetupProjectsPage() {
+  const [projects, setProjects] = useState<MeetupProjectCard[]>(INITIAL_MEETUP_PROJECTS)
+  const [cohort, setCohort] = useState(String(CURRENT_GENERATION))
+  const [modalOpen, setModalOpen] = useState(false)
+
+  const form = useMeetupProjectForm()
+
+  const latestProjectsRef = useRef(projects)
+  useEffect(() => {
+    latestProjectsRef.current = projects
+  }, [projects])
+  useEffect(() => {
+    return () => {
+      latestProjectsRef.current.forEach((project) => {
+        revokeIfBlobUrl(project.imageUrl)
+      })
+    }
+  }, [])
+
+  const visibleProjects = projects.filter((project) => project.cardinal === Number(cohort))
+
+  function openModal() {
+    form.reset()
+    setModalOpen(true)
+  }
+
+  function handleSave() {
+    void form.handleSubmit((values) => {
+      setProjects((prev) => [
+        ...prev,
+        {
+          id: crypto.randomUUID(),
+          cardinal: CURRENT_GENERATION,
+          serviceName: values.name,
+          imageUrl: values.posterUrl,
+        },
+      ])
+      form.resetAfterSave()
+      setModalOpen(false)
+    })()
+  }
+
+  function handleDelete(id: string) {
+    setProjects((prev) => {
+      const target = prev.find((project) => project.id === id)
+      revokeIfBlobUrl(target?.imageUrl)
+      return prev.filter((project) => project.id !== id)
+    })
+  }
+
+  return (
+    <div className="flex min-h-screen flex-col">
+      <PageHeader title="밋업 프로젝트" />
+
+      <div className="flex flex-col gap-7 pt-6 pr-8 pb-15 pl-6">
+        <section className="flex flex-col items-start gap-3">
+          <h2 className="text-body-18sb text-label-normal">프로젝트 추가하기</h2>
+          <Button variant="outlined" size="l" onClick={openModal}>
+            추가하기
+          </Button>
+        </section>
+
+        <section className="flex flex-col gap-6">
+          <SegmentedControl items={COHORT_OPTIONS} value={cohort} onValueChange={setCohort} />
+
+          {visibleProjects.length === 0 ? (
+            <p className="text-body-16sb text-label-alternative py-10 text-center">
+              등록된 프로젝트가 없습니다
+            </p>
+          ) : (
+            <div className="flex flex-wrap gap-x-3 gap-y-4">
+              {visibleProjects.map((project) => (
+                <ProjectThumbnailCard
+                  key={project.id}
+                  imageUrl={project.imageUrl}
+                  serviceName={project.serviceName}
+                  onDelete={() => {
+                    handleDelete(project.id)
+                  }}
+                />
+              ))}
+            </div>
+          )}
+        </section>
+      </div>
+
+      <MeetupProjectModal
+        open={modalOpen}
+        onOpenChange={setModalOpen}
+        cardinal={CURRENT_GENERATION}
+        type={form.type}
+        typeOptions={TYPE_OPTIONS}
+        onTypeChange={form.setType}
+        name={form.name}
+        onNameChange={form.setName}
+        oneLineIntro={form.oneLineIntro}
+        onOneLineIntroChange={form.setOneLineIntro}
+        intro={form.intro}
+        onIntroChange={form.setIntro}
+        members={form.members}
+        partOptions={PART_OPTIONS}
+        onMemberPartChange={form.onMemberPartChange}
+        onMemberRemove={form.onMemberRemove}
+        onMemberAdd={form.onMemberAdd}
+        posterUrl={form.posterUrl}
+        onPosterChange={form.onPosterChange}
+        onPosterDelete={form.onPosterDelete}
+        githubUrl={form.githubUrl}
+        onGithubUrlChange={form.setGithubUrl}
+        behanceUrl={form.behanceUrl}
+        onBehanceUrlChange={form.setBehanceUrl}
+        appUrl={form.appUrl}
+        onAppUrlChange={form.setAppUrl}
+        onCancel={() => {
+          setModalOpen(false)
+        }}
+        onSave={handleSave}
+        saveDisabled={!form.isValid}
+      />
+    </div>
+  )
+}
+
+export default MeetupProjectsPage

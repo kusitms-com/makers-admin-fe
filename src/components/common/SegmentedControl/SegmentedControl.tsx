@@ -19,7 +19,7 @@ export function SegmentedControl({
   className,
 }: SegmentedControlProps) {
   return (
-    <div role="tablist" className={cn('flex items-stretch', className)}>
+    <div role="tablist" className={cn('flex w-full items-stretch', className)}>
       {items.map((item) => {
         const isActive = item.value === value
 
@@ -43,6 +43,7 @@ export function SegmentedControl({
           </button>
         )
       })}
+      <div aria-hidden="true" className="border-line-normal -mb-px flex-1 border-b-[1.5px]" />
     </div>
   )
 }
