@@ -63,4 +63,21 @@ describe('DatePicker', () => {
     expect(appliedDate.getMonth()).toBe(7)
     expect(appliedDate.getDate()).toBe(19)
   })
+
+  it('선택된 날짜는 색상뿐 아니라 aria-pressed로도 구분된다', () => {
+    render(<DatePicker value={new Date('2026-06-19')} onChange={() => {}} />)
+
+    fireEvent.click(screen.getByText('2026.06.19'))
+
+    const selectedDay = screen.getByRole('button', { name: '19' })
+    expect(selectedDay.getAttribute('aria-pressed')).toBe('true')
+
+    const otherDay = screen.getByRole('button', { name: '20' })
+    expect(otherDay.getAttribute('aria-pressed')).toBe('false')
+
+    fireEvent.click(otherDay)
+
+    expect(selectedDay.getAttribute('aria-pressed')).toBe('false')
+    expect(otherDay.getAttribute('aria-pressed')).toBe('true')
+  })
 })

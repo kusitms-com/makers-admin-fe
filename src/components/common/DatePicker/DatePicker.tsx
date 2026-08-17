@@ -157,6 +157,8 @@ export function DatePicker({ value, onChange, className }: DatePickerProps) {
                         key={day.format('YYYY-MM-DD')}
                         type="button"
                         disabled={!inMonth}
+                        aria-pressed={isSelected}
+                        aria-current={isToday ? 'date' : undefined}
                         onClick={() => {
                           setSelected(day)
                         }}
@@ -190,6 +192,8 @@ export function DatePicker({ value, onChange, className }: DatePickerProps) {
                       <button
                         key={month}
                         type="button"
+                        aria-pressed={isSelected}
+                        aria-current={isCurrent ? 'date' : undefined}
                         onClick={() => {
                           const next = withYearMonth(selected, cursor.year(), month)
                           setSelected(next)
@@ -222,6 +226,8 @@ export function DatePicker({ value, onChange, className }: DatePickerProps) {
                         key={year}
                         type="button"
                         disabled={isDisabled}
+                        aria-pressed={isSelected}
+                        aria-current={isCurrent ? 'date' : undefined}
                         onClick={() => {
                           const next = withYearMonth(selected, year, selected.month())
                           setSelected(next)
