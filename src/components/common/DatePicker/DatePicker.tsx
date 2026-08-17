@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { Popover } from '@base-ui/react/popover'
 import dayjs, { type Dayjs } from 'dayjs'
 import { Calendar as CalendarIcon, ChevronLeft, ChevronRight } from 'lucide-react'
-import ChevronDownIcon from '@/assets/icons/generated/ChevronDownIcon'
+import CaretDownIcon from '@/assets/icons/generated/CaretDownIcon'
 import { cn } from '@lib/utils'
 
 const WEEKDAYS = ['월', '화', '수', '목', '금', '토', '일']
@@ -109,7 +109,7 @@ export function DatePicker({ value, onChange, className }: DatePickerProps) {
                       className="text-body-16sb text-label-normal hover:bg-fill-netural flex items-center gap-1 rounded-md px-3 py-1"
                     >
                       {headerLabel}
-                      <ChevronDownIcon className="size-3 shrink-0" aria-hidden="true" />
+                      <CaretDownIcon className="size-2.5 shrink-0" aria-hidden="true" />
                     </button>
                   )}
                   <div className="flex items-center py-[3px]">
@@ -250,7 +250,7 @@ export function DatePicker({ value, onChange, className }: DatePickerProps) {
               )}
             </div>
 
-            <div className="border-line-alternative flex items-center justify-end border-t px-3 py-2.5">
+            <div className="border-line-alternative flex items-center border-t px-3 py-2.5">
               <button
                 type="button"
                 onClick={handleApply}
