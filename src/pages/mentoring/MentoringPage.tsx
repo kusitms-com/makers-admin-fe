@@ -22,15 +22,15 @@ const REVIEW_PAGE_SIZE = 2
 const MENTOR_PAGE_SIZE = 7
 
 export function MentoringPage() {
-  const [sessions] = useState(INITIAL_SESSIONS)
+  const sessions = INITIAL_SESSIONS
   const [page, setPage] = useState(1)
   const [filterDate, setFilterDate] = useState(() => new Date())
   const listSectionRef = useRef<HTMLDivElement>(null)
 
-  const [reviews] = useState(INITIAL_REVIEWS)
+  const reviews = INITIAL_REVIEWS
   const [reviewPage, setReviewPage] = useState(1)
 
-  const [mentors] = useState(INITIAL_MENTORS)
+  const mentors = INITIAL_MENTORS
   const [mentorPage, setMentorPage] = useState(1)
 
   const filteredSessions = sessions.filter((session) =>

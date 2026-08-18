@@ -4,13 +4,13 @@ import { DatePicker } from './DatePicker'
 
 describe('DatePicker', () => {
   it('선택된 날짜를 트리거 버튼에 표시한다', () => {
-    render(<DatePicker value={new Date('2026-06-19')} onChange={() => {}} />)
+    render(<DatePicker value={new Date(2026, 5, 19)} onChange={() => {}} />)
 
     expect(screen.getByText('2026.06.19')).toBeTruthy()
   })
 
   it('트리거를 클릭하면 일 단위 캘린더가 열린다', () => {
-    render(<DatePicker value={new Date('2026-06-19')} onChange={() => {}} />)
+    render(<DatePicker value={new Date(2026, 5, 19)} onChange={() => {}} />)
 
     fireEvent.click(screen.getByText('2026.06.19'))
 
@@ -19,7 +19,7 @@ describe('DatePicker', () => {
   })
 
   it('헤더를 클릭하면 월 뷰, 다시 클릭하면 연 뷰로 전환된다', () => {
-    render(<DatePicker value={new Date('2026-06-19')} onChange={() => {}} />)
+    render(<DatePicker value={new Date(2026, 5, 19)} onChange={() => {}} />)
 
     fireEvent.click(screen.getByText('2026.06.19'))
     fireEvent.click(screen.getByText('2026년 6월'))
@@ -34,7 +34,7 @@ describe('DatePicker', () => {
 
   it('날짜를 선택하고 적용을 누르면 onChange가 호출되고 팝업이 닫힌다', () => {
     const handleChange = vi.fn()
-    render(<DatePicker value={new Date('2026-06-19')} onChange={handleChange} />)
+    render(<DatePicker value={new Date(2026, 5, 19)} onChange={handleChange} />)
 
     fireEvent.click(screen.getByText('2026.06.19'))
     fireEvent.click(screen.getByText('20'))
@@ -48,7 +48,7 @@ describe('DatePicker', () => {
 
   it('월 뷰에서 다른 달을 고르면 같은 일자를 유지한 채 일 뷰로 돌아온다', () => {
     const handleChange = vi.fn()
-    render(<DatePicker value={new Date('2026-06-19')} onChange={handleChange} />)
+    render(<DatePicker value={new Date(2026, 5, 19)} onChange={handleChange} />)
 
     fireEvent.click(screen.getByText('2026.06.19'))
     fireEvent.click(screen.getByText('2026년 6월'))
@@ -65,7 +65,7 @@ describe('DatePicker', () => {
   })
 
   it('선택된 날짜는 색상뿐 아니라 aria-pressed로도 구분된다', () => {
-    render(<DatePicker value={new Date('2026-06-19')} onChange={() => {}} />)
+    render(<DatePicker value={new Date(2026, 5, 19)} onChange={() => {}} />)
 
     fireEvent.click(screen.getByText('2026.06.19'))
 

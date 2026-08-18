@@ -31,9 +31,9 @@ function getYearGrid(cursor: Dayjs) {
 }
 
 function withYearMonth(date: Dayjs, year: number, month: number) {
-  const daysInTargetMonth = dayjs().year(year).month(month).daysInMonth()
-  const day = Math.min(date.date(), daysInTargetMonth)
-  return dayjs().year(year).month(month).date(day)
+  const anchor = date.date(1).year(year).month(month)
+  const day = Math.min(date.date(), anchor.daysInMonth())
+  return anchor.date(day)
 }
 
 const cellClassName =
