@@ -3,7 +3,15 @@ import type { SVGProps } from 'react'
 const ErrorIcon = (props: SVGProps<SVGSVGElement>) => (
   <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 16 16" {...props}>
     <g clipPath="url(#ErrorIcon__a)">
-      <mask id="ErrorIcon__b" width={16} height={16} x={0} y={0} maskUnits="userSpaceOnUse">
+      <mask
+        id="ErrorIcon__b"
+        width={16}
+        height={16}
+        x={0}
+        y={0}
+        mask-type="alpha"
+        maskUnits="userSpaceOnUse"
+      >
         <path fill="currentColor" d="M0 0h16v16H0z" />
       </mask>
       <g mask="url(#ErrorIcon__b)">
