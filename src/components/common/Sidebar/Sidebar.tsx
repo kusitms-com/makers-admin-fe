@@ -3,9 +3,11 @@ import { NavLink } from 'react-router'
 import {
   BlogIcon,
   CompanyIcon,
+  DashboardIcon,
   IntroductionIcon,
   LogoutIcon,
   MeetupIcon,
+  MentoringIcon,
   ReviewIcon,
 } from '@/assets/icons/generated'
 import { cn } from '@lib/utils'
@@ -22,10 +24,10 @@ const NAV_ITEMS: SidebarNavConfig[] = [
   { path: '/introduction', label: '학회 소개', icon: IntroductionIcon },
   { path: '/meetup', label: '밋업 프로젝트', icon: MeetupIcon },
   { path: '/company', label: '기업 프로젝트', icon: CompanyIcon },
-  { path: '/review', label: '후기', icon: ReviewIcon },
+  { path: '/review', label: '활동 후기', icon: ReviewIcon },
   { path: '/blog-review', label: '블로그 후기', icon: BlogIcon },
-  { path: '/members', label: '회원 관리', icon: BlogIcon },
-  { path: '/mentoring', label: '멘토링 관리', icon: BlogIcon },
+  { path: '/members', label: '회원 관리', icon: MentoringIcon },
+  { path: '/mentoring', label: '멘토링 관리', icon: DashboardIcon },
 ]
 
 interface SidebarNavLinkProps {
