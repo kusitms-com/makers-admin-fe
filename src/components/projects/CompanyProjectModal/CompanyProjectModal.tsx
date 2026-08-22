@@ -44,7 +44,7 @@ export function CompanyProjectModal({
       open={open}
       onOpenChange={onOpenChange}
       title="기업 프로젝트 등록"
-      className={className}
+      className={className ?? 'left-[calc(50%+30px)]'}
       footer={<ModalActions onCancel={onCancel} onSave={onSave} saveDisabled={saveDisabled} />}
     >
       <div className="flex items-stretch gap-3">
