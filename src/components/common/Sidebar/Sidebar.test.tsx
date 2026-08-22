@@ -19,7 +19,7 @@ describe('Sidebar', () => {
     expect(screen.getByRole('link', { name: '학회 소개' })).toBeTruthy()
     expect(screen.getByRole('link', { name: '밋업 프로젝트' })).toBeTruthy()
     expect(screen.getByRole('link', { name: '기업 프로젝트' })).toBeTruthy()
-    expect(screen.getByRole('link', { name: '후기' })).toBeTruthy()
+    expect(screen.getByRole('link', { name: '활동 후기' })).toBeTruthy()
     expect(screen.getByRole('link', { name: '블로그 후기' })).toBeTruthy()
     expect(screen.getByRole('link', { name: '회원 관리' })).toBeTruthy()
     expect(screen.getByRole('link', { name: '멘토링 관리' })).toBeTruthy()
@@ -28,7 +28,9 @@ describe('Sidebar', () => {
   it('현재 URL과 일치하는 메뉴에만 aria-current="page"가 붙는다', () => {
     renderSidebar(undefined, ['/review'])
 
-    expect(screen.getByRole('link', { name: '후기' }).getAttribute('aria-current')).toBe('page')
+    expect(screen.getByRole('link', { name: '활동 후기' }).getAttribute('aria-current')).toBe(
+      'page',
+    )
     expect(
       screen.getByRole('link', { name: '밋업 프로젝트' }).getAttribute('aria-current'),
     ).toBeNull()

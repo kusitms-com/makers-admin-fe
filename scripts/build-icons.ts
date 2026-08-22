@@ -50,6 +50,7 @@ const normalizeToCurrentColor = (svg: string) => {
       /\s(fill|stroke)=["'](?!none|currentColor|transparent|url\()[^"']+["']/gi,
       ' $1="currentColor"',
     )
+    .replace(/\sstyle=["']mask-type:\s*alpha;?["']/gi, ' mask-type="alpha"')
     .replace(/style=["'][^"']*["']/gi, '')
 }
 

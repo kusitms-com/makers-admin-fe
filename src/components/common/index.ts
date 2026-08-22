@@ -3,6 +3,7 @@
 export * from './Button'
 export * from './CardinalField'
 export * from './CohortBadge'
+export * from './DatePicker'
 export * from './ErrorFallback'
 export * from './FileChip'
 export * from './FormField'

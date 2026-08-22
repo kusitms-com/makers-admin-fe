@@ -2,7 +2,15 @@
 import type { SVGProps } from 'react'
 const LogoutIcon = (props: SVGProps<SVGSVGElement>) => (
   <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 20" {...props}>
-    <mask id="LogoutIcon__a" width={20} height={20} x={0} y={0} maskUnits="userSpaceOnUse">
+    <mask
+      id="LogoutIcon__a"
+      width={20}
+      height={20}
+      x={0}
+      y={0}
+      mask-type="alpha"
+      maskUnits="userSpaceOnUse"
+    >
       <path fill="currentColor" d="M0 0h20v20H0z" />
     </mask>
     <g fill="currentColor" mask="url(#LogoutIcon__a)">
