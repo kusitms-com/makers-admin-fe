@@ -1,6 +1,6 @@
 # 어드민 멤버 API Reference
 
-Swagger 출처: `https://kusitms.herokuapp.com/api-docs/json`
+Swagger 출처: `.env`의 `VITE_API_BASE_URL` + `/api-docs/json`
 
 관리자 회원 승인 대기 목록과 승인/반려 action에는 이 파일을 사용합니다.
 

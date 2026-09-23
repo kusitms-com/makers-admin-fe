@@ -1,6 +1,6 @@
 # 어드민 학회원 후기 API Reference
 
-Swagger 출처: `https://kusitms.herokuapp.com/api-docs/json`
+Swagger 출처: `.env`의 `VITE_API_BASE_URL` + `/api-docs/json`
 
 학회원 후기 CRUD에는 이 파일을 사용합니다.
 

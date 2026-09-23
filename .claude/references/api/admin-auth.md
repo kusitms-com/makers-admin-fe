@@ -2,8 +2,6 @@
 
 관리자 로그인, 토큰, 세션, 권한 확인 endpoint 작업에는 이 파일을 사용합니다.
 
-Swagger 출처: `https://kusitms.herokuapp.com/api-docs/json`
-
 ## 확인 결과: 별도 관리자 전용 로그인 endpoint는 없다
 
 `/admin/*` 아래에 인증 endpoint가 없다. 로그인은 일반 사용자와 공유하는 `/api/auth/*`를 쓰고, 응답의 `role` 값으로 관리자 여부를 구분한다.

@@ -1,6 +1,6 @@
 # 어드민 학회 소개 API Reference
 
-Swagger 출처: `https://kusitms.herokuapp.com/api-docs/json`
+Swagger 출처: `.env`의 `VITE_API_BASE_URL` + `/api-docs/json`
 
 학회 소개 페이지의 관리자 조회/수정에는 이 파일을 사용합니다.
 

@@ -1,6 +1,6 @@
 # 어드민 API Reference
 
-Swagger 출처: `https://kusitms.herokuapp.com/swagger-ui/index.html#`
+Swagger 출처: `.env`의 `VITE_API_BASE_URL` + `/swagger-ui/index.html#`
 
 이 파일은 어드민 API 작업의 인덱스입니다. 엔드포인트별 상세 내용은 `.claude/references/api` 아래의 `admin-*` 파일에 기록합니다.
 
