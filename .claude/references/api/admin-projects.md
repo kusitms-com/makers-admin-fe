@@ -1,6 +1,6 @@
 # 어드민 프로젝트 API Reference
 
-Swagger 출처: `https://kusitms.herokuapp.com/api-docs/json`
+Swagger 출처: `.env`의 `VITE_API_BASE_URL` + `/api-docs/json`
 
 관리자 프로젝트 조회와 등록/수정/삭제에는 이 파일을 사용합니다.
 

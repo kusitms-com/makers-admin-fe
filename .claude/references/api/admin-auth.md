@@ -2,7 +2,7 @@
 
 관리자 로그인, 토큰, 세션, 권한 확인 endpoint 작업에는 이 파일을 사용합니다.
 
-Swagger 출처: `https://kusitms.herokuapp.com/api-docs/json`
+Swagger 출처: `.env`의 `VITE_API_BASE_URL` + `/api-docs/json`
 
 ## 확인 결과: 별도 관리자 전용 로그인 endpoint는 없다
 
