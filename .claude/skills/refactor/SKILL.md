@@ -2,7 +2,7 @@
 name: refactor
 description: 현재 코드에서 동작을 바꾸지 않는 리팩터링 후보를 찾고, 승인된 범위만 수정합니다.
 user-invocable: true
-argument-hint: [file-or-scope]
+argument-hint: "[file-or-scope]"
 allowed-tools: Bash, Read, Grep, Glob, Edit, Write
 ---
 
