@@ -1,11 +1,11 @@
-# Claude Manifest
+# Claude README
 
 이 문서는 AI 코딩 에이전트가 `kusitms-admin`에서 작업하기 전에 어떤 지침을 읽어야 하는지 정의합니다.
 
 ## 부트 순서
 
 1. `CLAUDE.md` 또는 `AGENTS.md`에서 프로젝트 개요를 읽습니다.
-2. 이 manifest를 읽습니다.
+2. 이 README를 읽습니다.
 3. 코드 변경 작업에서는 Tier 1 규칙을 로드합니다.
 4. Tier 2 규칙과 admin API/domain reference는 작업에 필요한 경우에만 로드합니다.
 
@@ -18,7 +18,7 @@
 | `.claude/rules/workflow.md` | 기본 inspect-edit-verify 작업 흐름 |
 | `.claude/rules/verification.md` | 검증 명령 선택 기준 |
 
-Tier 1은 코드 변경, 리뷰, 리팩터링처럼 실제 작업이 시작될 때만 로드합니다. 단순 질문이나 설명 요청에서는 `CLAUDE.md`와 이 manifest만으로 답합니다.
+Tier 1은 코드 변경, 리뷰, 리팩터링처럼 실제 작업이 시작될 때만 로드합니다. 단순 질문이나 설명 요청에서는 `CLAUDE.md`와 이 README만으로 답합니다.
 
 ## Tier 2: 필요 시 로드
 

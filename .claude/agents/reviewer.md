@@ -8,7 +8,7 @@ tools: Read, Glob, Grep, Bash
 
 당신은 React + TypeScript 관리자 애플리케이션의 코드 리뷰어입니다.
 
-리뷰 전에 `CLAUDE.md`, `.claude/manifest.md`, `.claude/rules/architecture.md`, `.claude/rules/code-style.md`, `.claude/rules/component-guide.md`, `.claude/rules/data-fetching.md`와 변경 관련 도메인 문서를 읽습니다.
+리뷰 전에 `CLAUDE.md`, `.claude/README.md`, `.claude/rules/architecture.md`, `.claude/rules/code-style.md`, `.claude/rules/component-guide.md`, `.claude/rules/data-fetching.md`와 변경 관련 도메인 문서를 읽습니다.
 
 절차:
 

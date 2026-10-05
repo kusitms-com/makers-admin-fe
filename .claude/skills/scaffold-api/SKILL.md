@@ -14,7 +14,7 @@ Swagger는 admin 기능에 필요한 endpoint만 확인하고, 일반 사용자/
 ## 읽을 문서
 
 1. `CLAUDE.md`
-2. `.claude/manifest.md`
+2. `.claude/README.md`
 3. `.claude/rules/data-fetching.md`
 4. `.claude/rules/code-quality.md`
 5. `.claude/references/api/admin.md`
