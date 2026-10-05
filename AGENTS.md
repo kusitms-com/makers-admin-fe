@@ -1,16 +1,16 @@
 ## kusitms-admin Codex Instructions
 
-이 파일은 Codex용 최소 라우터입니다. 프로젝트의 메인 지침은 `CLAUDE.md`이고, 상세 로딩 기준은 `.claude/manifest.md`가 관리합니다.
+이 파일은 Codex용 최소 라우터입니다. 프로젝트의 메인 지침은 `CLAUDE.md`이고, 상세 로딩 기준은 `.claude/README.md`가 관리합니다.
 
 ### Required Reading
 
 - `CLAUDE.md`
-- `.claude/manifest.md`
+- `.claude/README.md`
 
 ### Codex Rules
 
 - 사용자가 다르게 요청하지 않으면 한국어로 사고하고 응답합니다.
-- 코드 변경 전에는 `.claude/manifest.md`의 Tier 1/Tier 2 로딩 기준을 따릅니다.
+- 코드 변경 전에는 `.claude/README.md`의 Tier 1/Tier 2 로딩 기준을 따릅니다.
 - `/create-pr`, `/scaffold-api` 같은 skill 요청은 `.codex/skills/{skill}/SKILL.md`를 진입점으로 사용하고, 해당 proxy가 가리키는 `.claude/skills/{skill}/SKILL.md`를 원본 지침으로 따릅니다.
 - 기존 사용자 변경을 보존하고 관련 없는 작업을 되돌리지 않습니다.
 - `pnpm`만 사용하고 `npm`/`yarn`은 사용하지 않습니다.

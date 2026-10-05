@@ -1,4 +1,4 @@
-@.claude/manifest.md
+@.claude/README.md
 
 # kusitms-admin
 
@@ -48,6 +48,6 @@ KUSITMS 관리자 패널입니다. React 19 + Vite 8 기반 SPA이며, KUSITMS S
 
 ### Boot Loader
 
-@.claude/manifest.md
+@.claude/README.md
 
-상세 rule, reference, skill 로딩 기준은 `.claude/manifest.md`에서 관리합니다.
+상세 rule, reference, skill 로딩 기준은 `.claude/README.md`에서 관리합니다.

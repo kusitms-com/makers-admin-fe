@@ -2,7 +2,7 @@
 name: create-pr
 description: 현재 브랜치 변경 내용을 분석해 프로젝트 PR 템플릿 기준으로 제목과 본문 초안을 작성합니다.
 user-invocable: true
-argument-hint: [--append]
+argument-hint: "[--append]"
 allowed-tools: Bash, Read, Grep, Glob
 ---
 
@@ -26,7 +26,7 @@ PR 제목과 본문 초안을 만듭니다. 사용자가 명시하지 않으면 
 ## Output Shape
 
 ```markdown
-## #️⃣연관된 이슈
+## #️⃣ 연관된 이슈
 
 - Close #<이슈번호> 또는 #<이슈번호>
 

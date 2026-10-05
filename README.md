@@ -52,7 +52,7 @@ src/
 └── types.ts      # 공통 타입
 ```
 
-상세 구조와 생성 워크플로우 규칙은 `.claude/manifest.md`에서 연결된 rules 문서를 기준으로 합니다.
+상세 구조와 생성 워크플로우 규칙은 `.claude/README.md`에서 연결된 rules 문서를 기준으로 합니다.
 
 ## 개발 가이드
 

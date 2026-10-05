@@ -2,7 +2,7 @@
 name: code-review
 description: 변경된 코드를 프로젝트 규칙 기준으로 읽기 전용 리뷰하고, 실제 위험이 있는 finding만 보고합니다.
 user-invocable: true
-argument-hint: [file-or-ref]
+argument-hint: "[file-or-ref]"
 allowed-tools: Bash, Read, Grep, Glob
 ---
 

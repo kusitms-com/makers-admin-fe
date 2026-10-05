@@ -70,7 +70,7 @@ knowledge_base:
     filePatterns:
       - 'AGENTS.md'
       - 'CLAUDE.md'
-      - '.claude/manifest.md'
+      - '.claude/README.md'
       - '.claude/rules/*.md'
       - '.claude/references/**/*.md'
       - 'docs/**/*.md'
