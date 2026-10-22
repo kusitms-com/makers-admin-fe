@@ -84,7 +84,7 @@ export function Sidebar({ onLogout, className }: SidebarProps) {
         <button
           type="button"
           onClick={onLogout}
-          className="text-body-16r text-label-netural hover:bg-fill-alternative flex h-12 items-center gap-2.5 rounded-[8px] px-4 transition-colors"
+          className="text-body-16r text-label-netural hover:bg-fill-alternative flex h-12 cursor-pointer items-center gap-2.5 rounded-[8px] px-4 transition-colors"
         >
           <LogoutIcon className="text-label-alternative size-5 shrink-0" aria-hidden="true" />
           로그아웃
