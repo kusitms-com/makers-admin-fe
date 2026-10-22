@@ -47,8 +47,10 @@ const COLUMNS = [
   ['비고', 'px-3'],
 ] as const
 
+// 열 최소 너비 합계(1144px) + 행 px-1(8px) = 행 min-w(1152px).
+// 1440px 화면의 본문 폭(1156px) 안에 들어가야 가로 스크롤이 생기지 않는다.
 const TABLE_GRID_CLASS =
-  'grid-cols-[minmax(170px,1.4fr)_minmax(64px,0.55fr)_minmax(100px,0.8fr)_minmax(156px,1.3fr)_minmax(180px,1.5fr)_minmax(132px,1.1fr)_minmax(72px,0.6fr)_minmax(108px,0.9fr)_minmax(72px,0.6fr)_minmax(160px,1.3fr)]'
+  'grid-cols-[minmax(140px,1.4fr)_minmax(64px,0.55fr)_minmax(100px,0.8fr)_minmax(156px,1.3fr)_minmax(160px,1.5fr)_minmax(132px,1.1fr)_minmax(72px,0.6fr)_minmax(108px,0.9fr)_minmax(72px,0.6fr)_minmax(140px,1.3fr)]'
 
 function MentoringMemberTableRow({
   member,
@@ -62,7 +64,7 @@ function MentoringMemberTableRow({
   return (
     <div
       role="row"
-      className={`border-line-alternative ${TABLE_GRID_CLASS} grid h-16 min-w-[1214px] items-center border-b px-1 last:border-b-0`}
+      className={`border-line-alternative ${TABLE_GRID_CLASS} grid h-16 min-w-[1152px] items-center border-b px-1 last:border-b-0`}
     >
       <div role="cell" className="flex min-w-0 items-center gap-2 px-3">
         <img src={memberAvatar} alt="" className="size-7 rounded-full object-cover" />
@@ -141,7 +143,7 @@ export const MentoringMemberTable = ({
       <div className="overflow-x-auto">
         <div
           role="row"
-          className={`bg-fill-netural ${TABLE_GRID_CLASS} grid h-12 min-w-[1214px] items-center px-1`}
+          className={`bg-fill-netural ${TABLE_GRID_CLASS} grid h-12 min-w-[1152px] items-center px-1`}
         >
           {COLUMNS.map(([label, className]) => (
             <span
@@ -170,7 +172,7 @@ export const MentoringMemberTable = ({
         ) : (
           <div
             role="row"
-            className="text-label-14m text-label-alternative flex h-16 min-w-[1214px] items-center justify-center"
+            className="text-label-14m text-label-alternative flex h-16 min-w-[1152px] items-center justify-center"
           >
             표시할 회원이 없습니다.
           </div>
