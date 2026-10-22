@@ -36,6 +36,7 @@ build
 !.codex/skills/
 !.codex/skills/**
 .agents
+.serena
 
 # Playwright
 /test-results/
