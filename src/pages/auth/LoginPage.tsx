@@ -20,18 +20,20 @@ export function LoginPage() {
           <ReviewsPage />
         </div>
       </div>
-      <main className="fixed inset-0 flex items-center justify-center">
+      {/* m-auto는 화면이 폼보다 낮으면 위쪽부터 배치되어 스크롤로 폼 전체에 접근할 수 있다. */}
+      <main className="fixed inset-0 flex overflow-y-auto p-4">
         <form
           onSubmit={handleSubmit}
-          className="bg-fill-normal border-line-neutral flex w-[354px] flex-col gap-9 rounded-2xl border p-9 shadow-[0_24px_19px_rgba(23,23,23,0.06)]"
+          className="bg-fill-normal border-line-neutral m-auto flex w-[354px] flex-col gap-9 rounded-2xl border p-9 shadow-[0_24px_19px_rgba(23,23,23,0.06)]"
         >
           <h1 className="sr-only">KUSITMS 관리자 로그인</h1>
           <Logo size="lg" className="h-[52px]" />
           <div className="flex flex-col gap-6">
             <div className="flex flex-col gap-4">
               <div className="flex flex-col gap-2">
+                {/* 디자인상 보이는 문구는 '로그인'이지만 입력란 이름은 '로그인 아이디'로 안내한다. */}
                 <label htmlFor="login-id" className="text-label-14b text-label-normal">
-                  로그인
+                  로그인<span className="sr-only"> 아이디</span>
                 </label>
                 <Inputfield
                   id="login-id"
