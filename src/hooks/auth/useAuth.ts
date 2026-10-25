@@ -45,11 +45,14 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
         },
       })
     } catch (error) {
-      sessionStorage.removeItem(REFRESH_TOKEN_KEY)
       set({ session: { status: 'guest' } })
+      // 토큰이 거부된 경우(4xx, 응답 형식 오류)만 지우고, 네트워크·5xx 같은 일시 오류는 다음 복원을 위해 남긴다.
       if (
-        !(error instanceof ApiError || error instanceof TypeError || error instanceof z.ZodError)
+        (error instanceof ApiError && error.status >= 400 && error.status < 500) ||
+        error instanceof z.ZodError
       ) {
+        sessionStorage.removeItem(REFRESH_TOKEN_KEY)
+      } else if (!(error instanceof ApiError || error instanceof TypeError)) {
         throw error
       }
     }

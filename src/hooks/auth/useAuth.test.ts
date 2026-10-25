@@ -94,6 +94,29 @@ describe('관리자 세션', () => {
     expect(sessionStorage.getItem(refreshTokenKey)).toBeNull()
   })
 
+  it('서버 오류(5xx)로 복원에 실패해도 리프레시 토큰은 남겨 두어 다시 시도할 수 있다', async () => {
+    sessionStorage.setItem(refreshTokenKey, 'valid-refresh')
+    respondWith(null, 503)
+
+    await useAuthStore.getState().restore()
+
+    expect(useAuthStore.getState().session.status).toBe('guest')
+    expect(sessionStorage.getItem(refreshTokenKey)).toBe('valid-refresh')
+  })
+
+  it('네트워크 오류로 복원에 실패해도 리프레시 토큰은 남겨 둔다', async () => {
+    sessionStorage.setItem(refreshTokenKey, 'valid-refresh')
+    vi.stubGlobal(
+      'fetch',
+      vi.fn<typeof fetch>().mockRejectedValue(new TypeError('Failed to fetch')),
+    )
+
+    await useAuthStore.getState().restore()
+
+    expect(useAuthStore.getState().session.status).toBe('guest')
+    expect(sessionStorage.getItem(refreshTokenKey)).toBe('valid-refresh')
+  })
+
   it('서버 로그아웃이 실패해도 로컬 세션을 제거한다', async () => {
     useAuthStore.setState({
       session: { status: 'authenticated', accessToken: 'access', authority: 'MANAGER' },
