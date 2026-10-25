@@ -23,6 +23,12 @@ export function refreshSession(refreshToken: string): Promise<SignInResponse> {
   )
 }
 
-export function signOut(accessToken: string): Promise<unknown> {
-  return apiRequest({ method: 'POST', path: '/api/auth/logout', accessToken }, z.unknown())
+export function signOut(
+  accessToken: string,
+  refreshAccessToken?: () => Promise<string>,
+): Promise<unknown> {
+  return apiRequest(
+    { method: 'POST', path: '/api/auth/logout', accessToken, refreshAccessToken },
+    z.unknown(),
+  )
 }

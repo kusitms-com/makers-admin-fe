@@ -154,4 +154,82 @@ describe('공통 API 요청', () => {
       apiRequest({ method: 'GET', path: '/admin/members' }, z.unknown()),
     ).rejects.toMatchObject({ name: 'ApiError', status: 502, code: undefined })
   })
+
+  it('응답 code가 401이면 새 액세스 토큰으로 보호 요청을 한 번 재시도한다', async () => {
+    const fetchMock = vi
+      .fn<typeof fetch>()
+      .mockResolvedValueOnce(
+        new Response(JSON.stringify({ code: 401, message: '만료', data: null }), { status: 200 }),
+      )
+      .mockResolvedValueOnce(
+        new Response(JSON.stringify({ code: 200, message: '성공', data: { id: 'member-1' } }), {
+          status: 200,
+        }),
+      )
+    vi.stubGlobal('fetch', fetchMock)
+    const refreshAccessToken = vi.fn().mockResolvedValue('new-access')
+
+    const result = await apiRequest(
+      {
+        method: 'GET',
+        path: '/admin/members',
+        accessToken: 'expired-access',
+        refreshAccessToken,
+      },
+      z.object({ id: z.string() }),
+    )
+
+    expect(result.id).toBe('member-1')
+    expect(refreshAccessToken).toHaveBeenCalledOnce()
+    expect(new Headers(fetchMock.mock.calls[1]?.[1]?.headers).get('Authorization')).toBe(
+      'Bearer new-access',
+    )
+  })
+
+  it('보호 요청이 403이면 토큰을 갱신하지 않는다', async () => {
+    const fetchMock = mockResponse(null, 403, 403)
+    const refreshAccessToken = vi.fn().mockResolvedValue('new-access')
+
+    await expect(
+      apiRequest(
+        {
+          method: 'GET',
+          path: '/admin/members',
+          accessToken: 'access',
+          refreshAccessToken,
+        },
+        z.unknown(),
+      ),
+    ).rejects.toMatchObject({ status: 403 })
+
+    expect(refreshAccessToken).not.toHaveBeenCalled()
+    expect(fetchMock).toHaveBeenCalledOnce()
+  })
+
+  it('새 액세스 토큰으로 재시도한 요청도 401이면 더는 갱신하지 않는다', async () => {
+    const fetchMock = vi
+      .fn<typeof fetch>()
+      .mockImplementation(() =>
+        Promise.resolve(
+          new Response(JSON.stringify({ code: 401, message: '만료', data: null }), { status: 401 }),
+        ),
+      )
+    vi.stubGlobal('fetch', fetchMock)
+    const refreshAccessToken = vi.fn().mockResolvedValue('new-access')
+
+    await expect(
+      apiRequest(
+        {
+          method: 'GET',
+          path: '/admin/members',
+          accessToken: 'expired-access',
+          refreshAccessToken,
+        },
+        z.unknown(),
+      ),
+    ).rejects.toMatchObject({ status: 401 })
+
+    expect(refreshAccessToken).toHaveBeenCalledOnce()
+    expect(fetchMock).toHaveBeenCalledTimes(2)
+  })
 })
