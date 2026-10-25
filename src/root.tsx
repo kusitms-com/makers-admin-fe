@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react'
 import { Links, Meta, Outlet, Scripts, ScrollRestoration } from 'react-router'
 import { GlobalErrorPage } from '@pages/errors/GlobalErrorPage'
+import { AuthProvider } from '@/providers/AuthProvider'
 import { QueryProvider } from '@/providers/QueryProvider'
 import { ToastProvider } from '@/providers/ToastProvider'
 import './index.css'
@@ -28,9 +29,11 @@ export function Layout({ children }: { children: ReactNode }) {
 export default function Root() {
   return (
     <QueryProvider>
-      <ToastProvider>
-        <Outlet />
-      </ToastProvider>
+      <AuthProvider>
+        <ToastProvider>
+          <Outlet />
+        </ToastProvider>
+      </AuthProvider>
     </QueryProvider>
   )
 }

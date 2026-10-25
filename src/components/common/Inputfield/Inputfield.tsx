@@ -1,11 +1,11 @@
-import type { InputHTMLAttributes } from 'react'
+import type { ComponentPropsWithRef } from 'react'
 import { cn } from '@lib/utils'
 
-interface InputfieldProps extends InputHTMLAttributes<HTMLInputElement> {
+interface InputfieldProps extends ComponentPropsWithRef<'input'> {
   className?: string
 }
 
-export function Inputfield({ className, ...props }: InputfieldProps) {
+export function Inputfield({ className, ref, ...props }: InputfieldProps) {
   const hasValue = props.value != null && String(props.value).length > 0
 
   return (
@@ -17,6 +17,7 @@ export function Inputfield({ className, ...props }: InputfieldProps) {
       )}
     >
       <input
+        ref={ref}
         className="text-label-14m text-label-strong placeholder:text-label-assitive w-full bg-transparent outline-none"
         {...props}
       />
