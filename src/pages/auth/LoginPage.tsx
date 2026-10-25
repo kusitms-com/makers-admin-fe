@@ -36,6 +36,7 @@ export function LoginPage() {
     control,
     handleSubmit,
     setError,
+    clearErrors,
     formState: { errors, isSubmitting },
   } = useForm<LoginFormValues>({
     resolver: loginResolver,
@@ -99,6 +100,10 @@ export function LoginPage() {
                   render={({ field }) => (
                     <Inputfield
                       {...field}
+                      onChange={(event) => {
+                        clearErrors('root')
+                        field.onChange(event)
+                      }}
                       id="login-id"
                       required
                       autoComplete="username"
@@ -120,6 +125,10 @@ export function LoginPage() {
                   render={({ field }) => (
                     <Inputfield
                       {...field}
+                      onChange={(event) => {
+                        clearErrors('root')
+                        field.onChange(event)
+                      }}
                       id="login-password"
                       type="password"
                       required

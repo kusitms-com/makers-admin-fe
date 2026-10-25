@@ -116,6 +116,21 @@ describe('LoginPage', () => {
     expect(screen.getByRole<HTMLButtonElement>('button', { name: '로그인' }).disabled).toBe(false)
   })
 
+  it('로그인 실패 후 입력을 고치면 이전 서버 오류 문구를 지운다', async () => {
+    const user = userEvent.setup()
+    mockLogin('MEMBER', 401)
+    renderLoginPage()
+
+    await user.type(screen.getByLabelText('로그인 아이디'), 'admin')
+    await user.type(screen.getByLabelText('비밀번호'), 'wrong')
+    await user.click(screen.getByRole('button', { name: '로그인' }))
+    await screen.findByRole('alert')
+
+    await user.type(screen.getByLabelText('비밀번호'), '1')
+
+    expect(screen.queryByRole('alert')).toBeNull()
+  })
+
   it('공백만 입력한 아이디는 서버에 보내지 않고 검증 오류를 보여준다', async () => {
     const user = userEvent.setup()
     const fetchMock = mockLogin('MANAGER')
