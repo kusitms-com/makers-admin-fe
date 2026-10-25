@@ -1,5 +1,26 @@
 import { test, expect } from '@playwright/test'
 
+test.beforeEach(async ({ page }) => {
+  await page.addInitScript(() => {
+    sessionStorage.setItem('kusitms-admin-refresh-token', 'test-refresh')
+  })
+  await page.route('**/api/auth/refresh', async (route) => {
+    await route.fulfill({
+      status: 200,
+      headers: { 'Access-Control-Allow-Origin': '*' },
+      json: {
+        code: 200,
+        message: '성공',
+        data: {
+          accessToken: 'test-access',
+          refreshToken: 'test-refresh',
+          authority: 'MANAGER',
+        },
+      },
+    })
+  })
+})
+
 test('/review 진입 시 사이드바 메뉴가 활성화되고 페이지 제목이 보인다', async ({ page }) => {
   await page.goto('/review')
 
