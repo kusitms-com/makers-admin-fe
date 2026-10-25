@@ -3,7 +3,8 @@ import { z } from 'zod'
 const responseSchema = z.object({
   code: z.number(),
   message: z.string(),
-  data: z.unknown(),
+  // 서버는 응답할 데이터가 없으면 data 키를 아예 생략한다.
+  data: z.unknown().optional(),
 })
 
 export class ApiError extends Error {

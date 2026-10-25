@@ -78,6 +78,19 @@ describe('인증 API', () => {
     )
   })
 
+  it('서버가 data 키를 생략한 성공 응답도 정상 처리한다', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn<typeof fetch>().mockResolvedValue(
+        new Response(JSON.stringify({ code: 200, message: '요청이 성공했습니다.' }), {
+          status: 200,
+        }),
+      ),
+    )
+
+    await expect(signOut('access-token')).resolves.toBeUndefined()
+  })
+
   it('로그인 실패의 HTTP 401을 전달한다', async () => {
     mockResponse(null, 401, 401)
 
