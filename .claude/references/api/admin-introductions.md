@@ -62,7 +62,7 @@ activities[0].description=밋업데이는 ~입니다.
 
 - 부분 업데이트가 불가능합니다. PUT 한 번에 바뀌지 않은 항목까지 항상 전부 다시 보내야 합니다.
 - **`teams[i].imageFile` / `activities[i].imageFile1,2`는 "파일 없으면 기존 URL 유지" 로직이 없습니다.** 항목을 다시 보내면서 파일을 첨부하지 않으면 그 항목의 이미지 URL이 `null`이 됩니다. (배너/파트별 이미지 같은 단일 필드는 반대로 파일 생략 시 기존 값을 유지합니다 — `uploadOrKeep`)
-- `IntroductionsPage` UI가 다루지 않는 필드(`bannerStatus`, `introYoutubeLink`, `expertLecture`, `obLecture`, `meetupImages`, `activities[].imageFile2`)를 PUT 요청에서 생략하면, 그 데이터가 서버에 이미 존재하더라도 **전부 삭제됩니다.** 이 UI로 저장을 시작하기 전에 이 필드들에 실제 데이터가 있는지, 있다면 지워져도 되는지 팀 내 확인이 필요합니다.
+- `IntroductionsPage` UI는 현재 `bannerStatus`, `introYoutubeLink`, `expertLecture`, `obLecture`, `meetupImages`, `activities[].imageFile2`를 포함해 `IntroRequest`의 모든 필드를 다룹니다(아래 "구현 메모" 참고). 다만 `teams`/`activities`/`expertLecture`/`obLecture` 항목은 GET 응답으로 하이드레이션될 때 기존 이미지를 URL로만 받고 `File`은 갖지 않습니다. 사용자가 해당 항목의 이미지를 새로 교체하지 않고 저장하면 `imageFile`이 `undefined`로 전송되어 **서버에 있던 그 이미지가 삭제됩니다.**
 
 ## Response (`GET`, `AdminIntroResponse`) — 확정됨
 
@@ -100,4 +100,4 @@ activities[0].description=밋업데이는 ~입니다.
 - query key는 `['admin', 'introductions']`를 우선한다. 수정은 `multipart/form-data`이고, 수정 이후 조회 query를 invalidate한다.
 - `IntroductionsPage` UI는 `IntroRequest`의 모든 필드를 다룬다: 배너 상태(`bannerStatus`)/슬로건/배너 이미지, 회원·프로젝트·대학 수, 학회 소개 영상(`introYoutubeLink`), 파트별 이미지 4종, 운영진(`teams`), 큐시즘 활동(`activities`, 이미지 2개), 밋업 이미지, 파트너사 로고(`partnerLogoFiles`), 전문가/OB 강연자, 후원사 이미지(`sponsors`).
 - `partnerLogoFiles`(파트너사)와 `sponsors`(후원사)는 별도 필드이므로 UI에서도 별도 섹션(`ImageSection`)으로 분리해 바인딩한다.
-- GET 응답을 폼에 하이드레이션하는 로직은 아직 없다 — 저장 시 항상 폼의 현재 상태로 PUT을 보낸다. 위 "PUT은 배열 필드를 매번 전체 교체" 항목 참고.
+- GET 응답은 `useIntroductionsForm.ts`의 `hydrateFromResponse`가 최초 로드 시 폼에 하이드레이션한다. 저장은 항상 하이드레이션된 폼의 현재 상태로 PUT을 보낸다 — 위 "PUT은 배열 필드를 매번 전체 교체" 항목과 "하이드레이션된 기존 이미지는 File이 없어 재업로드하지 않으면 삭제된다"는 위험 참고.
