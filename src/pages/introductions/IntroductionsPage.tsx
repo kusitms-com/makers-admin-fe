@@ -92,7 +92,7 @@ function CardListSection({
               updateItem(item.id, { description: value })
             }}
             extraLabel={extraLabel}
-            extraValue={item.extra}
+            extraValue={item.extra ?? ''}
             onExtraChange={(value) => {
               updateItem(item.id, { extra: value })
             }}
