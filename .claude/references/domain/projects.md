@@ -18,17 +18,17 @@
 src/pages/projects/
   MeetupProjectsPage.tsx      # 밋업 프로젝트 관리 페이지 (목록 조회/등록 API 연동 완료)
   MeetupProjectsPage.mock.ts
-  CompanyProjectsPage.tsx     # 기업 프로젝트 관리 페이지 (목록 조회/등록 API 연동 완료, 삭제는 로컬 숨김 처리)
+  CompanyProjectsPage.tsx     # 기업 프로젝트 관리 페이지 (목록 조회/등록/삭제 API 연동 완료)
   CompanyProjectsPage.mock.ts
 
 src/hooks/projects/
   useMeetupProjectForm.ts     # 밋업 프로젝트 등록 폼 상태 (RHF + Zod)
-  useMeetupProjects.ts        # 밋업 프로젝트 목록 조회/등록 TanStack Query 훅
+  useMeetupProjects.ts        # 밋업 프로젝트 목록 조회/등록/삭제 TanStack Query 훅
   useCompanyProjectForm.ts    # 기업 프로젝트 등록 폼 상태 (RHF + Zod)
-  useCompanyProjects.ts       # 기업 프로젝트 목록 조회/등록 TanStack Query 훅
+  useCompanyProjects.ts       # 기업 프로젝트 목록 조회/등록/삭제 TanStack Query 훅
 
-src/api/projects.ts            # 밋업/기업 프로젝트 모두 목록 조회(GET)/등록(POST) 구현
-                                # 기업 프로젝트 수정/삭제는 미구현
+src/api/projects.ts            # 밋업/기업 프로젝트 모두 목록 조회(GET)/등록(POST)/삭제(DELETE) 구현
+                                # 기업 프로젝트 수정(PUT)은 미구현
 ```
 
 ## 주요 액션

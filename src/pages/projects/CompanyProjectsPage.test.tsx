@@ -34,6 +34,11 @@ vi.mock('@api/projects', () => ({
       Promise.resolve({ corporateCount: corporateList.length, corporateList }),
     ),
   createCorporateProject: vi.fn().mockResolvedValue(undefined),
+  deleteCorporateProject: vi.fn().mockImplementation((id: number) => {
+    const index = corporateList.findIndex((item) => item.corporate_id === id)
+    if (index !== -1) corporateList.splice(index, 1)
+    return Promise.resolve(undefined)
+  }),
 }))
 
 function renderPage() {
@@ -160,7 +165,9 @@ describe('CompanyProjectsPage', () => {
     await user.hover(screen.getByText('브릿지웍스'))
     await user.click(screen.getByRole('button', { name: '삭제하기' }))
 
-    expect(screen.queryByText('브릿지웍스')).toBeFalsy()
+    await waitFor(() => {
+      expect(screen.queryByText('브릿지웍스')).toBeFalsy()
+    })
     expect(screen.getByText('등록된 프로젝트가 없습니다')).toBeTruthy()
   })
 })

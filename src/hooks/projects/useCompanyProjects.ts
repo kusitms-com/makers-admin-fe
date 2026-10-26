@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import {
   createCorporateProject,
+  deleteCorporateProject,
   getCorporateProjects,
   type CorporateProjectCreateRequest,
 } from '@api/projects'
@@ -37,6 +38,25 @@ export function useCreateCompanyProjectMutation() {
         return Promise.reject(new Error('로그인이 필요합니다.'))
       }
       return createCorporateProject(request, { accessToken })
+    },
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: companyProjectsQueryKey })
+    },
+  })
+}
+
+export function useDeleteCompanyProjectMutation() {
+  const queryClient = useQueryClient()
+  const accessToken = useAuthStore((state) =>
+    state.session.status === 'authenticated' ? state.session.accessToken : undefined,
+  )
+
+  return useMutation({
+    mutationFn: (id: number) => {
+      if (!accessToken) {
+        return Promise.reject(new Error('로그인이 필요합니다.'))
+      }
+      return deleteCorporateProject(id, { accessToken })
     },
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: companyProjectsQueryKey })

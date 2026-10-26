@@ -10,6 +10,7 @@ import { useCompanyProjectForm } from '@hooks/projects/useCompanyProjectForm'
 import {
   useCompanyProjectsQuery,
   useCreateCompanyProjectMutation,
+  useDeleteCompanyProjectMutation,
 } from '@hooks/projects/useCompanyProjects'
 import { toAbsoluteS3Url } from '@lib/s3'
 import {
@@ -38,16 +39,13 @@ export function CompanyProjectsPage() {
   const projectsQuery = useCompanyProjectsQuery()
   const [cohort, setCohort] = useState(String(CURRENT_GENERATION))
   const [modalOpen, setModalOpen] = useState(false)
-  // 삭제 API가 아직 없어서, 조회 데이터에서 숨길 id만 로컬로 들고 있는다.
-  const [hiddenProjectIds, setHiddenProjectIds] = useState<Set<string>>(new Set())
 
   const form = useCompanyProjectForm()
   const addToast = useToast()
   const createMutation = useCreateCompanyProjectMutation()
+  const deleteMutation = useDeleteCompanyProjectMutation()
 
-  const projects = (projectsQuery.data?.corporateList ?? [])
-    .map(toProjectCard)
-    .filter((project) => !hiddenProjectIds.has(project.id))
+  const projects = (projectsQuery.data?.corporateList ?? []).map(toProjectCard)
 
   const latestProjectsRef = useRef(projects)
   useEffect(() => {
@@ -95,9 +93,14 @@ export function CompanyProjectsPage() {
   }
 
   function handleDelete(id: string) {
-    const target = projects.find((project) => project.id === id)
-    revokeIfBlobUrl(target?.imageUrl)
-    setHiddenProjectIds((prev) => new Set(prev).add(id))
+    deleteMutation.mutate(Number(id), {
+      onSuccess: () => {
+        revokeIfBlobUrl(projects.find((project) => project.id === id)?.imageUrl)
+      },
+      onError: () => {
+        addToast({ type: 'error', message: '삭제하지 못했습니다. 다시 시도해주세요.' })
+      },
+    })
   }
 
   function closeModal() {

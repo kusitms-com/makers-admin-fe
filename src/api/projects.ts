@@ -207,3 +207,18 @@ export function createCorporateProject(
     z.unknown(),
   )
 }
+
+export function deleteCorporateProject(
+  id: number,
+  { accessToken, refreshAccessToken }: RequestContext,
+): Promise<unknown> {
+  return apiRequest(
+    {
+      method: 'DELETE',
+      path: `/admin/projects/corporate/${String(id)}`,
+      accessToken,
+      refreshAccessToken,
+    },
+    z.unknown(),
+  )
+}
