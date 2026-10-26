@@ -8,6 +8,7 @@ export function useIntroductionQuery() {
   const accessToken = useAuthStore((state) =>
     state.session.status === 'authenticated' ? state.session.accessToken : undefined,
   )
+  const refreshAccessToken = useAuthStore((state) => state.refreshAccessToken)
 
   return useQuery({
     queryKey: introductionsQueryKey,
@@ -15,7 +16,7 @@ export function useIntroductionQuery() {
       if (!accessToken) {
         return Promise.reject(new Error('로그인이 필요합니다.'))
       }
-      return getIntroduction({ accessToken })
+      return getIntroduction({ accessToken, refreshAccessToken })
     },
     enabled: accessToken !== undefined,
   })
@@ -26,13 +27,14 @@ export function useUpdateIntroductionMutation() {
   const accessToken = useAuthStore((state) =>
     state.session.status === 'authenticated' ? state.session.accessToken : undefined,
   )
+  const refreshAccessToken = useAuthStore((state) => state.refreshAccessToken)
 
   return useMutation({
     mutationFn: (payload: IntroUpdateRequest) => {
       if (!accessToken) {
         return Promise.reject(new Error('로그인이 필요합니다.'))
       }
-      return updateIntroduction(payload, { accessToken })
+      return updateIntroduction(payload, { accessToken, refreshAccessToken })
     },
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: introductionsQueryKey })
