@@ -98,6 +98,7 @@ function buildFormSnapshot(fields: {
 
 function hydrateFromResponse(data: AdminIntroResponse) {
   return {
+    bannerCardinal: data.banner_cardinal ?? undefined,
     bannerStatus: (data.banner_status ?? '') as BannerStatus | '',
     slogan: data.slogan ?? '',
     bannerImageUrl: toAbsoluteS3Url(data.banner_image_url),
@@ -170,6 +171,7 @@ export function useIntroductionsForm() {
   const introductionQuery = useIntroductionQuery()
   const updateMutation = useUpdateIntroductionMutation()
 
+  const [bannerCardinal, setBannerCardinal] = useState<number | undefined>()
   const [bannerStatus, setBannerStatus] = useState<BannerStatus | ''>('')
   const [slogan, setSlogan] = useState('')
   const [bannerImageUrl, setBannerImageUrl] = useState<string | undefined>()
@@ -228,6 +230,7 @@ export function useIntroductionsForm() {
 
     const hydrated = hydrateFromResponse(data)
 
+    setBannerCardinal(hydrated.bannerCardinal)
     setBannerStatus(hydrated.bannerStatus)
     setSlogan(hydrated.slogan)
     setBannerImageUrl(hydrated.bannerImageUrl)
@@ -304,7 +307,7 @@ export function useIntroductionsForm() {
   }, [])
 
   function buildPayload(): IntroUpdateRequest {
-    const payload: IntroUpdateRequest = { bannerCardinal: CURRENT_GENERATION }
+    const payload: IntroUpdateRequest = { bannerCardinal: bannerCardinal ?? CURRENT_GENERATION }
 
     if (bannerStatus) payload.bannerStatus = bannerStatus
     if (slogan) payload.slogan = slogan
