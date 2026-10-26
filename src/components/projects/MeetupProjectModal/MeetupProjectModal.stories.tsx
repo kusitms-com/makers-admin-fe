@@ -19,6 +19,8 @@ const meta = {
     onOneLineIntroChange: () => {},
     intro: '',
     onIntroChange: () => {},
+    teamName: '',
+    onTeamNameChange: () => {},
     members: [],
     partOptions: [{ value: 'PLAN', label: '기획' }],
     onMemberPartChange: () => {},
@@ -30,6 +32,12 @@ const meta = {
     onBehanceUrlChange: () => {},
     appUrl: '',
     onAppUrlChange: () => {},
+    instagramUrl: '',
+    onInstagramUrlChange: () => {},
+    startDate: new Date('2026-01-01'),
+    onStartDateChange: () => {},
+    endDate: new Date('2026-01-02'),
+    onEndDateChange: () => {},
     onCancel: () => {},
     onSave: () => {},
   },
@@ -62,10 +70,14 @@ function Demo() {
   const [name, setName] = useState('')
   const [oneLineIntro, setOneLineIntro] = useState('')
   const [intro, setIntro] = useState('')
+  const [teamName, setTeamName] = useState('')
   const [members, setMembers] = useState<MeetupTeamMember[]>([])
   const [githubUrl, setGithubUrl] = useState('')
   const [behanceUrl, setBehanceUrl] = useState('')
   const [appUrl, setAppUrl] = useState('')
+  const [instagramUrl, setInstagramUrl] = useState('')
+  const [startDate, setStartDate] = useState(new Date())
+  const [endDate, setEndDate] = useState(new Date())
 
   return (
     <MeetupProjectModal
@@ -81,6 +93,8 @@ function Demo() {
       onOneLineIntroChange={setOneLineIntro}
       intro={intro}
       onIntroChange={setIntro}
+      teamName={teamName}
+      onTeamNameChange={setTeamName}
       members={members}
       partOptions={PART_OPTIONS}
       onMemberPartChange={(id, value) => {
@@ -98,6 +112,12 @@ function Demo() {
       onBehanceUrlChange={setBehanceUrl}
       appUrl={appUrl}
       onAppUrlChange={setAppUrl}
+      instagramUrl={instagramUrl}
+      onInstagramUrlChange={setInstagramUrl}
+      startDate={startDate}
+      onStartDateChange={setStartDate}
+      endDate={endDate}
+      onEndDateChange={setEndDate}
       onCancel={() => {
         setOpen(false)
       }}

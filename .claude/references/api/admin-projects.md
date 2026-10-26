@@ -31,6 +31,11 @@ Swagger 출처: `.env`의 `VITE_API_BASE_URL` + `/api-docs/json`
 - 등록/수정은 `multipart/form-data`입니다.
 - 등록/수정/삭제 이후 관련 list/detail query를 invalidate합니다.
 - `meetup_id`와 `id` path parameter 이름이 다르므로 API 함수에서 명확히 구분합니다.
+- `getMeetupProjects`/`getCorporateProjects`는 목록 조회(`findAll...`)라서 row가 0개여도 500 없이 빈 리스트를 반환합니다 — introductions처럼 초기 데이터를 POST로 먼저 만들어둘 필요가 없습니다. 백엔드 소스(`AdminService`)로 확인했습니다(2026-10-26).
+- `planner`/`designer`/`frontend`/`backend`/`ios`/`aos`는 `List<String>`이라 introductions의 `teams`/`activities`와 달리 인덱스 표기가 필요 없습니다 — 같은 필드명을 항목 수만큼 반복해서 보내면 됩니다.
+- `MeetupRequest.logoFile`/`posterFile`은 `AdminService#saveMeetup`에서 null 체크 없이 바로 업로드를 시도합니다. **POST에서는 둘 다 필수**이며 생략하면 500이 납니다(PUT의 `updateMeetup`은 `uploadOrKeep`를 써서 생략 시 기존 값을 유지하므로 선택입니다).
+- `type`은 `ProjectType` enum(`APP`/`WEB`/`CHROME_EXTENSION`)입니다. 커스텀 컨버터가 없어 Spring 기본 enum 바인딩(대소문자 구분, 상수명과 정확히 일치)을 그대로 씁니다 — `app`/`Web` 같은 값은 바인딩 실패로 400이 납니다.
+- `startDate`/`endDate`는 `LocalDate.parse(..., DateTimeFormatter.ISO_DATE)`로 파싱되므로 `yyyy-MM-dd` 형식이어야 합니다. 형식이 틀리면 500이 납니다.
 
 ## Request Fields
 

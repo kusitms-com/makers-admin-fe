@@ -20,15 +20,20 @@ describe('meetupProjectFormResolver', () => {
   it('배열 하위 필드 오류를 RHF가 기대하는 중첩 구조로 반환한다', async () => {
     const result = await meetupProjectFormResolver(
       {
-        type: 'Web',
+        type: 'WEB',
         name: '이름',
         oneLineIntro: '한 줄 소개',
         intro: '소개',
+        teamName: '팀명',
         members: [{ id: '1', part: 'planner', name: '' }],
+        logoUrl: 'blob:logo',
         posterUrl: 'blob:poster',
         githubUrl: '',
         behanceUrl: '',
         appUrl: '',
+        instagramUrl: '',
+        startDate: '2026-01-01',
+        endDate: '2026-01-02',
       },
       undefined,
       RESOLVER_OPTIONS,

@@ -11,9 +11,10 @@ export const COHORT_OPTIONS: SegmentedControlItem[] = [
   { value: '30', label: '30기' },
 ]
 
+// 백엔드 ProjectType enum 상수명(WEB/APP)과 정확히 일치해야 한다(Spring 기본 enum 바인딩은 대소문자를 구분한다).
 export const TYPE_OPTIONS: SelectFieldOption[] = [
-  { value: 'Web', label: 'Web' },
-  { value: 'App', label: 'App' },
+  { value: 'WEB', label: 'Web' },
+  { value: 'APP', label: 'App' },
 ]
 
 export const PART_OPTIONS: SelectFieldOption[] = [

@@ -1,18 +1,26 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
+import dayjs from 'dayjs'
 import { useForm, type Resolver } from 'react-hook-form'
 import { z } from 'zod'
 import type { MeetupTeamMember } from '@components/projects/MeetupProjectModal'
+
+const DATE_FORMAT = 'YYYY-MM-DD'
 
 const meetupProjectFormSchema = z.object({
   type: z.string().min(1),
   name: z.string().min(1),
   oneLineIntro: z.string().min(1),
   intro: z.string().min(1),
+  teamName: z.string().min(1),
   members: z.array(z.object({ id: z.string(), part: z.string(), name: z.string().min(1) })).min(1),
+  logoUrl: z.string().min(1),
   posterUrl: z.string().min(1),
   githubUrl: z.string(),
   behanceUrl: z.string(),
   appUrl: z.string(),
+  instagramUrl: z.string(),
+  startDate: z.string().min(1),
+  endDate: z.string().min(1),
 })
 
 export type MeetupProjectFormValues = z.infer<typeof meetupProjectFormSchema>
@@ -56,16 +64,22 @@ export const meetupProjectFormResolver: Resolver<MeetupProjectFormValues> = (val
 }
 
 function createDefaultValues(): MeetupProjectFormValues {
+  const today = dayjs().format(DATE_FORMAT)
   return {
-    type: 'Web',
+    type: 'WEB',
     name: '',
     oneLineIntro: '',
     intro: '',
+    teamName: '',
     members: [],
+    logoUrl: '',
     posterUrl: '',
     githubUrl: '',
     behanceUrl: '',
     appUrl: '',
+    instagramUrl: '',
+    startDate: today,
+    endDate: today,
   }
 }
 
@@ -86,13 +100,20 @@ export function useMeetupProjectForm() {
 
   const values = watch()
 
+  // posterUrl/logoUrl은 미리보기용 blob URL일 뿐이라 업로드에 쓸 원본 File은 별도로 보관한다.
+  const [posterFile, setPosterFile] = useState<File | undefined>()
+  const [logoFile, setLogoFile] = useState<File | undefined>()
+
   const latestPosterUrlRef = useRef(values.posterUrl)
+  const latestLogoUrlRef = useRef(values.logoUrl)
   useEffect(() => {
     latestPosterUrlRef.current = values.posterUrl
-  }, [values.posterUrl])
+    latestLogoUrlRef.current = values.logoUrl
+  }, [values.posterUrl, values.logoUrl])
   useEffect(() => {
     return () => {
       revokeIfBlobUrl(latestPosterUrlRef.current)
+      revokeIfBlobUrl(latestLogoUrlRef.current)
     }
   }, [])
 
@@ -103,11 +124,25 @@ export function useMeetupProjectForm() {
   function onPosterChange(file: File) {
     revokeIfBlobUrl(values.posterUrl)
     setStringField('posterUrl', URL.createObjectURL(file))
+    setPosterFile(file)
   }
 
   function onPosterDelete() {
     revokeIfBlobUrl(values.posterUrl)
     setStringField('posterUrl', '')
+    setPosterFile(undefined)
+  }
+
+  function onLogoChange(file: File) {
+    revokeIfBlobUrl(values.logoUrl)
+    setStringField('logoUrl', URL.createObjectURL(file))
+    setLogoFile(file)
+  }
+
+  function onLogoDelete() {
+    revokeIfBlobUrl(values.logoUrl)
+    setStringField('logoUrl', '')
+    setLogoFile(undefined)
   }
 
   function onMemberAdd(member: { part: string; name: string }) {
@@ -133,11 +168,18 @@ export function useMeetupProjectForm() {
 
   function resetForm() {
     revokeIfBlobUrl(values.posterUrl)
+    revokeIfBlobUrl(values.logoUrl)
+    setPosterFile(undefined)
+    setLogoFile(undefined)
     reset(createDefaultValues())
   }
 
-  // 저장 성공 후에는 posterUrl 소유권이 저장된 카드로 넘어가므로 revoke 없이 폼만 비운다.
+  // 저장 성공 후에는 posterUrl 소유권이 저장된 카드로 넘어가므로 revoke하지 않는다.
+  // 로고는 카드에 표시되지 않으므로 그대로 revoke한다.
   function resetAfterSave() {
+    revokeIfBlobUrl(values.logoUrl)
+    setPosterFile(undefined)
+    setLogoFile(undefined)
     reset(createDefaultValues())
   }
 
@@ -158,11 +200,20 @@ export function useMeetupProjectForm() {
     setIntro: (value: string) => {
       setStringField('intro', value)
     },
+    teamName: values.teamName,
+    setTeamName: (value: string) => {
+      setStringField('teamName', value)
+    },
     members: values.members,
     onMemberAdd,
     onMemberPartChange,
     onMemberRemove,
+    logoUrl: values.logoUrl || undefined,
+    logoFile,
+    onLogoChange,
+    onLogoDelete,
     posterUrl: values.posterUrl || undefined,
+    posterFile,
     onPosterChange,
     onPosterDelete,
     githubUrl: values.githubUrl,
@@ -176,6 +227,20 @@ export function useMeetupProjectForm() {
     appUrl: values.appUrl,
     setAppUrl: (value: string) => {
       setStringField('appUrl', value)
+    },
+    instagramUrl: values.instagramUrl,
+    setInstagramUrl: (value: string) => {
+      setStringField('instagramUrl', value)
+    },
+    startDate: dayjs(values.startDate).toDate(),
+    startDateIso: values.startDate,
+    setStartDate: (date: Date) => {
+      setStringField('startDate', dayjs(date).format(DATE_FORMAT))
+    },
+    endDate: dayjs(values.endDate).toDate(),
+    endDateIso: values.endDate,
+    setEndDate: (date: Date) => {
+      setStringField('endDate', dayjs(date).format(DATE_FORMAT))
     },
     isValid: formState.isValid,
     handleSubmit,
