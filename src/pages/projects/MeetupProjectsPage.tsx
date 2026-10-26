@@ -1,5 +1,9 @@
 import { useEffect, useRef, useState } from 'react'
-import type { MeetupProjectCreateRequest, MeetupProjectType } from '@api/projects'
+import type {
+  MeetupProjectCreateRequest,
+  MeetupProjectListItem,
+  MeetupProjectType,
+} from '@api/projects'
 import { Button } from '@components/common/Button'
 import { PageHeader } from '@components/common/PageHeader'
 import { SegmentedControl } from '@components/common/SegmentedControl'
@@ -10,12 +14,16 @@ import {
   useMeetupProjectForm,
   type MeetupProjectFormValues,
 } from '@hooks/projects/useMeetupProjectForm'
-import { useCreateMeetupProjectMutation } from '@hooks/projects/useMeetupProjects'
+import {
+  useCreateMeetupProjectMutation,
+  useMeetupProjectsQuery,
+} from '@hooks/projects/useMeetupProjects'
+import { toAbsoluteS3Url } from '@lib/s3'
 import {
   COHORT_OPTIONS,
   CURRENT_GENERATION,
-  INITIAL_MEETUP_PROJECTS,
   PART_OPTIONS,
+  PLACEHOLDER_THUMBNAIL_URL,
   TYPE_OPTIONS,
   type MeetupProjectCard,
 } from './MeetupProjectsPage.mock'
@@ -30,14 +38,29 @@ function membersByPart(members: MeetupProjectFormValues['members'], part: string
   return members.filter((member) => member.part === part).map((member) => member.name)
 }
 
+function toProjectCard(item: MeetupProjectListItem): MeetupProjectCard {
+  return {
+    id: String(item.meetup_id),
+    cardinal: item.cardinal,
+    serviceName: item.name,
+    imageUrl: toAbsoluteS3Url(item.poster_url) ?? PLACEHOLDER_THUMBNAIL_URL,
+  }
+}
+
 export function MeetupProjectsPage() {
-  const [projects, setProjects] = useState<MeetupProjectCard[]>(INITIAL_MEETUP_PROJECTS)
+  const projectsQuery = useMeetupProjectsQuery()
   const [cohort, setCohort] = useState(String(CURRENT_GENERATION))
   const [modalOpen, setModalOpen] = useState(false)
+  // 삭제 API가 아직 없어서, 조회 데이터에서 숨길 id만 로컬로 들고 있는다.
+  const [hiddenProjectIds, setHiddenProjectIds] = useState<Set<string>>(new Set())
 
   const form = useMeetupProjectForm()
   const addToast = useToast()
   const createMutation = useCreateMeetupProjectMutation()
+
+  const projects = (projectsQuery.data?.meetup_list ?? [])
+    .map(toProjectCard)
+    .filter((project) => !hiddenProjectIds.has(project.id))
 
   const latestProjectsRef = useRef(projects)
   useEffect(() => {
@@ -89,15 +112,6 @@ export function MeetupProjectsPage() {
 
       createMutation.mutate(request, {
         onSuccess: () => {
-          setProjects((prev) => [
-            ...prev,
-            {
-              id: crypto.randomUUID(),
-              cardinal: CURRENT_GENERATION,
-              serviceName: values.name,
-              imageUrl: values.posterUrl,
-            },
-          ])
           form.resetAfterSave()
           setModalOpen(false)
         },
@@ -109,11 +123,42 @@ export function MeetupProjectsPage() {
   }
 
   function handleDelete(id: string) {
-    setProjects((prev) => {
-      const target = prev.find((project) => project.id === id)
-      revokeIfBlobUrl(target?.imageUrl)
-      return prev.filter((project) => project.id !== id)
-    })
+    const target = projects.find((project) => project.id === id)
+    revokeIfBlobUrl(target?.imageUrl)
+    setHiddenProjectIds((prev) => new Set(prev).add(id))
+  }
+
+  if (projectsQuery.isLoading) {
+    return (
+      <div className="flex min-h-screen flex-col">
+        <PageHeader title="밋업 프로젝트" />
+        <div className="text-label-14m text-label-alternative flex flex-1 items-center justify-center">
+          불러오는 중입니다...
+        </div>
+      </div>
+    )
+  }
+
+  if (projectsQuery.isError) {
+    return (
+      <div className="flex min-h-screen flex-col">
+        <PageHeader title="밋업 프로젝트" />
+        <div className="flex flex-1 flex-col items-center justify-center gap-3">
+          <p className="text-label-14m text-label-alternative">
+            밋업 프로젝트 목록을 불러오지 못했습니다.
+          </p>
+          <Button
+            variant="primary"
+            size="s"
+            onClick={() => {
+              void projectsQuery.refetch()
+            }}
+          >
+            다시 시도
+          </Button>
+        </div>
+      </div>
+    )
   }
 
   return (

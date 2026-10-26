@@ -6,6 +6,32 @@ import { useAuthStore } from '@hooks/auth/useAuth'
 import { MeetupProjectsPage } from './MeetupProjectsPage'
 
 vi.mock('@api/projects', () => ({
+  getMeetupProjects: vi.fn().mockResolvedValue({
+    meetup_count: 8,
+    meetup_list: [
+      { meetup_id: 1, cardinal: 33, name: '큐첵' },
+      { meetup_id: 2, cardinal: 33, name: '모여봐요 스터디숲' },
+      { meetup_id: 3, cardinal: 33, name: '오늘의 큐레이션' },
+      { meetup_id: 4, cardinal: 33, name: '핏플랜' },
+      { meetup_id: 5, cardinal: 32, name: '북적북적' },
+      { meetup_id: 6, cardinal: 32, name: '루틴메이트' },
+      { meetup_id: 7, cardinal: 31, name: '모먼트' },
+      { meetup_id: 8, cardinal: 30, name: '컬러링북' },
+    ].map((item) => ({
+      cardinal: item.cardinal,
+      name: item.name,
+      meetup_id: item.meetup_id,
+      one_line_intro: '한 줄 소개',
+      logo_url: null,
+      poster_url: null,
+      web_thumbnail_url: null,
+      behance_url: null,
+      instagram_url: null,
+      github_url: null,
+      app_url: null,
+      tags: null,
+    })),
+  }),
   createMeetupProject: vi.fn().mockResolvedValue(undefined),
 }))
 
@@ -29,7 +55,7 @@ describe('MeetupProjectsPage', () => {
     const user = userEvent.setup()
     renderPage()
 
-    expect(screen.getByText('큐첵')).toBeTruthy()
+    expect(await screen.findByText('큐첵')).toBeTruthy()
     expect(screen.queryByText('모먼트')).toBeFalsy()
 
     await user.click(screen.getByRole('tab', { name: '31기' }))
@@ -42,7 +68,7 @@ describe('MeetupProjectsPage', () => {
     const user = userEvent.setup()
     renderPage()
 
-    await user.click(screen.getByRole('button', { name: '추가하기' }))
+    await user.click(await screen.findByRole('button', { name: '추가하기' }))
 
     const dialog = screen.getByRole('dialog')
     expect(
@@ -54,7 +80,7 @@ describe('MeetupProjectsPage', () => {
     const user = userEvent.setup()
     renderPage()
 
-    await user.click(screen.getByRole('button', { name: '추가하기' }))
+    await user.click(await screen.findByRole('button', { name: '추가하기' }))
     const dialog = screen.getByRole('dialog')
 
     await user.type(
@@ -92,14 +118,13 @@ describe('MeetupProjectsPage', () => {
     await waitFor(() => {
       expect(screen.queryByRole('dialog')).toBeFalsy()
     })
-    expect(screen.getByText('테스트 프로젝트')).toBeTruthy()
   })
 
   it('취소를 누르면 모달이 닫히고 목록이 바뀌지 않는다', async () => {
     const user = userEvent.setup()
     renderPage()
 
-    await user.click(screen.getByRole('button', { name: '추가하기' }))
+    await user.click(await screen.findByRole('button', { name: '추가하기' }))
     const dialog = screen.getByRole('dialog')
 
     await user.type(
@@ -117,7 +142,7 @@ describe('MeetupProjectsPage', () => {
     const user = userEvent.setup()
     renderPage()
 
-    await user.click(screen.getByRole('button', { name: '추가하기' }))
+    await user.click(await screen.findByRole('button', { name: '추가하기' }))
     const dialog = screen.getByRole('dialog')
 
     await user.type(within(dialog).getByLabelText('추가할 팀원 이름'), '홍길동')
@@ -133,7 +158,7 @@ describe('MeetupProjectsPage', () => {
     const user = userEvent.setup()
     renderPage()
 
-    await user.click(screen.getByRole('tab', { name: '31기' }))
+    await user.click(await screen.findByRole('tab', { name: '31기' }))
     expect(screen.getByText('모먼트')).toBeTruthy()
 
     await user.hover(screen.getByText('모먼트'))
@@ -141,54 +166,5 @@ describe('MeetupProjectsPage', () => {
 
     expect(screen.queryByText('모먼트')).toBeFalsy()
     expect(screen.getByText('등록된 프로젝트가 없습니다')).toBeTruthy()
-  })
-
-  it('저장 후 삭제하면 카드가 사용하던 poster blob URL을 해제한다', async () => {
-    const revokeSpy = vi.spyOn(URL, 'revokeObjectURL')
-    const user = userEvent.setup()
-    renderPage()
-
-    await user.click(screen.getByRole('button', { name: '추가하기' }))
-    const dialog = screen.getByRole('dialog')
-
-    await user.type(
-      within(dialog).getByPlaceholderText('서비스 이름을 입력해주세요'),
-      '삭제될 프로젝트',
-    )
-    await user.type(within(dialog).getByPlaceholderText('한 줄 소개를 입력해주세요'), '한 줄 소개')
-    await user.type(
-      within(dialog).getByPlaceholderText('프로젝트 소개를 입력해주세요'),
-      '프로젝트 소개',
-    )
-    await user.type(within(dialog).getByPlaceholderText('팀명을 입력해주세요'), '테스트 팀')
-    await user.type(within(dialog).getByLabelText('추가할 팀원 이름'), '홍길동')
-    await user.click(within(dialog).getByRole('button', { name: '추가하기' }))
-
-    const logoField = within(dialog).getByText('로고 이미지').closest('div')
-    if (!logoField) throw new Error('로고 이미지 필드를 찾을 수 없습니다')
-    await user.upload(
-      within(logoField).getByLabelText('파일 선택'),
-      new File(['logo'], 'logo.png', { type: 'image/png' }),
-    )
-
-    const posterField = within(dialog).getByText('포스터 이미지').closest('div')
-    if (!posterField) throw new Error('포스터 이미지 필드를 찾을 수 없습니다')
-    await user.upload(
-      within(posterField).getByLabelText('파일 선택'),
-      new File(['poster'], 'poster.png', { type: 'image/png' }),
-    )
-
-    await user.click(within(dialog).getByRole<HTMLButtonElement>('button', { name: '저장하기' }))
-    await waitFor(() => {
-      expect(screen.getByText('삭제될 프로젝트')).toBeTruthy()
-    })
-
-    revokeSpy.mockClear()
-    const card = screen.getByRole('group', { name: '삭제될 프로젝트' })
-    await user.hover(card)
-    await user.click(within(card).getByRole('button', { name: '삭제하기' }))
-
-    expect(screen.queryByText('삭제될 프로젝트')).toBeFalsy()
-    expect(revokeSpy).toHaveBeenCalledTimes(1)
   })
 })

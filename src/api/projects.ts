@@ -8,6 +8,42 @@ interface RequestContext {
 
 export type MeetupProjectType = 'APP' | 'WEB' | 'CHROME_EXTENSION'
 
+// GET은 목록 조회라 isDetail=false로 내려온다(AdminService#getMeetupProjects,
+// new MeetupDetailResponse(p, false)) — intro/type/start_date/end_date/team은
+// @JsonInclude(NON_NULL)이라 이 응답에는 아예 포함되지 않는다.
+const meetupProjectListItemSchema = z.object({
+  meetup_id: z.number(),
+  cardinal: z.number(),
+  name: z.string(),
+  one_line_intro: z.string(),
+  logo_url: z.string().nullable(),
+  poster_url: z.string().nullable(),
+  web_thumbnail_url: z.string().nullable(),
+  behance_url: z.string().nullable(),
+  instagram_url: z.string().nullable(),
+  github_url: z.string().nullable(),
+  app_url: z.string().nullable(),
+  tags: z.array(z.string()).nullable(),
+})
+
+const meetupProjectListResponseSchema = z.object({
+  meetup_count: z.number(),
+  meetup_list: z.array(meetupProjectListItemSchema),
+})
+
+export type MeetupProjectListItem = z.infer<typeof meetupProjectListItemSchema>
+export type MeetupProjectListResponse = z.infer<typeof meetupProjectListResponseSchema>
+
+export function getMeetupProjects({
+  accessToken,
+  refreshAccessToken,
+}: RequestContext): Promise<MeetupProjectListResponse> {
+  return apiRequest(
+    { method: 'GET', path: '/admin/meetup', accessToken, refreshAccessToken },
+    meetupProjectListResponseSchema,
+  )
+}
+
 export interface MeetupProjectCreateRequest {
   cardinal: number
   name: string

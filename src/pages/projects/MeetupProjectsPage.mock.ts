@@ -35,14 +35,3 @@ export interface MeetupProjectCard {
   serviceName: string
   imageUrl: string
 }
-
-export const INITIAL_MEETUP_PROJECTS: MeetupProjectCard[] = [
-  { id: '1', cardinal: 33, serviceName: '큐첵', imageUrl: PLACEHOLDER_THUMBNAIL_URL },
-  { id: '2', cardinal: 33, serviceName: '모여봐요 스터디숲', imageUrl: PLACEHOLDER_THUMBNAIL_URL },
-  { id: '3', cardinal: 33, serviceName: '오늘의 큐레이션', imageUrl: PLACEHOLDER_THUMBNAIL_URL },
-  { id: '4', cardinal: 33, serviceName: '핏플랜', imageUrl: PLACEHOLDER_THUMBNAIL_URL },
-  { id: '5', cardinal: 32, serviceName: '북적북적', imageUrl: PLACEHOLDER_THUMBNAIL_URL },
-  { id: '6', cardinal: 32, serviceName: '루틴메이트', imageUrl: PLACEHOLDER_THUMBNAIL_URL },
-  { id: '7', cardinal: 31, serviceName: '모먼트', imageUrl: PLACEHOLDER_THUMBNAIL_URL },
-  { id: '8', cardinal: 30, serviceName: '컬러링북', imageUrl: PLACEHOLDER_THUMBNAIL_URL },
-]

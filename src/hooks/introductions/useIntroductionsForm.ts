@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState, type Dispatch, type SetStateAction } from 'react'
 import type { AdminIntroResponse, BannerStatus, IntroUpdateRequest } from '@api/introductions'
+import { toAbsoluteS3Url } from '@lib/s3'
 import { useIntroductionQuery, useUpdateIntroductionMutation } from './useIntroductions'
 
 export type PartKey = 'plan' | 'design' | 'frontend' | 'backend'
@@ -40,20 +41,8 @@ function toFileList(items: PartnerLogo[]): File[] {
   return items.map((item) => item.imageFile).filter((file): file is File => file !== undefined)
 }
 
-// ponytail: 백엔드가 이미지 필드에 완전한 URL이 아니라 S3 object key만 반환해서 버킷 도메인을 하드코딩해 붙인다.
-// 백엔드가 완전한 URL을 반환하도록 고치면 이 우회 코드를 제거한다.
-// 자세한 내용은 .claude/known-issues/records/api-introductions-image-url-not-absolute.md 참고.
-const S3_BASE_URL = 'https://kusitms-bucket.s3.ap-northeast-2.amazonaws.com'
-
-function toAbsoluteImageUrl(key: string | null): string | undefined {
-  if (!key) return undefined
-  if (key.startsWith('http://') || key.startsWith('https://')) return key
-  const encodedKey = key.split('/').map(encodeURIComponent).join('/')
-  return `${S3_BASE_URL}/${encodedKey}`
-}
-
 function toPartnerLogoList(urls: string[]): PartnerLogo[] {
-  return urls.map((url) => ({ id: crypto.randomUUID(), imageUrl: toAbsoluteImageUrl(url) }))
+  return urls.map((url) => ({ id: crypto.randomUUID(), imageUrl: toAbsoluteS3Url(url) }))
 }
 
 function toSnapshotItem({
@@ -111,42 +100,42 @@ function hydrateFromResponse(data: AdminIntroResponse) {
   return {
     bannerStatus: (data.banner_status ?? '') as BannerStatus | '',
     slogan: data.slogan ?? '',
-    bannerImageUrl: toAbsoluteImageUrl(data.banner_image_url),
+    bannerImageUrl: toAbsoluteS3Url(data.banner_image_url),
     memberCount: data.member_count !== null ? String(data.member_count) : '',
     projectCount: data.project_count !== null ? String(data.project_count) : '',
     universityCount: data.university_count !== null ? String(data.university_count) : '',
     introYoutubeLink: data.intro_youtube_link ?? '',
     partImages: {
-      plan: toAbsoluteImageUrl(data.planning_image_url),
-      design: toAbsoluteImageUrl(data.design_image_url),
-      frontend: toAbsoluteImageUrl(data.frontend_image_url),
-      backend: toAbsoluteImageUrl(data.backend_image_url),
+      plan: toAbsoluteS3Url(data.planning_image_url),
+      design: toAbsoluteS3Url(data.design_image_url),
+      frontend: toAbsoluteS3Url(data.frontend_image_url),
+      backend: toAbsoluteS3Url(data.backend_image_url),
     },
     teams: data.teams.map((team) => ({
       id: crypto.randomUUID(),
       title: team.name,
       description: team.description,
-      thumbnailUrl: toAbsoluteImageUrl(team.image_link),
+      thumbnailUrl: toAbsoluteS3Url(team.image_link),
     })),
     activities: data.activities.map((activity) => ({
       id: crypto.randomUUID(),
       title: activity.name,
       description: activity.description,
-      thumbnailUrl: toAbsoluteImageUrl(activity.image_url1),
-      thumbnailUrl2: toAbsoluteImageUrl(activity.image_url2),
+      thumbnailUrl: toAbsoluteS3Url(activity.image_url1),
+      thumbnailUrl2: toAbsoluteS3Url(activity.image_url2),
     })),
     expertLecture: data.expert_lecture.map((lecture) => ({
       id: crypto.randomUUID(),
       title: lecture.name,
       description: lecture.description,
       extra: lecture.corporation,
-      thumbnailUrl: toAbsoluteImageUrl(lecture.image_link),
+      thumbnailUrl: toAbsoluteS3Url(lecture.image_link),
     })),
     obLecture: data.ob_lecture.map((lecture) => ({
       id: crypto.randomUUID(),
       title: lecture.name,
       description: lecture.topic,
-      thumbnailUrl: toAbsoluteImageUrl(lecture.image_link),
+      thumbnailUrl: toAbsoluteS3Url(lecture.image_link),
     })),
     partnerLogos: toPartnerLogoList(data.partner_logo_urls),
     meetupImages: toPartnerLogoList(data.meetup_image_urls),
