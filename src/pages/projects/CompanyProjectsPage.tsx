@@ -1,15 +1,22 @@
 import { useEffect, useRef, useState } from 'react'
+import type { CorporateProjectCreateRequest, CorporateProjectListItem } from '@api/projects'
 import { Button } from '@components/common/Button'
 import { PageHeader } from '@components/common/PageHeader'
 import { SegmentedControl } from '@components/common/SegmentedControl'
 import { CompanyProjectModal } from '@components/projects/CompanyProjectModal'
 import { ProjectThumbnailCard } from '@components/projects/ProjectThumbnailCard'
+import { useToast } from '@hooks/common/useToast'
 import { useCompanyProjectForm } from '@hooks/projects/useCompanyProjectForm'
+import {
+  useCompanyProjectsQuery,
+  useCreateCompanyProjectMutation,
+  useDeleteCompanyProjectMutation,
+} from '@hooks/projects/useCompanyProjects'
+import { toAbsoluteS3Url } from '@lib/s3'
 import {
   COHORT_OPTIONS,
   CURRENT_GENERATION,
-  INITIAL_COMPANY_PROJECTS,
-  type CompanyProjectCard,
+  PLACEHOLDER_THUMBNAIL_URL,
 } from './CompanyProjectsPage.mock'
 
 function revokeIfBlobUrl(url: string | undefined) {
@@ -18,12 +25,27 @@ function revokeIfBlobUrl(url: string | undefined) {
   }
 }
 
+function toProjectCard(item: CorporateProjectListItem) {
+  return {
+    id: String(item.corporate_id),
+    cardinal: item.cardinal,
+    serviceName: item.name,
+    content: item.content,
+    imageUrl: toAbsoluteS3Url(item.banner_url) ?? PLACEHOLDER_THUMBNAIL_URL,
+  }
+}
+
 export function CompanyProjectsPage() {
-  const [projects, setProjects] = useState<CompanyProjectCard[]>(INITIAL_COMPANY_PROJECTS)
+  const projectsQuery = useCompanyProjectsQuery()
   const [cohort, setCohort] = useState(String(CURRENT_GENERATION))
   const [modalOpen, setModalOpen] = useState(false)
 
   const form = useCompanyProjectForm()
+  const addToast = useToast()
+  const createMutation = useCreateCompanyProjectMutation()
+  const deleteMutation = useDeleteCompanyProjectMutation()
+
+  const projects = (projectsQuery.data?.corporateList ?? []).map(toProjectCard)
 
   const latestProjectsRef = useRef(projects)
   useEffect(() => {
@@ -46,30 +68,77 @@ export function CompanyProjectsPage() {
 
   function handleSave() {
     void form.handleSubmit((values) => {
-      setProjects((prev) => [
-        ...prev,
-        {
-          id: crypto.randomUUID(),
-          cardinal: CURRENT_GENERATION,
-          serviceName: values.name,
-          content: values.content,
-          imageUrl: values.bannerUrl,
+      // zod 검증(logoUrl/bannerUrl 필수)을 통과했다면 onLogoChange/onBannerChange에서
+      // 항상 같이 설정되므로 logoFile/bannerFile도 존재한다.
+      if (!form.logoFile || !form.bannerFile) return
+
+      const request: CorporateProjectCreateRequest = {
+        cardinal: CURRENT_GENERATION,
+        name: values.name,
+        content: values.content,
+        logoFile: form.logoFile,
+        bannerFile: form.bannerFile,
+      }
+
+      createMutation.mutate(request, {
+        onSuccess: () => {
+          form.resetAfterSave()
+          setModalOpen(false)
         },
-      ])
-      form.resetAfterSave()
-      setModalOpen(false)
+        onError: () => {
+          addToast({ type: 'error', message: '저장하지 못했습니다. 다시 시도해주세요.' })
+        },
+      })
     })()
   }
 
   function handleDelete(id: string) {
-    const target = projects.find((project) => project.id === id)
-    revokeIfBlobUrl(target?.imageUrl)
-    setProjects((prev) => prev.filter((project) => project.id !== id))
+    deleteMutation.mutate(Number(id), {
+      onSuccess: () => {
+        revokeIfBlobUrl(projects.find((project) => project.id === id)?.imageUrl)
+      },
+      onError: () => {
+        addToast({ type: 'error', message: '삭제하지 못했습니다. 다시 시도해주세요.' })
+      },
+    })
   }
 
   function closeModal() {
     form.reset()
     setModalOpen(false)
+  }
+
+  if (projectsQuery.isLoading) {
+    return (
+      <div className="flex min-h-screen flex-col">
+        <PageHeader title="기업 프로젝트" />
+        <div className="text-label-14m text-label-alternative flex flex-1 items-center justify-center">
+          불러오는 중입니다...
+        </div>
+      </div>
+    )
+  }
+
+  if (projectsQuery.isError) {
+    return (
+      <div className="flex min-h-screen flex-col">
+        <PageHeader title="기업 프로젝트" />
+        <div className="flex flex-1 flex-col items-center justify-center gap-3">
+          <p className="text-label-14m text-label-alternative">
+            기업 프로젝트 목록을 불러오지 못했습니다.
+          </p>
+          <Button
+            variant="primary"
+            size="s"
+            onClick={() => {
+              void projectsQuery.refetch()
+            }}
+          >
+            다시 시도
+          </Button>
+        </div>
+      </div>
+    )
   }
 
   return (
@@ -120,12 +189,15 @@ export function CompanyProjectsPage() {
         onNameChange={form.setName}
         content={form.content}
         onContentChange={form.setContent}
+        logoUrl={form.logoUrl}
+        onLogoChange={form.onLogoChange}
+        onLogoDelete={form.onLogoDelete}
         bannerUrl={form.bannerUrl}
         onBannerChange={form.onBannerChange}
         onBannerDelete={form.onBannerDelete}
         onCancel={closeModal}
         onSave={handleSave}
-        saveDisabled={!form.isValid}
+        saveDisabled={!form.isValid || createMutation.isPending}
       />
     </div>
   )

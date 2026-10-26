@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react'
+import { render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { describe, expect, it, vi } from 'vitest'
 import { MeetupProjectModal } from './MeetupProjectModal'
@@ -24,11 +24,15 @@ function renderModal(overrides: Partial<Parameters<typeof MeetupProjectModal>[0]
     onOneLineIntroChange: vi.fn(),
     intro: '',
     onIntroChange: vi.fn(),
+    teamName: '',
+    onTeamNameChange: vi.fn(),
     members: [],
     partOptions: PART_OPTIONS,
     onMemberPartChange: vi.fn(),
     onMemberRemove: vi.fn(),
     onMemberAdd: vi.fn(),
+    onLogoChange: vi.fn(),
+    onLogoDelete: vi.fn(),
     onPosterChange: vi.fn(),
     onPosterDelete: vi.fn(),
     githubUrl: '',
@@ -37,6 +41,12 @@ function renderModal(overrides: Partial<Parameters<typeof MeetupProjectModal>[0]
     onBehanceUrlChange: vi.fn(),
     appUrl: '',
     onAppUrlChange: vi.fn(),
+    instagramUrl: '',
+    onInstagramUrlChange: vi.fn(),
+    startDate: new Date('2026-01-01'),
+    onStartDateChange: vi.fn(),
+    endDate: new Date('2026-01-02'),
+    onEndDateChange: vi.fn(),
     onCancel: vi.fn(),
     onSave: vi.fn(),
     ...overrides,
@@ -138,8 +148,11 @@ describe('MeetupProjectModal', () => {
     const user = userEvent.setup()
     const props = renderModal()
 
+    const posterField = screen.getByText('포스터 이미지').closest('div')
+    if (!posterField) throw new Error('포스터 이미지 필드를 찾을 수 없습니다')
+
     const file = new File(['content'], 'poster.png', { type: 'image/png' })
-    await user.upload(screen.getByLabelText('파일 선택'), file)
+    await user.upload(within(posterField).getByLabelText('파일 선택'), file)
 
     expect(props.onPosterChange).toHaveBeenCalledWith(file)
   })

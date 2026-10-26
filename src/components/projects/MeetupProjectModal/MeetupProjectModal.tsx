@@ -1,6 +1,7 @@
 import { useState, type ChangeEvent } from 'react'
 import { Button } from '@components/common/Button'
 import { CardinalField } from '@components/common/CardinalField'
+import { DatePicker } from '@components/common/DatePicker'
 import { FormField } from '@components/common/FormField'
 import { ImageUploadBox } from '@components/common/ImageUploadBox'
 import { Inputfield } from '@components/common/Inputfield'
@@ -27,11 +28,16 @@ interface MeetupProjectModalProps {
   onOneLineIntroChange: (value: string) => void
   intro: string
   onIntroChange: (value: string) => void
+  teamName: string
+  onTeamNameChange: (value: string) => void
   members: MeetupTeamMember[]
   partOptions: SelectFieldOption[]
   onMemberPartChange: (id: string, value: string) => void
   onMemberRemove: (id: string) => void
   onMemberAdd: (member: { part: string; name: string }) => void
+  logoUrl?: string
+  onLogoChange?: (file: File) => void
+  onLogoDelete?: () => void
   posterUrl?: string
   onPosterChange?: (file: File) => void
   onPosterDelete?: () => void
@@ -41,6 +47,12 @@ interface MeetupProjectModalProps {
   onBehanceUrlChange: (value: string) => void
   appUrl: string
   onAppUrlChange: (value: string) => void
+  instagramUrl: string
+  onInstagramUrlChange: (value: string) => void
+  startDate: Date
+  onStartDateChange: (date: Date) => void
+  endDate: Date
+  onEndDateChange: (date: Date) => void
   onCancel: () => void
   onSave: () => void
   saveDisabled?: boolean
@@ -60,11 +72,16 @@ export function MeetupProjectModal({
   onOneLineIntroChange,
   intro,
   onIntroChange,
+  teamName,
+  onTeamNameChange,
   members,
   partOptions,
   onMemberPartChange,
   onMemberRemove,
   onMemberAdd,
+  logoUrl,
+  onLogoChange,
+  onLogoDelete,
   posterUrl,
   onPosterChange,
   onPosterDelete,
@@ -74,6 +91,12 @@ export function MeetupProjectModal({
   onBehanceUrlChange,
   appUrl,
   onAppUrlChange,
+  instagramUrl,
+  onInstagramUrlChange,
+  startDate,
+  onStartDateChange,
+  endDate,
+  onEndDateChange,
   onCancel,
   onSave,
   saveDisabled = true,
@@ -137,6 +160,24 @@ export function MeetupProjectModal({
           placeholder="프로젝트 소개를 입력해주세요"
         />
       </FormField>
+      <div className="flex items-stretch gap-3">
+        <FormField label="팀명" className="flex-1">
+          <Inputfield
+            value={teamName}
+            onChange={(event: ChangeEvent<HTMLInputElement>) => {
+              onTeamNameChange(event.target.value)
+            }}
+            placeholder="팀명을 입력해주세요"
+          />
+        </FormField>
+        <FormField label="진행 기간" className="shrink-0">
+          <div className="flex items-center gap-2">
+            <DatePicker value={startDate} onChange={onStartDateChange} />
+            <span className="text-label-14m text-label-alternative">~</span>
+            <DatePicker value={endDate} onChange={onEndDateChange} />
+          </div>
+        </FormField>
+      </div>
       <FormField label="팀원 관리">
         <div className="flex flex-col items-stretch gap-3">
           <div className="flex w-full items-center gap-2">
@@ -198,6 +239,9 @@ export function MeetupProjectModal({
           ))}
         </div>
       </FormField>
+      <FormField label="로고 이미지">
+        <ImageUploadBox imageUrl={logoUrl} onFileChange={onLogoChange} onDelete={onLogoDelete} />
+      </FormField>
       <FormField label="포스터 이미지">
         <ImageUploadBox
           imageUrl={posterUrl}
@@ -206,8 +250,8 @@ export function MeetupProjectModal({
         />
       </FormField>
       <FormField label="링크">
-        <div className="flex items-center gap-3">
-          <div className="flex flex-1 flex-col gap-1.5">
+        <div className="flex flex-wrap items-center gap-3">
+          <div className="flex min-w-[140px] flex-1 flex-col gap-1.5">
             <span className="text-caption-12sb text-label-alternative">깃허브 URL</span>
             <Inputfield
               value={githubUrl}
@@ -218,7 +262,7 @@ export function MeetupProjectModal({
               aria-label="깃허브 URL"
             />
           </div>
-          <div className="flex flex-1 flex-col gap-1.5">
+          <div className="flex min-w-[140px] flex-1 flex-col gap-1.5">
             <span className="text-caption-12sb text-label-alternative">비핸스 URL</span>
             <Inputfield
               value={behanceUrl}
@@ -229,7 +273,7 @@ export function MeetupProjectModal({
               aria-label="비핸스 URL"
             />
           </div>
-          <div className="flex flex-1 flex-col gap-1.5">
+          <div className="flex min-w-[140px] flex-1 flex-col gap-1.5">
             <span className="text-caption-12sb text-label-alternative">서비스 URL</span>
             <Inputfield
               value={appUrl}
@@ -238,6 +282,17 @@ export function MeetupProjectModal({
               }}
               placeholder="링크를 붙여넣어주세요"
               aria-label="서비스 URL"
+            />
+          </div>
+          <div className="flex min-w-[140px] flex-1 flex-col gap-1.5">
+            <span className="text-caption-12sb text-label-alternative">인스타그램 URL</span>
+            <Inputfield
+              value={instagramUrl}
+              onChange={(event: ChangeEvent<HTMLInputElement>) => {
+                onInstagramUrlChange(event.target.value)
+              }}
+              placeholder="링크를 붙여넣어주세요"
+              aria-label="인스타그램 URL"
             />
           </div>
         </div>

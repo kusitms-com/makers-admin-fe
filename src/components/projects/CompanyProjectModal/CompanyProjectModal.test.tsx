@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react'
+import { render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { describe, expect, it, vi } from 'vitest'
 import { CompanyProjectModal } from './CompanyProjectModal'
@@ -72,8 +72,11 @@ describe('CompanyProjectModal', () => {
     const user = userEvent.setup()
     const props = renderModal()
 
+    const bannerField = screen.getByText('배너').closest('div')
+    if (!bannerField) throw new Error('배너 필드를 찾을 수 없습니다')
+
     const file = new File(['content'], 'banner.png', { type: 'image/png' })
-    await user.upload(screen.getByLabelText('파일 선택'), file)
+    await user.upload(within(bannerField).getByLabelText('파일 선택'), file)
 
     expect(props.onBannerChange).toHaveBeenCalledWith(file)
   })

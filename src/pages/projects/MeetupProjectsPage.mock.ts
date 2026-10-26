@@ -11,9 +11,10 @@ export const COHORT_OPTIONS: SegmentedControlItem[] = [
   { value: '30', label: '30기' },
 ]
 
+// 백엔드 ProjectType enum 상수명(WEB/APP)과 정확히 일치해야 한다(Spring 기본 enum 바인딩은 대소문자를 구분한다).
 export const TYPE_OPTIONS: SelectFieldOption[] = [
-  { value: 'Web', label: 'Web' },
-  { value: 'App', label: 'App' },
+  { value: 'WEB', label: 'Web' },
+  { value: 'APP', label: 'App' },
 ]
 
 export const PART_OPTIONS: SelectFieldOption[] = [
@@ -34,14 +35,3 @@ export interface MeetupProjectCard {
   serviceName: string
   imageUrl: string
 }
-
-export const INITIAL_MEETUP_PROJECTS: MeetupProjectCard[] = [
-  { id: '1', cardinal: 33, serviceName: '큐첵', imageUrl: PLACEHOLDER_THUMBNAIL_URL },
-  { id: '2', cardinal: 33, serviceName: '모여봐요 스터디숲', imageUrl: PLACEHOLDER_THUMBNAIL_URL },
-  { id: '3', cardinal: 33, serviceName: '오늘의 큐레이션', imageUrl: PLACEHOLDER_THUMBNAIL_URL },
-  { id: '4', cardinal: 33, serviceName: '핏플랜', imageUrl: PLACEHOLDER_THUMBNAIL_URL },
-  { id: '5', cardinal: 32, serviceName: '북적북적', imageUrl: PLACEHOLDER_THUMBNAIL_URL },
-  { id: '6', cardinal: 32, serviceName: '루틴메이트', imageUrl: PLACEHOLDER_THUMBNAIL_URL },
-  { id: '7', cardinal: 31, serviceName: '모먼트', imageUrl: PLACEHOLDER_THUMBNAIL_URL },
-  { id: '8', cardinal: 30, serviceName: '컬러링북', imageUrl: PLACEHOLDER_THUMBNAIL_URL },
-]

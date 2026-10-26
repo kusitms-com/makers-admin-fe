@@ -18,10 +18,30 @@ interface AuthStore {
   readonly restore: () => Promise<void>
   readonly login: (id: string, password: string) => Promise<void>
   readonly logout: () => Promise<void>
+  readonly refreshAccessToken: () => Promise<string>
 }
 
 export const useAuthStore = create<AuthStore>((set, get) => ({
   session: { status: 'loading' },
+  refreshAccessToken: async () => {
+    const refreshToken = sessionStorage.getItem(REFRESH_TOKEN_KEY)
+    if (!refreshToken) {
+      throw new ApiError(401, undefined, '다시 로그인해주세요.')
+    }
+    const result = await refreshSession(refreshToken)
+    if (result.authority === 'MEMBER') {
+      throw new ApiError(403, undefined, '관리자 권한이 없는 계정입니다.')
+    }
+    sessionStorage.setItem(REFRESH_TOKEN_KEY, result.refreshToken)
+    set({
+      session: {
+        status: 'authenticated',
+        accessToken: result.accessToken,
+        authority: result.authority,
+      },
+    })
+    return result.accessToken
+  },
   restore: async () => {
     const refreshToken = sessionStorage.getItem(REFRESH_TOKEN_KEY)
     if (!refreshToken) {
