@@ -103,10 +103,11 @@ export function useCompanyProjectForm() {
     reset(createDefaultValues())
   }
 
-  // 저장 성공 후에는 bannerUrl 소유권이 저장된 카드로 넘어가므로 revoke 없이 폼만 비운다.
-  // 로고는 카드에 표시되지 않으므로 그대로 revoke한다.
+  // 저장 성공 후 카드 목록은 서버 조회 데이터(banner_url)를 쓰므로, 폼이 들고 있던
+  // blob URL은 더 이상 어디서도 쓰이지 않는다 — logoUrl/bannerUrl 모두 바로 revoke한다.
   function resetAfterSave() {
     revokeIfBlobUrl(values.logoUrl)
+    revokeIfBlobUrl(values.bannerUrl)
     setLogoFile(undefined)
     setBannerFile(undefined)
     reset(createDefaultValues())

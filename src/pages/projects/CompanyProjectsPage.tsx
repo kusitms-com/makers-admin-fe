@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import type { CorporateProjectCreateRequest } from '@api/projects'
+import type { CorporateProjectCreateRequest, CorporateProjectListItem } from '@api/projects'
 import { Button } from '@components/common/Button'
 import { PageHeader } from '@components/common/PageHeader'
 import { SegmentedControl } from '@components/common/SegmentedControl'
@@ -7,12 +7,15 @@ import { CompanyProjectModal } from '@components/projects/CompanyProjectModal'
 import { ProjectThumbnailCard } from '@components/projects/ProjectThumbnailCard'
 import { useToast } from '@hooks/common/useToast'
 import { useCompanyProjectForm } from '@hooks/projects/useCompanyProjectForm'
-import { useCreateCompanyProjectMutation } from '@hooks/projects/useCompanyProjects'
+import {
+  useCompanyProjectsQuery,
+  useCreateCompanyProjectMutation,
+} from '@hooks/projects/useCompanyProjects'
+import { toAbsoluteS3Url } from '@lib/s3'
 import {
   COHORT_OPTIONS,
   CURRENT_GENERATION,
-  INITIAL_COMPANY_PROJECTS,
-  type CompanyProjectCard,
+  PLACEHOLDER_THUMBNAIL_URL,
 } from './CompanyProjectsPage.mock'
 
 function revokeIfBlobUrl(url: string | undefined) {
@@ -21,14 +24,30 @@ function revokeIfBlobUrl(url: string | undefined) {
   }
 }
 
+function toProjectCard(item: CorporateProjectListItem) {
+  return {
+    id: String(item.corporate_id),
+    cardinal: item.cardinal,
+    serviceName: item.name,
+    content: item.content,
+    imageUrl: toAbsoluteS3Url(item.banner_url) ?? PLACEHOLDER_THUMBNAIL_URL,
+  }
+}
+
 export function CompanyProjectsPage() {
-  const [projects, setProjects] = useState<CompanyProjectCard[]>(INITIAL_COMPANY_PROJECTS)
+  const projectsQuery = useCompanyProjectsQuery()
   const [cohort, setCohort] = useState(String(CURRENT_GENERATION))
   const [modalOpen, setModalOpen] = useState(false)
+  // 삭제 API가 아직 없어서, 조회 데이터에서 숨길 id만 로컬로 들고 있는다.
+  const [hiddenProjectIds, setHiddenProjectIds] = useState<Set<string>>(new Set())
 
   const form = useCompanyProjectForm()
   const addToast = useToast()
   const createMutation = useCreateCompanyProjectMutation()
+
+  const projects = (projectsQuery.data?.corporateList ?? [])
+    .map(toProjectCard)
+    .filter((project) => !hiddenProjectIds.has(project.id))
 
   const latestProjectsRef = useRef(projects)
   useEffect(() => {
@@ -65,16 +84,6 @@ export function CompanyProjectsPage() {
 
       createMutation.mutate(request, {
         onSuccess: () => {
-          setProjects((prev) => [
-            ...prev,
-            {
-              id: crypto.randomUUID(),
-              cardinal: CURRENT_GENERATION,
-              serviceName: values.name,
-              content: values.content,
-              imageUrl: values.bannerUrl,
-            },
-          ])
           form.resetAfterSave()
           setModalOpen(false)
         },
@@ -88,12 +97,45 @@ export function CompanyProjectsPage() {
   function handleDelete(id: string) {
     const target = projects.find((project) => project.id === id)
     revokeIfBlobUrl(target?.imageUrl)
-    setProjects((prev) => prev.filter((project) => project.id !== id))
+    setHiddenProjectIds((prev) => new Set(prev).add(id))
   }
 
   function closeModal() {
     form.reset()
     setModalOpen(false)
+  }
+
+  if (projectsQuery.isLoading) {
+    return (
+      <div className="flex min-h-screen flex-col">
+        <PageHeader title="기업 프로젝트" />
+        <div className="text-label-14m text-label-alternative flex flex-1 items-center justify-center">
+          불러오는 중입니다...
+        </div>
+      </div>
+    )
+  }
+
+  if (projectsQuery.isError) {
+    return (
+      <div className="flex min-h-screen flex-col">
+        <PageHeader title="기업 프로젝트" />
+        <div className="flex flex-1 flex-col items-center justify-center gap-3">
+          <p className="text-label-14m text-label-alternative">
+            기업 프로젝트 목록을 불러오지 못했습니다.
+          </p>
+          <Button
+            variant="primary"
+            size="s"
+            onClick={() => {
+              void projectsQuery.refetch()
+            }}
+          >
+            다시 시도
+          </Button>
+        </div>
+      </div>
+    )
   }
 
   return (

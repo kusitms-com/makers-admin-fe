@@ -135,6 +135,38 @@ export function deleteMeetupProject(
   )
 }
 
+// logo_url/banner_url은 밋업과 동일하게 버킷 도메인과 key 사이 슬래시가 빠져 있다
+// (CorporateDetailResponse도 MeetupDetailResponse와 같은 s3Url + key 문자열 연결 방식으로 보인다).
+// toAbsoluteS3Url()로 정규화해서 써야 한다.
+const corporateProjectListItemSchema = z.object({
+  corporate_id: z.number(),
+  cardinal: z.number(),
+  name: z.string(),
+  content: z.string(),
+  category: z.array(z.string()),
+  logo_url: z.string().nullable(),
+  banner_url: z.string().nullable(),
+  tags: z.array(z.string()).nullable(),
+})
+
+const corporateProjectListResponseSchema = z.object({
+  corporateCount: z.number(),
+  corporateList: z.array(corporateProjectListItemSchema),
+})
+
+export type CorporateProjectListItem = z.infer<typeof corporateProjectListItemSchema>
+export type CorporateProjectListResponse = z.infer<typeof corporateProjectListResponseSchema>
+
+export function getCorporateProjects({
+  accessToken,
+  refreshAccessToken,
+}: RequestContext): Promise<CorporateProjectListResponse> {
+  return apiRequest(
+    { method: 'GET', path: '/admin/corporate', accessToken, refreshAccessToken },
+    corporateProjectListResponseSchema,
+  )
+}
+
 export interface CorporateProjectCreateRequest {
   cardinal: number
   name: string
