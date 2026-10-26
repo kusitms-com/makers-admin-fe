@@ -16,7 +16,7 @@
 
 ```text
 src/pages/projects/
-  MeetupProjectsPage.tsx      # 밋업 프로젝트 관리 페이지 (목록 조회/등록 API 연동 완료)
+  MeetupProjectsPage.tsx      # 밋업 프로젝트 관리 페이지 (목록 조회/등록/삭제 API 연동 완료)
   MeetupProjectsPage.mock.ts
   CompanyProjectsPage.tsx     # 기업 프로젝트 관리 페이지 (목록 조회/등록/삭제 API 연동 완료)
   CompanyProjectsPage.mock.ts
