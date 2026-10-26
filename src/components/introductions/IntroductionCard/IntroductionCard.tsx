@@ -20,6 +20,9 @@ interface IntroductionCardProps {
   onExtraChange?: (value: string) => void
   thumbnailUrl?: string
   onThumbnailChange?: (file: File) => void
+  allowMultipleImages?: boolean
+  thumbnailUrl2?: string
+  onThumbnailChange2?: (file: File) => void
   onDelete?: () => void
   className?: string
 }
@@ -39,11 +42,17 @@ export function IntroductionCard({
   onExtraChange,
   thumbnailUrl,
   onThumbnailChange,
+  allowMultipleImages = false,
+  thumbnailUrl2,
+  onThumbnailChange2,
   onDelete,
   className,
 }: IntroductionCardProps) {
   const isActive = variant === 'active'
   const { inputProps, openFilePicker } = useImageFileInput({ onFileChange: onThumbnailChange })
+  const { inputProps: inputProps2, openFilePicker: openFilePicker2 } = useImageFileInput({
+    onFileChange: onThumbnailChange2,
+  })
 
   return (
     <div className={cn('border-line-neutral flex rounded-xl border bg-white', className)}>
@@ -87,19 +96,55 @@ export function IntroductionCard({
           />
         </div>
         <div className="flex flex-col justify-center gap-2.5">
-          <span className="text-caption-12sb text-label-alternative">썸네일</span>
-          <div className="flex items-center gap-2.5">
-            <input {...inputProps} aria-label="썸네일" />
-            <ImageBoxThumbnail imageUrl={thumbnailUrl} />
-            <div className="flex flex-col justify-center gap-1.5">
-              <Button variant={isActive ? 'primary' : 'disable'} size="s" onClick={openFilePicker}>
-                {thumbnailUrl ? '교체하기' : '추가하기'}
-              </Button>
-              <Button variant="error" size="s" onClick={onDelete}>
+          <span className="text-caption-12sb text-label-alternative">
+            썸네일{allowMultipleImages && ' (최대 2장)'}
+          </span>
+          {allowMultipleImages ? (
+            <div className="flex flex-col gap-3">
+              <div className="flex items-center gap-2.5">
+                <input {...inputProps} aria-label="썸네일 1" />
+                <ImageBoxThumbnail imageUrl={thumbnailUrl} />
+                <Button
+                  variant={isActive ? 'primary' : 'disable'}
+                  size="s"
+                  onClick={openFilePicker}
+                >
+                  {thumbnailUrl ? '교체하기' : '추가하기'}
+                </Button>
+              </div>
+              <div className="flex items-center gap-2.5">
+                <input {...inputProps2} aria-label="썸네일 2" />
+                <ImageBoxThumbnail imageUrl={thumbnailUrl2} />
+                <Button
+                  variant={isActive ? 'primary' : 'disable'}
+                  size="s"
+                  onClick={openFilePicker2}
+                >
+                  {thumbnailUrl2 ? '교체하기' : '추가하기'}
+                </Button>
+              </div>
+              <Button variant="error" size="s" className="self-start" onClick={onDelete}>
                 삭제하기
               </Button>
             </div>
-          </div>
+          ) : (
+            <div className="flex items-center gap-2.5">
+              <input {...inputProps} aria-label="썸네일" />
+              <ImageBoxThumbnail imageUrl={thumbnailUrl} />
+              <div className="flex flex-col justify-center gap-1.5">
+                <Button
+                  variant={isActive ? 'primary' : 'disable'}
+                  size="s"
+                  onClick={openFilePicker}
+                >
+                  {thumbnailUrl ? '교체하기' : '추가하기'}
+                </Button>
+                <Button variant="error" size="s" onClick={onDelete}>
+                  삭제하기
+                </Button>
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </div>

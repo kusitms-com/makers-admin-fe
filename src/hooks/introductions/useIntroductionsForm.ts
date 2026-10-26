@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, type Dispatch, type SetStateAction } from 'react'
-import type { IntroUpdateRequest } from '@api/introductions'
+import type { BannerStatus, IntroUpdateRequest } from '@api/introductions'
 import { useUpdateIntroductionMutation } from './useIntroductions'
 
 export type PartKey = 'plan' | 'design' | 'frontend' | 'backend'
@@ -11,6 +11,8 @@ export interface IntroductionItem {
   extra?: string
   thumbnailUrl?: string
   thumbnailFile?: File
+  thumbnailUrl2?: string
+  thumbnailFile2?: File
 }
 
 export interface PartnerLogo {
@@ -64,12 +66,14 @@ function createImageListHandlers(setItems: Dispatch<SetStateAction<PartnerLogo[]
 export function useIntroductionsForm() {
   const updateMutation = useUpdateIntroductionMutation()
 
+  const [bannerStatus, setBannerStatus] = useState<BannerStatus | ''>('')
   const [slogan, setSlogan] = useState('')
   const [bannerImageUrl, setBannerImageUrl] = useState<string | undefined>()
   const [bannerImageFile, setBannerImageFile] = useState<File | undefined>()
   const [memberCount, setMemberCount] = useState('')
   const [projectCount, setProjectCount] = useState('')
   const [universityCount, setUniversityCount] = useState('')
+  const [introYoutubeLink, setIntroYoutubeLink] = useState('')
 
   const [partImages, setPartImages] = useState<Record<PartKey, string | undefined>>({
     plan: undefined,
@@ -86,28 +90,32 @@ export function useIntroductionsForm() {
 
   const [activities, setActivities] = useState<IntroductionItem[]>([])
   const [teams, setTeams] = useState<IntroductionItem[]>([])
-  const [partners, setPartners] = useState<PartnerLogo[]>([])
+  const [partnerLogos, setPartnerLogos] = useState<PartnerLogo[]>([])
   const [expertLecture, setExpertLecture] = useState<IntroductionItem[]>([])
   const [obLecture, setObLecture] = useState<IntroductionItem[]>([])
   const [meetupImages, setMeetupImages] = useState<PartnerLogo[]>([])
+  const [sponsors, setSponsors] = useState<PartnerLogo[]>([])
 
   function toSnapshotItem({ id, title, description, extra, thumbnailUrl }: IntroductionItem) {
     return { id, title, description, extra, thumbnailUrl }
   }
 
   const formSnapshot = JSON.stringify({
+    bannerStatus,
     slogan,
     bannerImageUrl,
     memberCount,
     projectCount,
     universityCount,
+    introYoutubeLink,
     partImages,
     activities: activities.map(toSnapshotItem),
     teams: teams.map(toSnapshotItem),
-    partners: partners.map(({ id, imageUrl }) => ({ id, imageUrl })),
+    partnerLogos: partnerLogos.map(({ id, imageUrl }) => ({ id, imageUrl })),
     expertLecture: expertLecture.map(toSnapshotItem),
     obLecture: obLecture.map(toSnapshotItem),
     meetupImages: meetupImages.map(({ id, imageUrl }) => ({ id, imageUrl })),
+    sponsors: sponsors.map(({ id, imageUrl }) => ({ id, imageUrl })),
   })
   const [pristineSnapshot, setPristineSnapshot] = useState(formSnapshot)
   const isDirty = formSnapshot !== pristineSnapshot
@@ -117,10 +125,11 @@ export function useIntroductionsForm() {
     partImages,
     activities,
     teams,
-    partners,
+    partnerLogos,
     expertLecture,
     obLecture,
     meetupImages,
+    sponsors,
   })
   useEffect(() => {
     latestImagesRef.current = {
@@ -128,20 +137,22 @@ export function useIntroductionsForm() {
       partImages,
       activities,
       teams,
-      partners,
+      partnerLogos,
       expertLecture,
       obLecture,
       meetupImages,
+      sponsors,
     }
   }, [
     bannerImageUrl,
     partImages,
     activities,
     teams,
-    partners,
+    partnerLogos,
     expertLecture,
     obLecture,
     meetupImages,
+    sponsors,
   ])
 
   useEffect(() => {
@@ -153,10 +164,11 @@ export function useIntroductionsForm() {
         (items) => {
           items.forEach((item) => {
             revokeIfBlobUrl(item.thumbnailUrl)
+            revokeIfBlobUrl(item.thumbnailUrl2)
           })
         },
       )
-      ;[current.partners, current.meetupImages].forEach((items) => {
+      ;[current.partnerLogos, current.meetupImages, current.sponsors].forEach((items) => {
         items.forEach((item) => {
           revokeIfBlobUrl(item.imageUrl)
         })
@@ -167,6 +179,7 @@ export function useIntroductionsForm() {
   function buildPayload(): IntroUpdateRequest {
     const payload: IntroUpdateRequest = { bannerCardinal: CURRENT_GENERATION }
 
+    if (bannerStatus) payload.bannerStatus = bannerStatus
     if (slogan) payload.slogan = slogan
     if (bannerImageFile) payload.bannerImageFile = bannerImageFile
     const memberCountValue = toOptionalCount(memberCount)
@@ -175,6 +188,7 @@ export function useIntroductionsForm() {
     if (projectCountValue !== undefined) payload.projectCount = projectCountValue
     const universityCountValue = toOptionalCount(universityCount)
     if (universityCountValue !== undefined) payload.universityCount = universityCountValue
+    if (introYoutubeLink) payload.introYoutubeLink = introYoutubeLink
     if (partImageFiles.plan) payload.planningImage = partImageFiles.plan
     if (partImageFiles.design) payload.designImage = partImageFiles.design
     if (partImageFiles.frontend) payload.frontendImage = partImageFiles.frontend
@@ -189,6 +203,7 @@ export function useIntroductionsForm() {
       name: item.title,
       description: item.description,
       imageFile1: item.thumbnailFile,
+      imageFile2: item.thumbnailFile2,
     }))
     payload.expertLecture = expertLecture.map((item) => ({
       name: item.title,
@@ -201,8 +216,9 @@ export function useIntroductionsForm() {
       topic: item.description,
       imageFile: item.thumbnailFile,
     }))
-    payload.partnerLogoFiles = toFileList(partners)
+    payload.partnerLogoFiles = toFileList(partnerLogos)
     payload.meetupImages = toFileList(meetupImages)
+    payload.sponsors = toFileList(sponsors)
 
     return payload
   }
@@ -244,11 +260,14 @@ export function useIntroductionsForm() {
     setPartImageFiles((prev) => ({ ...prev, [key]: undefined }))
   }
 
-  const partnerHandlers = createImageListHandlers(setPartners)
+  const partnerLogoHandlers = createImageListHandlers(setPartnerLogos)
   const meetupImageHandlers = createImageListHandlers(setMeetupImages)
+  const sponsorHandlers = createImageListHandlers(setSponsors)
 
   return {
     cardinal: CURRENT_GENERATION,
+    bannerStatus,
+    setBannerStatus,
     slogan,
     setSlogan,
     bannerImageUrl,
@@ -260,6 +279,8 @@ export function useIntroductionsForm() {
     setProjectCount,
     universityCount,
     setUniversityCount,
+    introYoutubeLink,
+    setIntroYoutubeLink,
     partImages,
     onPartImageChange,
     onPartImageDelete,
@@ -267,10 +288,10 @@ export function useIntroductionsForm() {
     setActivities,
     teams,
     setTeams,
-    partners,
-    onPartnerAdd: partnerHandlers.onAdd,
-    onPartnerReplace: partnerHandlers.onReplace,
-    onPartnerDelete: partnerHandlers.onDelete,
+    partnerLogos,
+    onPartnerLogoAdd: partnerLogoHandlers.onAdd,
+    onPartnerLogoReplace: partnerLogoHandlers.onReplace,
+    onPartnerLogoDelete: partnerLogoHandlers.onDelete,
     expertLecture,
     setExpertLecture,
     obLecture,
@@ -279,6 +300,10 @@ export function useIntroductionsForm() {
     onMeetupImageAdd: meetupImageHandlers.onAdd,
     onMeetupImageReplace: meetupImageHandlers.onReplace,
     onMeetupImageDelete: meetupImageHandlers.onDelete,
+    sponsors,
+    onSponsorAdd: sponsorHandlers.onAdd,
+    onSponsorReplace: sponsorHandlers.onReplace,
+    onSponsorDelete: sponsorHandlers.onDelete,
     isDirty,
     isSaving: updateMutation.isPending,
     handleSave,

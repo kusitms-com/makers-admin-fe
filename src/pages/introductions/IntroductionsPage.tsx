@@ -14,8 +14,8 @@ import {
   type IntroductionItem,
   type PartKey,
 } from '@hooks/introductions/useIntroductionsForm'
+import { ImageSection } from './ImageSection'
 import { IntroductionBannerSection } from './IntroductionBannerSection'
-import { IntroductionPartnerSection } from './IntroductionPartnerSection'
 
 const PART_FIELDS: { key: PartKey; label: string }[] = [
   { key: 'plan', label: '기획' },
@@ -58,6 +58,7 @@ interface CardListSectionProps {
   setItems: Dispatch<SetStateAction<IntroductionItem[]>>
   descriptionLabel?: string
   extraLabel?: string
+  allowMultipleImages?: boolean
 }
 
 function CardListSection({
@@ -67,6 +68,7 @@ function CardListSection({
   setItems,
   descriptionLabel,
   extraLabel,
+  allowMultipleImages,
 }: CardListSectionProps) {
   function updateItem(id: string, patch: Partial<IntroductionItem>) {
     setItems((prev) => prev.map((item) => (item.id === id ? { ...item, ...patch } : item)))
@@ -98,8 +100,18 @@ function CardListSection({
               revokeIfBlobUrl(item.thumbnailUrl)
               updateItem(item.id, { thumbnailUrl: URL.createObjectURL(file), thumbnailFile: file })
             }}
+            allowMultipleImages={allowMultipleImages}
+            thumbnailUrl2={item.thumbnailUrl2}
+            onThumbnailChange2={(file) => {
+              revokeIfBlobUrl(item.thumbnailUrl2)
+              updateItem(item.id, {
+                thumbnailUrl2: URL.createObjectURL(file),
+                thumbnailFile2: file,
+              })
+            }}
             onDelete={() => {
               revokeIfBlobUrl(item.thumbnailUrl)
+              revokeIfBlobUrl(item.thumbnailUrl2)
               setItems((prev) => prev.filter((existing) => existing.id !== item.id))
             }}
           />
@@ -143,6 +155,8 @@ export function IntroductionsPage() {
       <div className="flex flex-col gap-7 px-6 pt-6 pb-15">
         <IntroductionBannerSection
           cardinal={form.cardinal}
+          bannerStatus={form.bannerStatus}
+          onBannerStatusChange={form.setBannerStatus}
           slogan={form.slogan}
           onSloganChange={form.setSlogan}
           bannerImageUrl={form.bannerImageUrl}
@@ -185,6 +199,18 @@ export function IntroductionsPage() {
           </div>
         </IntroductionSection>
 
+        <IntroductionSection title="학회 소개 영상">
+          <FormField label="유튜브 링크">
+            <Inputfield
+              value={form.introYoutubeLink}
+              onChange={(event: ChangeEvent<HTMLInputElement>) => {
+                form.setIntroYoutubeLink(event.target.value)
+              }}
+              placeholder="유튜브 링크를 입력해주세요"
+            />
+          </FormField>
+        </IntroductionSection>
+
         <IntroductionSection title="파트별 소개">
           <div className="grid grid-cols-4 gap-4">
             {PART_FIELDS.map(({ key, label }) => (
@@ -204,17 +230,36 @@ export function IntroductionsPage() {
         </IntroductionSection>
 
         <CardListSection
-          title="큐시즘 활동 소개"
-          addLabel="큐시즘 활동 추가"
-          items={form.activities}
-          setItems={form.setActivities}
-        />
-
-        <CardListSection
           title="운영진 소개"
           addLabel="운영진 추가"
           items={form.teams}
           setItems={form.setTeams}
+        />
+
+        <CardListSection
+          title="큐시즘 활동 소개"
+          addLabel="큐시즘 활동 추가"
+          items={form.activities}
+          setItems={form.setActivities}
+          allowMultipleImages
+        />
+
+        <ImageSection
+          title="밋업 이미지"
+          addLabel="밋업 이미지 추가"
+          partners={form.meetupImages}
+          onReplace={form.onMeetupImageReplace}
+          onDelete={form.onMeetupImageDelete}
+          onAdd={form.onMeetupImageAdd}
+        />
+
+        <ImageSection
+          title="파트너사"
+          addLabel="파트너사 이미지 추가"
+          partners={form.partnerLogos}
+          onReplace={form.onPartnerLogoReplace}
+          onDelete={form.onPartnerLogoDelete}
+          onAdd={form.onPartnerLogoAdd}
         />
 
         <CardListSection
@@ -233,20 +278,13 @@ export function IntroductionsPage() {
           descriptionLabel="주제"
         />
 
-        <IntroductionPartnerSection
-          partners={form.partners}
-          onReplace={form.onPartnerReplace}
-          onDelete={form.onPartnerDelete}
-          onAdd={form.onPartnerAdd}
-        />
-
-        <IntroductionPartnerSection
-          title="밋업 이미지"
-          addLabel="밋업 이미지 추가"
-          partners={form.meetupImages}
-          onReplace={form.onMeetupImageReplace}
-          onDelete={form.onMeetupImageDelete}
-          onAdd={form.onMeetupImageAdd}
+        <ImageSection
+          title="후원사"
+          addLabel="후원사 추가"
+          partners={form.sponsors}
+          onReplace={form.onSponsorReplace}
+          onDelete={form.onSponsorDelete}
+          onAdd={form.onSponsorAdd}
         />
       </div>
     </div>

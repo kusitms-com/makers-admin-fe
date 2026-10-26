@@ -3,23 +3,23 @@ import { IntroductionSection } from '@components/introductions/IntroductionSecti
 import { PartnerImageBox } from '@components/introductions/PartnerImageBox'
 import type { PartnerLogo } from '@hooks/introductions/useIntroductionsForm'
 
-interface IntroductionPartnerSectionProps {
-  title?: string
-  addLabel?: string
+interface ImageSectionProps {
+  title: string
+  addLabel: string
   partners: PartnerLogo[]
   onReplace: (id: string, file: File) => void
   onDelete: (id: string) => void
   onAdd: () => void
 }
 
-export function IntroductionPartnerSection({
-  title = '후원사',
-  addLabel = '후원사 추가',
+export function ImageSection({
+  title,
+  addLabel,
   partners,
   onReplace,
   onDelete,
   onAdd,
-}: IntroductionPartnerSectionProps) {
+}: ImageSectionProps) {
   return (
     <IntroductionSection title={title}>
       <div className="flex flex-wrap gap-3">

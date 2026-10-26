@@ -98,4 +98,6 @@ activities[0].description=밋업데이는 ~입니다.
 
 - API 함수는 `src/api/introductions.ts`에 둔다.
 - query key는 `['admin', 'introductions']`를 우선한다. 수정은 `multipart/form-data`이고, 수정 이후 조회 query를 invalidate한다.
-- `IntroductionsPage` UI는 슬로건/배너 이미지, 회원·프로젝트·대학 수, 파트별 이미지 4종, 큐시즘 활동(이미지 1개만), 운영진, 파트너사 로고만 다룬다. `bannerStatus`, `introYoutubeLink`, `expertLecture`, `obLecture`, `meetupImages`, `activities[].imageFile2`는 편집 UI가 없다 — 위 "PUT은 배열 필드를 매번 전체 교체" 항목 참고.
+- `IntroductionsPage` UI는 `IntroRequest`의 모든 필드를 다룬다: 배너 상태(`bannerStatus`)/슬로건/배너 이미지, 회원·프로젝트·대학 수, 학회 소개 영상(`introYoutubeLink`), 파트별 이미지 4종, 운영진(`teams`), 큐시즘 활동(`activities`, 이미지 2개), 밋업 이미지, 파트너사 로고(`partnerLogoFiles`), 전문가/OB 강연자, 후원사 이미지(`sponsors`).
+- `partnerLogoFiles`(파트너사)와 `sponsors`(후원사)는 별도 필드이므로 UI에서도 별도 섹션(`ImageSection`)으로 분리해 바인딩한다.
+- GET 응답을 폼에 하이드레이션하는 로직은 아직 없다 — 저장 시 항상 폼의 현재 상태로 PUT을 보낸다. 위 "PUT은 배열 필드를 매번 전체 교체" 항목 참고.
