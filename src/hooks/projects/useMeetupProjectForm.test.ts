@@ -45,7 +45,7 @@ describe('meetupProjectFormResolver', () => {
 })
 
 describe('useMeetupProjectForm', () => {
-  it('resetAfterSave는 현재 posterUrl을 revoke하지 않는다', () => {
+  it('resetAfterSave는 현재 posterUrl도 revoke한다', () => {
     const revokeSpy = vi.spyOn(URL, 'revokeObjectURL')
     const { result } = renderHook(() => useMeetupProjectForm())
 
@@ -59,7 +59,7 @@ describe('useMeetupProjectForm', () => {
       result.current.resetAfterSave()
     })
 
-    expect(revokeSpy).not.toHaveBeenCalledWith(savedPosterUrl)
+    expect(revokeSpy).toHaveBeenCalledWith(savedPosterUrl)
   })
 
   it('reset(취소/재오픈)은 현재 posterUrl을 revoke한다', () => {
