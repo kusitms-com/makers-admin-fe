@@ -56,9 +56,18 @@ interface CardListSectionProps {
   addLabel: string
   items: IntroductionItem[]
   setItems: Dispatch<SetStateAction<IntroductionItem[]>>
+  descriptionLabel?: string
+  extraLabel?: string
 }
 
-function CardListSection({ title, addLabel, items, setItems }: CardListSectionProps) {
+function CardListSection({
+  title,
+  addLabel,
+  items,
+  setItems,
+  descriptionLabel,
+  extraLabel,
+}: CardListSectionProps) {
   function updateItem(id: string, patch: Partial<IntroductionItem>) {
     setItems((prev) => prev.map((item) => (item.id === id ? { ...item, ...patch } : item)))
   }
@@ -74,9 +83,15 @@ function CardListSection({ title, addLabel, items, setItems }: CardListSectionPr
             onTitleChange={(value) => {
               updateItem(item.id, { title: value })
             }}
+            descriptionLabel={descriptionLabel}
             description={item.description}
             onDescriptionChange={(value) => {
               updateItem(item.id, { description: value })
+            }}
+            extraLabel={extraLabel}
+            extraValue={item.extra}
+            onExtraChange={(value) => {
+              updateItem(item.id, { extra: value })
             }}
             thumbnailUrl={item.thumbnailUrl}
             onThumbnailChange={(file) => {
@@ -202,11 +217,36 @@ export function IntroductionsPage() {
           setItems={form.setTeams}
         />
 
+        <CardListSection
+          title="전문가 초청 강연자 소개"
+          addLabel="전문가 강연자 추가"
+          items={form.expertLecture}
+          setItems={form.setExpertLecture}
+          extraLabel="소속"
+        />
+
+        <CardListSection
+          title="OB 초청 강연자 소개"
+          addLabel="OB 강연자 추가"
+          items={form.obLecture}
+          setItems={form.setObLecture}
+          descriptionLabel="주제"
+        />
+
         <IntroductionPartnerSection
           partners={form.partners}
           onReplace={form.onPartnerReplace}
           onDelete={form.onPartnerDelete}
           onAdd={form.onPartnerAdd}
+        />
+
+        <IntroductionPartnerSection
+          title="밋업 이미지"
+          addLabel="밋업 이미지 추가"
+          partners={form.meetupImages}
+          onReplace={form.onMeetupImageReplace}
+          onDelete={form.onMeetupImageDelete}
+          onAdd={form.onMeetupImageAdd}
         />
       </div>
     </div>

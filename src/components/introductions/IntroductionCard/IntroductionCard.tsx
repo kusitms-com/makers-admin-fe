@@ -10,9 +10,14 @@ interface IntroductionCardProps {
   title?: string
   titlePlaceholder?: string
   onTitleChange?: (value: string) => void
+  descriptionLabel?: string
   description?: string
   descriptionPlaceholder?: string
   onDescriptionChange?: (value: string) => void
+  extraLabel?: string
+  extraValue?: string
+  extraPlaceholder?: string
+  onExtraChange?: (value: string) => void
   thumbnailUrl?: string
   onThumbnailChange?: (file: File) => void
   onDelete?: () => void
@@ -24,9 +29,14 @@ export function IntroductionCard({
   title,
   titlePlaceholder = '타이틀',
   onTitleChange,
+  descriptionLabel = '설명',
   description,
   descriptionPlaceholder = '설명을 입력해주세요',
   onDescriptionChange,
+  extraLabel,
+  extraValue,
+  extraPlaceholder,
+  onExtraChange,
   thumbnailUrl,
   onThumbnailChange,
   onDelete,
@@ -50,12 +60,26 @@ export function IntroductionCard({
         />
       </div>
       <div className="flex flex-1 flex-col gap-4 p-4">
+        {extraLabel && (
+          <div className="flex flex-col gap-2.5">
+            <span className="text-caption-12sb text-label-alternative">{extraLabel}</span>
+            <Inputfield
+              value={extraValue}
+              placeholder={extraPlaceholder}
+              aria-label={extraLabel}
+              onChange={(event: ChangeEvent<HTMLInputElement>) => {
+                onExtraChange?.(event.target.value)
+              }}
+              className="w-full"
+            />
+          </div>
+        )}
         <div className="flex flex-col gap-2.5">
-          <span className="text-caption-12sb text-label-alternative">설명</span>
+          <span className="text-caption-12sb text-label-alternative">{descriptionLabel}</span>
           <Inputfield
             value={description}
             placeholder={descriptionPlaceholder}
-            aria-label="설명"
+            aria-label={descriptionLabel}
             onChange={(event: ChangeEvent<HTMLInputElement>) => {
               onDescriptionChange?.(event.target.value)
             }}

@@ -4,6 +4,8 @@ import { PartnerImageBox } from '@components/introductions/PartnerImageBox'
 import type { PartnerLogo } from '@hooks/introductions/useIntroductionsForm'
 
 interface IntroductionPartnerSectionProps {
+  title?: string
+  addLabel?: string
   partners: PartnerLogo[]
   onReplace: (id: string, file: File) => void
   onDelete: (id: string) => void
@@ -11,13 +13,15 @@ interface IntroductionPartnerSectionProps {
 }
 
 export function IntroductionPartnerSection({
+  title = '후원사',
+  addLabel = '후원사 추가',
   partners,
   onReplace,
   onDelete,
   onAdd,
 }: IntroductionPartnerSectionProps) {
   return (
-    <IntroductionSection title="후원사">
+    <IntroductionSection title={title}>
       <div className="flex flex-wrap gap-3">
         {partners.map((partner) => (
           <PartnerImageBox
@@ -33,7 +37,7 @@ export function IntroductionPartnerSection({
         ))}
       </div>
       <div className="flex justify-center">
-        <AddCircleButton aria-label="후원사 추가" onClick={onAdd} />
+        <AddCircleButton aria-label={addLabel} onClick={onAdd} />
       </div>
     </IntroductionSection>
   )
