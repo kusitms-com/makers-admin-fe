@@ -1,7 +1,22 @@
 import { useEffect, useRef, useState } from 'react'
-import type { IntroductionItem, PartnerLogo } from '@pages/introductions/IntroductionsPage.mock'
+import type { IntroUpdateRequest } from '@api/introductions'
+import { useUpdateIntroductionMutation } from './useIntroductions'
 
 export type PartKey = 'plan' | 'design' | 'frontend' | 'backend'
+
+export interface IntroductionItem {
+  id: string
+  title: string
+  description: string
+  thumbnailUrl?: string
+  thumbnailFile?: File
+}
+
+export interface PartnerLogo {
+  id: string
+  imageUrl?: string
+  imageFile?: File
+}
 
 export function revokeIfBlobUrl(url: string | undefined) {
   if (url?.startsWith('blob:')) {
@@ -9,21 +24,21 @@ export function revokeIfBlobUrl(url: string | undefined) {
   }
 }
 
-interface UseIntroductionsFormOptions {
-  cardinal: number
-  initialActivities: IntroductionItem[]
-  initialTeams: IntroductionItem[]
-  initialPartners: PartnerLogo[]
+// 기수 선택 소스가 생기기 전까지 현재 활동 기수를 고정값으로 둔다.
+const CURRENT_GENERATION = 33
+
+function toOptionalCount(value: string): number | undefined {
+  if (value === '') return undefined
+  const parsed = Number(value)
+  return Number.isNaN(parsed) ? undefined : parsed
 }
 
-export function useIntroductionsForm({
-  cardinal,
-  initialActivities,
-  initialTeams,
-  initialPartners,
-}: UseIntroductionsFormOptions) {
+export function useIntroductionsForm() {
+  const updateMutation = useUpdateIntroductionMutation()
+
   const [slogan, setSlogan] = useState('')
   const [bannerImageUrl, setBannerImageUrl] = useState<string | undefined>()
+  const [bannerImageFile, setBannerImageFile] = useState<File | undefined>()
   const [memberCount, setMemberCount] = useState('')
   const [projectCount, setProjectCount] = useState('')
   const [universityCount, setUniversityCount] = useState('')
@@ -34,10 +49,16 @@ export function useIntroductionsForm({
     frontend: undefined,
     backend: undefined,
   })
+  const [partImageFiles, setPartImageFiles] = useState<Record<PartKey, File | undefined>>({
+    plan: undefined,
+    design: undefined,
+    frontend: undefined,
+    backend: undefined,
+  })
 
-  const [activities, setActivities] = useState<IntroductionItem[]>(initialActivities)
-  const [teams, setTeams] = useState<IntroductionItem[]>(initialTeams)
-  const [partners, setPartners] = useState<PartnerLogo[]>(initialPartners)
+  const [activities, setActivities] = useState<IntroductionItem[]>([])
+  const [teams, setTeams] = useState<IntroductionItem[]>([])
+  const [partners, setPartners] = useState<PartnerLogo[]>([])
 
   const formSnapshot = JSON.stringify({
     slogan,
@@ -46,9 +67,19 @@ export function useIntroductionsForm({
     projectCount,
     universityCount,
     partImages,
-    activities,
-    teams,
-    partners,
+    activities: activities.map(({ id, title, description, thumbnailUrl }) => ({
+      id,
+      title,
+      description,
+      thumbnailUrl,
+    })),
+    teams: teams.map(({ id, title, description, thumbnailUrl }) => ({
+      id,
+      title,
+      description,
+      thumbnailUrl,
+    })),
+    partners: partners.map(({ id, imageUrl }) => ({ id, imageUrl })),
   })
   const [pristineSnapshot, setPristineSnapshot] = useState(formSnapshot)
   const isDirty = formSnapshot !== pristineSnapshot
@@ -75,7 +106,41 @@ export function useIntroductionsForm({
     }
   }, [])
 
-  function handleSave() {
+  function buildPayload(): IntroUpdateRequest {
+    const payload: IntroUpdateRequest = { bannerCardinal: CURRENT_GENERATION }
+
+    if (slogan) payload.slogan = slogan
+    if (bannerImageFile) payload.bannerImageFile = bannerImageFile
+    const memberCountValue = toOptionalCount(memberCount)
+    if (memberCountValue !== undefined) payload.memberCount = memberCountValue
+    const projectCountValue = toOptionalCount(projectCount)
+    if (projectCountValue !== undefined) payload.projectCount = projectCountValue
+    const universityCountValue = toOptionalCount(universityCount)
+    if (universityCountValue !== undefined) payload.universityCount = universityCountValue
+    if (partImageFiles.plan) payload.planningImage = partImageFiles.plan
+    if (partImageFiles.design) payload.designImage = partImageFiles.design
+    if (partImageFiles.frontend) payload.frontendImage = partImageFiles.frontend
+    if (partImageFiles.backend) payload.backendImage = partImageFiles.backend
+
+    payload.teams = teams.map((item) => ({
+      name: item.title,
+      description: item.description,
+      imageFile: item.thumbnailFile,
+    }))
+    payload.activities = activities.map((item) => ({
+      name: item.title,
+      description: item.description,
+      imageFile1: item.thumbnailFile,
+    }))
+    payload.partnerLogoFiles = partners
+      .map((partner) => partner.imageFile)
+      .filter((file): file is File => file !== undefined)
+
+    return payload
+  }
+
+  async function handleSave() {
+    await updateMutation.mutateAsync(buildPayload())
     setPristineSnapshot(formSnapshot)
   }
 
@@ -84,6 +149,7 @@ export function useIntroductionsForm({
       revokeIfBlobUrl(prev)
       return URL.createObjectURL(file)
     })
+    setBannerImageFile(file)
   }
 
   function onBannerImageDelete() {
@@ -91,6 +157,7 @@ export function useIntroductionsForm({
       revokeIfBlobUrl(prev)
       return undefined
     })
+    setBannerImageFile(undefined)
   }
 
   function onPartImageChange(key: PartKey, file: File) {
@@ -98,6 +165,7 @@ export function useIntroductionsForm({
       revokeIfBlobUrl(prev[key])
       return { ...prev, [key]: URL.createObjectURL(file) }
     })
+    setPartImageFiles((prev) => ({ ...prev, [key]: file }))
   }
 
   function onPartImageDelete(key: PartKey) {
@@ -105,6 +173,7 @@ export function useIntroductionsForm({
       revokeIfBlobUrl(prev[key])
       return { ...prev, [key]: undefined }
     })
+    setPartImageFiles((prev) => ({ ...prev, [key]: undefined }))
   }
 
   function onPartnerAdd() {
@@ -116,7 +185,7 @@ export function useIntroductionsForm({
       prev.map((partner) => {
         if (partner.id !== id) return partner
         revokeIfBlobUrl(partner.imageUrl)
-        return { ...partner, imageUrl: URL.createObjectURL(file) }
+        return { ...partner, imageUrl: URL.createObjectURL(file), imageFile: file }
       }),
     )
   }
@@ -129,7 +198,7 @@ export function useIntroductionsForm({
   }
 
   return {
-    cardinal,
+    cardinal: CURRENT_GENERATION,
     slogan,
     setSlogan,
     bannerImageUrl,
@@ -153,9 +222,9 @@ export function useIntroductionsForm({
     onPartnerReplace,
     onPartnerDelete,
     isDirty,
+    isSaving: updateMutation.isPending,
     handleSave,
   }
 }
 
-export type { IntroductionItem, PartnerLogo } from '@pages/introductions/IntroductionsPage.mock'
 export type UseIntroductionsFormResult = ReturnType<typeof useIntroductionsForm>

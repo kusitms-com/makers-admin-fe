@@ -7,6 +7,7 @@ import { IntroductionSection } from '@components/introductions/IntroductionSecti
 import { PageHeader } from '@components/common/PageHeader'
 import { PartImageCard } from '@components/introductions/PartImageCard'
 import { useImageFileInput } from '@hooks/common/useImageFileInput'
+import { useToast } from '@hooks/common/useToast'
 import {
   revokeIfBlobUrl,
   useIntroductionsForm,
@@ -15,12 +16,6 @@ import {
 } from '@hooks/introductions/useIntroductionsForm'
 import { IntroductionBannerSection } from './IntroductionBannerSection'
 import { IntroductionPartnerSection } from './IntroductionPartnerSection'
-import {
-  CURRENT_GENERATION,
-  INITIAL_ACTIVITIES,
-  INITIAL_PARTNERS,
-  INITIAL_TEAMS,
-} from './IntroductionsPage.mock'
 
 const PART_FIELDS: { key: PartKey; label: string }[] = [
   { key: 'plan', label: '기획' },
@@ -86,7 +81,7 @@ function CardListSection({ title, addLabel, items, setItems }: CardListSectionPr
             thumbnailUrl={item.thumbnailUrl}
             onThumbnailChange={(file) => {
               revokeIfBlobUrl(item.thumbnailUrl)
-              updateItem(item.id, { thumbnailUrl: URL.createObjectURL(file) })
+              updateItem(item.id, { thumbnailUrl: URL.createObjectURL(file), thumbnailFile: file })
             }}
             onDelete={() => {
               revokeIfBlobUrl(item.thumbnailUrl)
@@ -108,20 +103,26 @@ function CardListSection({ title, addLabel, items, setItems }: CardListSectionPr
 }
 
 export function IntroductionsPage() {
-  const form = useIntroductionsForm({
-    cardinal: CURRENT_GENERATION,
-    initialActivities: INITIAL_ACTIVITIES,
-    initialTeams: INITIAL_TEAMS,
-    initialPartners: INITIAL_PARTNERS,
-  })
+  const form = useIntroductionsForm()
+  const addToast = useToast()
+
+  function handleSave() {
+    void form.handleSave().catch((error: unknown) => {
+      if (error instanceof Error) {
+        addToast({ type: 'error', message: '저장하지 못했습니다. 다시 시도해주세요.' })
+        return
+      }
+      throw error
+    })
+  }
 
   return (
     <div className="flex min-h-screen flex-col">
       <PageHeader
         title="학회 소개"
         actionLabel="저장하기"
-        actionDisabled={!form.isDirty}
-        onAction={form.handleSave}
+        actionDisabled={!form.isDirty || form.isSaving}
+        onAction={handleSave}
       />
 
       <div className="flex flex-col gap-7 px-6 pt-6 pb-15">
