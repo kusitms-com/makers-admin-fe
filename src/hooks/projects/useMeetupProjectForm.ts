@@ -174,9 +174,10 @@ export function useMeetupProjectForm() {
     reset(createDefaultValues())
   }
 
-  // 저장 성공 후에는 posterUrl 소유권이 저장된 카드로 넘어가므로 revoke하지 않는다.
-  // 로고는 카드에 표시되지 않으므로 그대로 revoke한다.
+  // 저장 성공 후 카드 목록은 서버 응답의 poster_url로 다시 렌더링되므로
+  // 폼이 만든 posterUrl/logoUrl blob은 둘 다 그대로 revoke한다.
   function resetAfterSave() {
+    revokeIfBlobUrl(values.posterUrl)
     revokeIfBlobUrl(values.logoUrl)
     setPosterFile(undefined)
     setLogoFile(undefined)
