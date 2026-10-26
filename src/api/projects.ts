@@ -134,3 +134,39 @@ export function deleteMeetupProject(
     z.unknown(),
   )
 }
+
+export interface CorporateProjectCreateRequest {
+  cardinal: number
+  name: string
+  content: string
+  logoFile: File
+  bannerFile: File
+}
+
+function buildCorporateFormData(request: CorporateProjectCreateRequest): FormData {
+  const formData = new FormData()
+
+  formData.append('cardinal', String(request.cardinal))
+  formData.append('name', request.name)
+  formData.append('content', request.content)
+  formData.append('logoFile', request.logoFile)
+  formData.append('bannerFile', request.bannerFile)
+
+  return formData
+}
+
+export function createCorporateProject(
+  request: CorporateProjectCreateRequest,
+  { accessToken, refreshAccessToken }: RequestContext,
+): Promise<unknown> {
+  return apiRequest(
+    {
+      method: 'POST',
+      path: '/admin/projects/corporate',
+      body: buildCorporateFormData(request),
+      accessToken,
+      refreshAccessToken,
+    },
+    z.unknown(),
+  )
+}

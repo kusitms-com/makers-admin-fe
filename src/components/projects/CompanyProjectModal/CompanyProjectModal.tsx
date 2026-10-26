@@ -14,6 +14,9 @@ interface CompanyProjectModalProps {
   onNameChange: (value: string) => void
   content: string
   onContentChange: (value: string) => void
+  logoUrl?: string
+  onLogoChange?: (file: File) => void
+  onLogoDelete?: () => void
   bannerUrl?: string
   onBannerChange?: (file: File) => void
   onBannerDelete?: () => void
@@ -31,6 +34,9 @@ export function CompanyProjectModal({
   onNameChange,
   content,
   onContentChange,
+  logoUrl,
+  onLogoChange,
+  onLogoDelete,
   bannerUrl,
   onBannerChange,
   onBannerDelete,
@@ -67,6 +73,9 @@ export function CompanyProjectModal({
           }}
           placeholder="프로젝트 소개를 입력해주세요"
         />
+      </FormField>
+      <FormField label="로고 이미지">
+        <ImageUploadBox imageUrl={logoUrl} onFileChange={onLogoChange} onDelete={onLogoDelete} />
       </FormField>
       <FormField label="배너">
         <ImageUploadBox

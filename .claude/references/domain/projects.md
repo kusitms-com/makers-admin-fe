@@ -18,13 +18,17 @@
 src/pages/projects/
   MeetupProjectsPage.tsx      # 밋업 프로젝트 관리 페이지 (목록 조회/등록 API 연동 완료)
   MeetupProjectsPage.mock.ts
-  # 기업 프로젝트 관리 화면은 미구현, 구현 시 CorporateProjectsPage.tsx로 생성
+  CompanyProjectsPage.tsx     # 기업 프로젝트 관리 페이지 (등록 API 연동 완료, 목록 조회/삭제는 mock)
+  CompanyProjectsPage.mock.ts
 
 src/hooks/projects/
   useMeetupProjectForm.ts     # 밋업 프로젝트 등록 폼 상태 (RHF + Zod)
   useMeetupProjects.ts        # 밋업 프로젝트 목록 조회/등록 TanStack Query 훅
+  useCompanyProjectForm.ts    # 기업 프로젝트 등록 폼 상태 (RHF + Zod)
+  useCompanyProjects.ts       # 기업 프로젝트 등록 TanStack Query 훅
 
-src/api/projects.ts            # 밋업 프로젝트 목록 조회(GET)/등록(POST) 구현, 기업 프로젝트와 수정/삭제는 미구현
+src/api/projects.ts            # 밋업 프로젝트 목록 조회(GET)/등록(POST), 기업 프로젝트 등록(POST) 구현
+                                # 기업 프로젝트 목록 조회/수정/삭제는 미구현
 ```
 
 ## 주요 액션

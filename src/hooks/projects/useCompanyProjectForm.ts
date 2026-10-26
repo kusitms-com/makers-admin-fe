@@ -1,10 +1,11 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useForm, type Resolver } from 'react-hook-form'
 import { z } from 'zod'
 
 const companyProjectFormSchema = z.object({
   name: z.string().min(1),
   content: z.string().min(1),
+  logoUrl: z.string().min(1),
   bannerUrl: z.string().min(1),
 })
 
@@ -29,7 +30,7 @@ const companyProjectFormResolver: Resolver<CompanyProjectFormValues> = (values) 
 }
 
 function createDefaultValues(): CompanyProjectFormValues {
-  return { name: '', content: '', bannerUrl: '' }
+  return { name: '', content: '', logoUrl: '', bannerUrl: '' }
 }
 
 function revokeIfBlobUrl(url: string | undefined) {
@@ -49,12 +50,19 @@ export function useCompanyProjectForm() {
 
   const values = watch()
 
+  // logoUrl/bannerUrl은 미리보기용 blob URL일 뿐이라 업로드에 쓸 원본 File은 별도로 보관한다.
+  const [logoFile, setLogoFile] = useState<File | undefined>()
+  const [bannerFile, setBannerFile] = useState<File | undefined>()
+
+  const latestLogoUrlRef = useRef(values.logoUrl)
   const latestBannerUrlRef = useRef(values.bannerUrl)
   useEffect(() => {
+    latestLogoUrlRef.current = values.logoUrl
     latestBannerUrlRef.current = values.bannerUrl
-  }, [values.bannerUrl])
+  }, [values.logoUrl, values.bannerUrl])
   useEffect(() => {
     return () => {
+      revokeIfBlobUrl(latestLogoUrlRef.current)
       revokeIfBlobUrl(latestBannerUrlRef.current)
     }
   }, [])
@@ -63,23 +71,44 @@ export function useCompanyProjectForm() {
     setValue(key, value, { shouldValidate: true })
   }
 
+  function onLogoChange(file: File) {
+    revokeIfBlobUrl(values.logoUrl)
+    setStringField('logoUrl', URL.createObjectURL(file))
+    setLogoFile(file)
+  }
+
+  function onLogoDelete() {
+    revokeIfBlobUrl(values.logoUrl)
+    setStringField('logoUrl', '')
+    setLogoFile(undefined)
+  }
+
   function onBannerChange(file: File) {
     revokeIfBlobUrl(values.bannerUrl)
     setStringField('bannerUrl', URL.createObjectURL(file))
+    setBannerFile(file)
   }
 
   function onBannerDelete() {
     revokeIfBlobUrl(values.bannerUrl)
     setStringField('bannerUrl', '')
+    setBannerFile(undefined)
   }
 
   function resetForm() {
+    revokeIfBlobUrl(values.logoUrl)
     revokeIfBlobUrl(values.bannerUrl)
+    setLogoFile(undefined)
+    setBannerFile(undefined)
     reset(createDefaultValues())
   }
 
   // 저장 성공 후에는 bannerUrl 소유권이 저장된 카드로 넘어가므로 revoke 없이 폼만 비운다.
+  // 로고는 카드에 표시되지 않으므로 그대로 revoke한다.
   function resetAfterSave() {
+    revokeIfBlobUrl(values.logoUrl)
+    setLogoFile(undefined)
+    setBannerFile(undefined)
     reset(createDefaultValues())
   }
 
@@ -92,7 +121,12 @@ export function useCompanyProjectForm() {
     setContent: (value: string) => {
       setStringField('content', value)
     },
+    logoUrl: values.logoUrl || undefined,
+    logoFile,
+    onLogoChange,
+    onLogoDelete,
     bannerUrl: values.bannerUrl || undefined,
+    bannerFile,
     onBannerChange,
     onBannerDelete,
     isValid: formState.isValid,

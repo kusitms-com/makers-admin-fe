@@ -1,12 +1,33 @@
-import { render, screen, within } from '@testing-library/react'
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import { render, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { describe, expect, it, vi } from 'vitest'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { useAuthStore } from '@hooks/auth/useAuth'
 import { CompanyProjectsPage } from './CompanyProjectsPage'
 
+vi.mock('@api/projects', () => ({
+  createCorporateProject: vi.fn().mockResolvedValue(undefined),
+}))
+
+function renderPage() {
+  const queryClient = new QueryClient({ defaultOptions: { mutations: { retry: false } } })
+  return render(
+    <QueryClientProvider client={queryClient}>
+      <CompanyProjectsPage />
+    </QueryClientProvider>,
+  )
+}
+
 describe('CompanyProjectsPage', () => {
+  beforeEach(() => {
+    useAuthStore.setState({
+      session: { status: 'authenticated', accessToken: 'test-token', authority: 'MANAGER' },
+    })
+  })
+
   it('기수 필터를 선택하면 해당 기수 프로젝트만 보여준다', async () => {
     const user = userEvent.setup()
-    render(<CompanyProjectsPage />)
+    renderPage()
 
     expect(screen.getByText('큐시즘 파트너스')).toBeTruthy()
     expect(screen.queryByText('브릿지웍스')).toBeFalsy()
@@ -19,7 +40,7 @@ describe('CompanyProjectsPage', () => {
 
   it('필수 필드를 모두 채우기 전에는 저장 버튼이 비활성화된다', async () => {
     const user = userEvent.setup()
-    render(<CompanyProjectsPage />)
+    renderPage()
 
     await user.click(screen.getByRole('button', { name: '추가하기' }))
 
@@ -31,7 +52,7 @@ describe('CompanyProjectsPage', () => {
 
   it('필수 필드를 채우면 저장 버튼이 활성화되고, 저장하면 목록에 추가된다', async () => {
     const user = userEvent.setup()
-    render(<CompanyProjectsPage />)
+    renderPage()
 
     await user.click(screen.getByRole('button', { name: '추가하기' }))
     const dialog = screen.getByRole('dialog')
@@ -42,23 +63,29 @@ describe('CompanyProjectsPage', () => {
       '프로젝트 소개',
     )
 
-    const fileInput = dialog.querySelector<HTMLInputElement>('input[type="file"]')
-    if (!fileInput) throw new Error('배너 업로드 input을 찾을 수 없습니다')
+    const logoField = within(dialog).getByText('로고 이미지').closest('div')
+    const bannerField = within(dialog).getByText('배너').closest('div')
+    if (!logoField || !bannerField) throw new Error('이미지 필드를 찾을 수 없습니다')
+
+    const logoFile = new File(['logo'], 'logo.png', { type: 'image/png' })
+    await user.upload(within(logoField).getByLabelText('파일 선택'), logoFile)
     const bannerFile = new File(['banner'], 'banner.png', { type: 'image/png' })
-    await user.upload(fileInput, bannerFile)
+    await user.upload(within(bannerField).getByLabelText('파일 선택'), bannerFile)
 
     const saveButton = within(dialog).getByRole<HTMLButtonElement>('button', { name: '저장하기' })
     expect(saveButton.disabled).toBe(false)
 
     await user.click(saveButton)
 
-    expect(screen.queryByRole('dialog')).toBeFalsy()
+    await waitFor(() => {
+      expect(screen.queryByRole('dialog')).toBeFalsy()
+    })
     expect(screen.getByText('테스트 기업')).toBeTruthy()
   })
 
   it('취소를 누르면 모달이 닫히고 목록이 바뀌지 않는다', async () => {
     const user = userEvent.setup()
-    render(<CompanyProjectsPage />)
+    renderPage()
 
     await user.click(screen.getByRole('button', { name: '추가하기' }))
     const dialog = screen.getByRole('dialog')
@@ -74,15 +101,15 @@ describe('CompanyProjectsPage', () => {
   it('배너를 업로드한 뒤 취소하면 사용하던 banner blob URL을 해제한다', async () => {
     const revokeSpy = vi.spyOn(URL, 'revokeObjectURL')
     const user = userEvent.setup()
-    render(<CompanyProjectsPage />)
+    renderPage()
 
     await user.click(screen.getByRole('button', { name: '추가하기' }))
     const dialog = screen.getByRole('dialog')
 
-    const fileInput = dialog.querySelector<HTMLInputElement>('input[type="file"]')
-    if (!fileInput) throw new Error('배너 업로드 input을 찾을 수 없습니다')
+    const bannerField = within(dialog).getByText('배너').closest('div')
+    if (!bannerField) throw new Error('배너 필드를 찾을 수 없습니다')
     const bannerFile = new File(['banner'], 'banner.png', { type: 'image/png' })
-    await user.upload(fileInput, bannerFile)
+    await user.upload(within(bannerField).getByLabelText('파일 선택'), bannerFile)
 
     revokeSpy.mockClear()
     await user.click(within(dialog).getByRole('button', { name: '취소하기' }))
@@ -92,7 +119,7 @@ describe('CompanyProjectsPage', () => {
 
   it('기수의 마지막 프로젝트를 삭제하면 empty state 문구가 보인다', async () => {
     const user = userEvent.setup()
-    render(<CompanyProjectsPage />)
+    renderPage()
 
     await user.click(screen.getByRole('tab', { name: '31기' }))
     expect(screen.getByText('브릿지웍스')).toBeTruthy()
@@ -107,7 +134,7 @@ describe('CompanyProjectsPage', () => {
   it('저장 후 삭제하면 카드가 사용하던 banner blob URL을 해제한다', async () => {
     const revokeSpy = vi.spyOn(URL, 'revokeObjectURL')
     const user = userEvent.setup()
-    render(<CompanyProjectsPage />)
+    renderPage()
 
     await user.click(screen.getByRole('button', { name: '추가하기' }))
     const dialog = screen.getByRole('dialog')
@@ -118,13 +145,17 @@ describe('CompanyProjectsPage', () => {
       '프로젝트 소개',
     )
 
-    const fileInput = dialog.querySelector<HTMLInputElement>('input[type="file"]')
-    if (!fileInput) throw new Error('배너 업로드 input을 찾을 수 없습니다')
+    const logoField = within(dialog).getByText('로고 이미지').closest('div')
+    const bannerField = within(dialog).getByText('배너').closest('div')
+    if (!logoField || !bannerField) throw new Error('이미지 필드를 찾을 수 없습니다')
+
+    const logoFile = new File(['logo'], 'logo.png', { type: 'image/png' })
+    await user.upload(within(logoField).getByLabelText('파일 선택'), logoFile)
     const bannerFile = new File(['banner'], 'banner.png', { type: 'image/png' })
-    await user.upload(fileInput, bannerFile)
+    await user.upload(within(bannerField).getByLabelText('파일 선택'), bannerFile)
 
     await user.click(within(dialog).getByRole<HTMLButtonElement>('button', { name: '저장하기' }))
-    expect(screen.getByText('삭제될 기업')).toBeTruthy()
+    expect(await screen.findByText('삭제될 기업')).toBeTruthy()
 
     revokeSpy.mockClear()
     const card = screen.getByRole('group', { name: '삭제될 기업' })

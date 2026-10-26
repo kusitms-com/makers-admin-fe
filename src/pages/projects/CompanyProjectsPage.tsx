@@ -1,10 +1,13 @@
 import { useEffect, useRef, useState } from 'react'
+import type { CorporateProjectCreateRequest } from '@api/projects'
 import { Button } from '@components/common/Button'
 import { PageHeader } from '@components/common/PageHeader'
 import { SegmentedControl } from '@components/common/SegmentedControl'
 import { CompanyProjectModal } from '@components/projects/CompanyProjectModal'
 import { ProjectThumbnailCard } from '@components/projects/ProjectThumbnailCard'
+import { useToast } from '@hooks/common/useToast'
 import { useCompanyProjectForm } from '@hooks/projects/useCompanyProjectForm'
+import { useCreateCompanyProjectMutation } from '@hooks/projects/useCompanyProjects'
 import {
   COHORT_OPTIONS,
   CURRENT_GENERATION,
@@ -24,6 +27,8 @@ export function CompanyProjectsPage() {
   const [modalOpen, setModalOpen] = useState(false)
 
   const form = useCompanyProjectForm()
+  const addToast = useToast()
+  const createMutation = useCreateCompanyProjectMutation()
 
   const latestProjectsRef = useRef(projects)
   useEffect(() => {
@@ -46,18 +51,37 @@ export function CompanyProjectsPage() {
 
   function handleSave() {
     void form.handleSubmit((values) => {
-      setProjects((prev) => [
-        ...prev,
-        {
-          id: crypto.randomUUID(),
-          cardinal: CURRENT_GENERATION,
-          serviceName: values.name,
-          content: values.content,
-          imageUrl: values.bannerUrl,
+      // zod 검증(logoUrl/bannerUrl 필수)을 통과했다면 onLogoChange/onBannerChange에서
+      // 항상 같이 설정되므로 logoFile/bannerFile도 존재한다.
+      if (!form.logoFile || !form.bannerFile) return
+
+      const request: CorporateProjectCreateRequest = {
+        cardinal: CURRENT_GENERATION,
+        name: values.name,
+        content: values.content,
+        logoFile: form.logoFile,
+        bannerFile: form.bannerFile,
+      }
+
+      createMutation.mutate(request, {
+        onSuccess: () => {
+          setProjects((prev) => [
+            ...prev,
+            {
+              id: crypto.randomUUID(),
+              cardinal: CURRENT_GENERATION,
+              serviceName: values.name,
+              content: values.content,
+              imageUrl: values.bannerUrl,
+            },
+          ])
+          form.resetAfterSave()
+          setModalOpen(false)
         },
-      ])
-      form.resetAfterSave()
-      setModalOpen(false)
+        onError: () => {
+          addToast({ type: 'error', message: '저장하지 못했습니다. 다시 시도해주세요.' })
+        },
+      })
     })()
   }
 
@@ -120,12 +144,15 @@ export function CompanyProjectsPage() {
         onNameChange={form.setName}
         content={form.content}
         onContentChange={form.setContent}
+        logoUrl={form.logoUrl}
+        onLogoChange={form.onLogoChange}
+        onLogoDelete={form.onLogoDelete}
         bannerUrl={form.bannerUrl}
         onBannerChange={form.onBannerChange}
         onBannerDelete={form.onBannerDelete}
         onCancel={closeModal}
         onSave={handleSave}
-        saveDisabled={!form.isValid}
+        saveDisabled={!form.isValid || createMutation.isPending}
       />
     </div>
   )
