@@ -34,7 +34,7 @@ public String uploadFile(MultipartFile multipartFile, String dirName) {
 
 ## 왜 지금 우리 코드에서 고치면 안 되는지
 
-S3 버킷명/리전(`cloud.aws.s3.bucket`)은 백엔드 환경 변수로만 주입되고(`application.yml`/레포에 커밋돼 있지 않음) Swagger 스키마 응답 필드 자체에는 노출되지 않는다. 다만 백엔드 레포의 `OBLectureResponse`/`ExpertLectureResponse`/`ManagementTeamResponse`의 Swagger `@Schema(example = ...)` 값과 `MailService.java`에 하드코딩된 상수에서 실제 버킷 도메인(`https://kusitms-bucket.s3.ap-northeast-2.amazonaws.com`)을 확인했고, 응답 key를 이 도메인 뒤에 붙여 `curl`로 200을 확인했다(2026-10-26). 그래서 "근본 해결"은 여전히 백엔드가 완전한 URL을 반환하는 것이지만, 프론트에서 이 도메인을 상수로 하드코딩해 당장 우회하는 것도 가능하다 — `src/hooks/introductions/useIntroductionsForm.ts`의 `toAbsoluteImageUrl()` 참고(`ponytail:` 주석으로 표시).
+S3 버킷명/리전(`cloud.aws.s3.bucket`)은 백엔드 환경 변수로만 주입되고(`application.yml`/레포에 커밋돼 있지 않음) Swagger 스키마 응답 필드 자체에는 노출되지 않는다. 다만 백엔드 레포의 `OBLectureResponse`/`ExpertLectureResponse`/`ManagementTeamResponse`의 Swagger `@Schema(example = ...)` 값과 `MailService.java`에 하드코딩된 상수에서 실제 버킷 도메인(`https://kusitms-bucket.s3.ap-northeast-2.amazonaws.com`)을 확인했고, 응답 key를 이 도메인 뒤에 붙여 `curl`로 200을 확인했다(2026-10-26). 그래서 "근본 해결"은 여전히 백엔드가 완전한 URL을 반환하는 것이지만, 프론트에서 이 도메인을 상수로 하드코딩해 당장 우회하는 것도 가능하다 — `src/lib/s3.ts`의 `toAbsoluteS3Url()` 참고(`ponytail:` 주석으로 표시). 이 함수는 `src/hooks/introductions/useIntroductionsForm.ts`뿐 아니라 `src/pages/projects/MeetupProjectsPage.tsx`, `src/pages/projects/CompanyProjectsPage.tsx`에서도 공유해서 쓴다.
 
 ## 언제/누가 해결해야 하는지
 
