@@ -119,3 +119,18 @@ export function createMeetupProject(
     z.unknown(),
   )
 }
+
+export function deleteMeetupProject(
+  id: number,
+  { accessToken, refreshAccessToken }: RequestContext,
+): Promise<unknown> {
+  return apiRequest(
+    {
+      method: 'DELETE',
+      path: `/admin/projects/meetup/${String(id)}`,
+      accessToken,
+      refreshAccessToken,
+    },
+    z.unknown(),
+  )
+}

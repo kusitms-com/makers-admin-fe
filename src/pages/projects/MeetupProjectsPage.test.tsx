@@ -5,34 +5,44 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { useAuthStore } from '@hooks/auth/useAuth'
 import { MeetupProjectsPage } from './MeetupProjectsPage'
 
+const INITIAL_MEETUP_ITEMS = [
+  { meetup_id: 1, cardinal: 33, name: '큐첵' },
+  { meetup_id: 2, cardinal: 33, name: '모여봐요 스터디숲' },
+  { meetup_id: 3, cardinal: 33, name: '오늘의 큐레이션' },
+  { meetup_id: 4, cardinal: 33, name: '핏플랜' },
+  { meetup_id: 5, cardinal: 32, name: '북적북적' },
+  { meetup_id: 6, cardinal: 32, name: '루틴메이트' },
+  { meetup_id: 7, cardinal: 31, name: '모먼트' },
+  { meetup_id: 8, cardinal: 30, name: '컬러링북' },
+].map((item) => ({
+  cardinal: item.cardinal,
+  name: item.name,
+  meetup_id: item.meetup_id,
+  one_line_intro: '한 줄 소개',
+  logo_url: null,
+  poster_url: null,
+  web_thumbnail_url: null,
+  behance_url: null,
+  instagram_url: null,
+  github_url: null,
+  app_url: null,
+  tags: null,
+}))
+
+const meetupList = [...INITIAL_MEETUP_ITEMS]
+
 vi.mock('@api/projects', () => ({
-  getMeetupProjects: vi.fn().mockResolvedValue({
-    meetup_count: 8,
-    meetup_list: [
-      { meetup_id: 1, cardinal: 33, name: '큐첵' },
-      { meetup_id: 2, cardinal: 33, name: '모여봐요 스터디숲' },
-      { meetup_id: 3, cardinal: 33, name: '오늘의 큐레이션' },
-      { meetup_id: 4, cardinal: 33, name: '핏플랜' },
-      { meetup_id: 5, cardinal: 32, name: '북적북적' },
-      { meetup_id: 6, cardinal: 32, name: '루틴메이트' },
-      { meetup_id: 7, cardinal: 31, name: '모먼트' },
-      { meetup_id: 8, cardinal: 30, name: '컬러링북' },
-    ].map((item) => ({
-      cardinal: item.cardinal,
-      name: item.name,
-      meetup_id: item.meetup_id,
-      one_line_intro: '한 줄 소개',
-      logo_url: null,
-      poster_url: null,
-      web_thumbnail_url: null,
-      behance_url: null,
-      instagram_url: null,
-      github_url: null,
-      app_url: null,
-      tags: null,
-    })),
-  }),
+  getMeetupProjects: vi
+    .fn()
+    .mockImplementation(() =>
+      Promise.resolve({ meetup_count: meetupList.length, meetup_list: meetupList }),
+    ),
   createMeetupProject: vi.fn().mockResolvedValue(undefined),
+  deleteMeetupProject: vi.fn().mockImplementation((id: number) => {
+    const index = meetupList.findIndex((item) => item.meetup_id === id)
+    if (index !== -1) meetupList.splice(index, 1)
+    return Promise.resolve(undefined)
+  }),
 }))
 
 function renderPage() {
@@ -46,6 +56,7 @@ function renderPage() {
 
 describe('MeetupProjectsPage', () => {
   beforeEach(() => {
+    meetupList.splice(0, meetupList.length, ...INITIAL_MEETUP_ITEMS)
     useAuthStore.setState({
       session: { status: 'authenticated', accessToken: 'test-token', authority: 'MANAGER' },
     })
@@ -164,7 +175,9 @@ describe('MeetupProjectsPage', () => {
     await user.hover(screen.getByText('모먼트'))
     await user.click(screen.getByRole('button', { name: '삭제하기' }))
 
-    expect(screen.queryByText('모먼트')).toBeFalsy()
+    await waitFor(() => {
+      expect(screen.queryByText('모먼트')).toBeFalsy()
+    })
     expect(screen.getByText('등록된 프로젝트가 없습니다')).toBeTruthy()
   })
 })
