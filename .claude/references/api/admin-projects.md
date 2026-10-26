@@ -37,7 +37,8 @@ Swagger 출처: `.env`의 `VITE_API_BASE_URL` + `/api-docs/json`
 - `type`은 `ProjectType` enum(`APP`/`WEB`/`CHROME_EXTENSION`)입니다. 커스텀 컨버터가 없어 Spring 기본 enum 바인딩(대소문자 구분, 상수명과 정확히 일치)을 그대로 씁니다 — `app`/`Web` 같은 값은 바인딩 실패로 400이 납니다.
 - `startDate`/`endDate`는 `LocalDate.parse(..., DateTimeFormatter.ISO_DATE)`로 파싱되므로 `yyyy-MM-dd` 형식이어야 합니다. 형식이 틀리면 500이 납니다.
 - `getMeetupProjects`(목록)는 `isDetail=false`로 `MeetupDetailResponse`를 만들어서(`new MeetupDetailResponse(p, false)`) `intro`/`type`/`start_date`/`end_date`/`team` 필드가 `@JsonInclude(NON_NULL)`이라 응답에 아예 포함되지 않습니다. 상세 조회(`getMeetupProject`, `isDetail=true`)에서만 내려옵니다.
-- `getCorporateProjects_1`(`GET /admin/corporate`)의 `CorporateDetailResponse`도 `category`(과제 분류)와 `tags`(태그)를 별도 필드로 내려줍니다. `CorporateRequest`의 `tag`(요청, 단수)와 이름이 다르고, `category`는 request 쪽에 대응 필드가 없습니다 — 실제 값도 `["33"]`처럼 cardinal을 그대로 담거나 `[""]`처럼 비어 있어서 현재는 신뢰할 수 있는 입력값이 아닙니다.
+- **`CorporateRequest.tag`를 생략하면 POST/PUT이 500이 납니다.** `AdminService#saveCorporate`/`updateCorporate`가 `request.getTag().size()`를 null 체크 없이 호출해서, `tag`를 아예 안 보내면 NPE가 납니다(`tag`는 기본값 초기화가 없는 `List<String>`). 백엔드 소스(`AdminService`)로 확인했습니다(2026-10-26). 자세한 내용과 프론트 workaround는 `.claude/known-issues/records/api-corporate-create-tag-npe.md` 참고.
+- `getCorporateProjects_1`(`GET /admin/corporate`)의 `CorporateDetailResponse`는 `category`(과제 분류, `tag`를 `#`로 join해서 저장)와 `tags`(별도 태그 필드, 현재 항상 `null`)를 내려줍니다. `category`는 `CorporateRequest.tag`가 실제로 저장된 값이라 request의 `tag`와 대응되지만, 필드명이 다릅니다.
 - `logo_url`/`banner_url`도 밋업과 동일하게 버킷 도메인과 key 사이 슬래시가 빠져 있습니다(2026-10-26, 실제 응답으로 확인). `toAbsoluteS3Url()`로 정규화해야 합니다.
 - **`logo_url`/`poster_url`/`web_thumbnail_url`이 완전한 URL이 아닙니다.** `MeetupDetailResponse`가 `s3Url + meetup.getPosterUrl()`로 문자열만 이어붙여서, 버킷 도메인과 key 사이에 슬래시가 빠진 `https://kusitms-bucket.s3.ap-northeast-2.amazonaws.commeetup/...` 형태로 내려옵니다. `src/lib/s3.ts`의 `toAbsoluteS3Url()`로 정규화해서 써야 합니다. 자세한 내용은 `.claude/known-issues/records/api-meetup-image-url-missing-slash.md` 참고.
 

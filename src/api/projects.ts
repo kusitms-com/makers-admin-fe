@@ -181,6 +181,11 @@ function buildCorporateFormData(request: CorporateProjectCreateRequest): FormDat
   formData.append('cardinal', String(request.cardinal))
   formData.append('name', request.name)
   formData.append('content', request.content)
+  // AdminService#saveCorporate가 request.getTag()를 null 체크 없이 바로 .size()를 호출해서,
+  // tag 필드를 아예 안 보내면 NPE로 500이 난다. tag UI가 아직 없어서 빈 문자열 하나를 보내
+  // null 바인딩을 피한다. 자세한 내용은
+  // .claude/known-issues/records/api-corporate-create-tag-npe.md 참고.
+  formData.append('tag', '')
   formData.append('logoFile', request.logoFile)
   formData.append('bannerFile', request.bannerFile)
 
