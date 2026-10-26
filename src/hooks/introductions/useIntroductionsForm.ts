@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState, type Dispatch, type SetStateAction } from 'react'
-import type { BannerStatus, IntroUpdateRequest } from '@api/introductions'
-import { useUpdateIntroductionMutation } from './useIntroductions'
+import type { AdminIntroResponse, BannerStatus, IntroUpdateRequest } from '@api/introductions'
+import { useIntroductionQuery, useUpdateIntroductionMutation } from './useIntroductions'
 
 export type PartKey = 'plan' | 'design' | 'frontend' | 'backend'
 
@@ -40,6 +40,120 @@ function toFileList(items: PartnerLogo[]): File[] {
   return items.map((item) => item.imageFile).filter((file): file is File => file !== undefined)
 }
 
+// ponytail: 백엔드가 이미지 필드에 완전한 URL이 아니라 S3 object key만 반환해서 버킷 도메인을 하드코딩해 붙인다.
+// 백엔드가 완전한 URL을 반환하도록 고치면 이 우회 코드를 제거한다.
+// 자세한 내용은 .claude/known-issues/records/api-introductions-image-url-not-absolute.md 참고.
+const S3_BASE_URL = 'https://kusitms-bucket.s3.ap-northeast-2.amazonaws.com'
+
+function toAbsoluteImageUrl(key: string | null): string | undefined {
+  if (!key) return undefined
+  if (key.startsWith('http://') || key.startsWith('https://')) return key
+  const encodedKey = key.split('/').map(encodeURIComponent).join('/')
+  return `${S3_BASE_URL}/${encodedKey}`
+}
+
+function toPartnerLogoList(urls: string[]): PartnerLogo[] {
+  return urls.map((url) => ({ id: crypto.randomUUID(), imageUrl: toAbsoluteImageUrl(url) }))
+}
+
+function toSnapshotItem({
+  id,
+  title,
+  description,
+  extra,
+  thumbnailUrl,
+  thumbnailUrl2,
+}: IntroductionItem) {
+  return { id, title, description, extra, thumbnailUrl, thumbnailUrl2 }
+}
+
+function toLogoSnapshot(items: PartnerLogo[]) {
+  return items.map(({ id, imageUrl }) => ({ id, imageUrl }))
+}
+
+function buildFormSnapshot(fields: {
+  bannerStatus: BannerStatus | ''
+  slogan: string
+  bannerImageUrl: string | undefined
+  memberCount: string
+  projectCount: string
+  universityCount: string
+  introYoutubeLink: string
+  partImages: Record<PartKey, string | undefined>
+  activities: IntroductionItem[]
+  teams: IntroductionItem[]
+  partnerLogos: PartnerLogo[]
+  expertLecture: IntroductionItem[]
+  obLecture: IntroductionItem[]
+  meetupImages: PartnerLogo[]
+  sponsors: PartnerLogo[]
+}) {
+  return JSON.stringify({
+    bannerStatus: fields.bannerStatus,
+    slogan: fields.slogan,
+    bannerImageUrl: fields.bannerImageUrl,
+    memberCount: fields.memberCount,
+    projectCount: fields.projectCount,
+    universityCount: fields.universityCount,
+    introYoutubeLink: fields.introYoutubeLink,
+    partImages: fields.partImages,
+    activities: fields.activities.map(toSnapshotItem),
+    teams: fields.teams.map(toSnapshotItem),
+    partnerLogos: toLogoSnapshot(fields.partnerLogos),
+    expertLecture: fields.expertLecture.map(toSnapshotItem),
+    obLecture: fields.obLecture.map(toSnapshotItem),
+    meetupImages: toLogoSnapshot(fields.meetupImages),
+    sponsors: toLogoSnapshot(fields.sponsors),
+  })
+}
+
+function hydrateFromResponse(data: AdminIntroResponse) {
+  return {
+    bannerStatus: (data.banner_status ?? '') as BannerStatus | '',
+    slogan: data.slogan ?? '',
+    bannerImageUrl: toAbsoluteImageUrl(data.banner_image_url),
+    memberCount: data.member_count !== null ? String(data.member_count) : '',
+    projectCount: data.project_count !== null ? String(data.project_count) : '',
+    universityCount: data.university_count !== null ? String(data.university_count) : '',
+    introYoutubeLink: data.intro_youtube_link ?? '',
+    partImages: {
+      plan: toAbsoluteImageUrl(data.planning_image_url),
+      design: toAbsoluteImageUrl(data.design_image_url),
+      frontend: toAbsoluteImageUrl(data.frontend_image_url),
+      backend: toAbsoluteImageUrl(data.backend_image_url),
+    },
+    teams: data.teams.map((team) => ({
+      id: crypto.randomUUID(),
+      title: team.name,
+      description: team.description,
+      thumbnailUrl: toAbsoluteImageUrl(team.image_link),
+    })),
+    activities: data.activities.map((activity) => ({
+      id: crypto.randomUUID(),
+      title: activity.name,
+      description: activity.description,
+      thumbnailUrl: toAbsoluteImageUrl(activity.image_url1),
+      thumbnailUrl2: toAbsoluteImageUrl(activity.image_url2),
+    })),
+    expertLecture: data.expert_lecture.map((lecture) => ({
+      id: crypto.randomUUID(),
+      title: lecture.name,
+      description: lecture.description,
+      extra: lecture.corporation,
+      thumbnailUrl: toAbsoluteImageUrl(lecture.image_link),
+    })),
+    obLecture: data.ob_lecture.map((lecture) => ({
+      id: crypto.randomUUID(),
+      title: lecture.name,
+      description: lecture.topic,
+      thumbnailUrl: toAbsoluteImageUrl(lecture.image_link),
+    })),
+    partnerLogos: toPartnerLogoList(data.partner_logo_urls),
+    meetupImages: toPartnerLogoList(data.meetup_image_urls),
+    sponsors: toPartnerLogoList(data.sponsor_image_urls),
+  }
+}
+
 function createImageListHandlers(setItems: Dispatch<SetStateAction<PartnerLogo[]>>) {
   return {
     onAdd: () => {
@@ -64,6 +178,7 @@ function createImageListHandlers(setItems: Dispatch<SetStateAction<PartnerLogo[]
 }
 
 export function useIntroductionsForm() {
+  const introductionQuery = useIntroductionQuery()
   const updateMutation = useUpdateIntroductionMutation()
 
   const [bannerStatus, setBannerStatus] = useState<BannerStatus | ''>('')
@@ -96,11 +211,7 @@ export function useIntroductionsForm() {
   const [meetupImages, setMeetupImages] = useState<PartnerLogo[]>([])
   const [sponsors, setSponsors] = useState<PartnerLogo[]>([])
 
-  function toSnapshotItem({ id, title, description, extra, thumbnailUrl }: IntroductionItem) {
-    return { id, title, description, extra, thumbnailUrl }
-  }
-
-  const formSnapshot = JSON.stringify({
+  const formSnapshot = buildFormSnapshot({
     bannerStatus,
     slogan,
     bannerImageUrl,
@@ -109,16 +220,43 @@ export function useIntroductionsForm() {
     universityCount,
     introYoutubeLink,
     partImages,
-    activities: activities.map(toSnapshotItem),
-    teams: teams.map(toSnapshotItem),
-    partnerLogos: partnerLogos.map(({ id, imageUrl }) => ({ id, imageUrl })),
-    expertLecture: expertLecture.map(toSnapshotItem),
-    obLecture: obLecture.map(toSnapshotItem),
-    meetupImages: meetupImages.map(({ id, imageUrl }) => ({ id, imageUrl })),
-    sponsors: sponsors.map(({ id, imageUrl }) => ({ id, imageUrl })),
+    activities,
+    teams,
+    partnerLogos,
+    expertLecture,
+    obLecture,
+    meetupImages,
+    sponsors,
   })
   const [pristineSnapshot, setPristineSnapshot] = useState(formSnapshot)
   const isDirty = formSnapshot !== pristineSnapshot
+
+  const hasHydratedRef = useRef(false)
+  useEffect(() => {
+    const data = introductionQuery.data
+    if (!data || hasHydratedRef.current) return
+    hasHydratedRef.current = true
+
+    const hydrated = hydrateFromResponse(data)
+
+    setBannerStatus(hydrated.bannerStatus)
+    setSlogan(hydrated.slogan)
+    setBannerImageUrl(hydrated.bannerImageUrl)
+    setMemberCount(hydrated.memberCount)
+    setProjectCount(hydrated.projectCount)
+    setUniversityCount(hydrated.universityCount)
+    setIntroYoutubeLink(hydrated.introYoutubeLink)
+    setPartImages(hydrated.partImages)
+    setTeams(hydrated.teams)
+    setActivities(hydrated.activities)
+    setExpertLecture(hydrated.expertLecture)
+    setObLecture(hydrated.obLecture)
+    setPartnerLogos(hydrated.partnerLogos)
+    setMeetupImages(hydrated.meetupImages)
+    setSponsors(hydrated.sponsors)
+
+    setPristineSnapshot(buildFormSnapshot(hydrated))
+  }, [introductionQuery.data])
 
   const latestImagesRef = useRef({
     bannerImageUrl,
@@ -307,6 +445,11 @@ export function useIntroductionsForm() {
     isDirty,
     isSaving: updateMutation.isPending,
     handleSave,
+    isLoadingIntroduction: introductionQuery.isLoading,
+    isIntroductionError: introductionQuery.isError,
+    refetchIntroduction: () => {
+      void introductionQuery.refetch()
+    },
   }
 }
 

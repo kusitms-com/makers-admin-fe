@@ -1,5 +1,6 @@
 import type { ChangeEvent, Dispatch, SetStateAction } from 'react'
 import { AddCircleButton } from '@components/introductions/AddCircleButton'
+import { Button } from '@components/common/Button'
 import { FormField } from '@components/common/FormField'
 import { Inputfield } from '@components/common/Inputfield'
 import { IntroductionCard } from '@components/introductions/IntroductionCard'
@@ -141,6 +142,33 @@ export function IntroductionsPage() {
       }
       throw error
     })
+  }
+
+  if (form.isLoadingIntroduction) {
+    return (
+      <div className="flex min-h-screen flex-col">
+        <PageHeader title="학회 소개" />
+        <div className="text-label-14m text-label-alternative flex flex-1 items-center justify-center">
+          불러오는 중입니다...
+        </div>
+      </div>
+    )
+  }
+
+  if (form.isIntroductionError) {
+    return (
+      <div className="flex min-h-screen flex-col">
+        <PageHeader title="학회 소개" />
+        <div className="flex flex-1 flex-col items-center justify-center gap-3">
+          <p className="text-label-14m text-label-alternative">
+            학회 소개 정보를 불러오지 못했습니다.
+          </p>
+          <Button variant="primary" size="s" onClick={form.refetchIntroduction}>
+            다시 시도
+          </Button>
+        </div>
+      </div>
+    )
   }
 
   return (

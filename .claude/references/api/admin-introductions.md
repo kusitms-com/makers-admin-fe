@@ -92,7 +92,7 @@ activities[0].description=밋업데이는 ~입니다.
 
 응답은 전부 snake_case(`@JsonProperty`), 요청(`IntroRequest`)은 camelCase입니다. `bannerCardinal`은 요청에만 있고 응답에는 `banner_cardinal`로 내려옵니다.
 
-`banner_status`/`banner_content`는 Figma·실제 홈페이지 기준 모집 배너 문구 자체가 쓰이지 않는 것으로 확인돼 `IntroductionsPage` 구현 범위 밖입니다.
+**`*_url`/`*_image_url`/`image_link` 필드는 절대 URL이 아니라 S3 object key만 내려옵니다.** `<img src>`에 그대로 쓰면 깨진 이미지가 됩니다 — 원인과 우회 불가 사유는 `.claude/known-issues/records/api-introductions-image-url-not-absolute.md` 참고.
 
 ## 구현 메모
 
