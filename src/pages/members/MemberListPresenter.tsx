@@ -1,26 +1,19 @@
 import { useNavigate } from 'react-router'
 import { Button } from '@/components/common'
-import type { SelectFieldOption } from '@/components/common/SelectField'
 import {
   MentoringMemberTable,
   type MentoringMemberRow,
   type MentoringMemberStatus,
 } from '@/components/members'
 
-const LIST_STATUS_OPTIONS: SelectFieldOption[] = [
-  { value: 'PENDING', label: '대기' },
-  { value: 'APPROVED', label: '승인' },
-  { value: 'REJECTED', label: '반려' },
-]
-
 interface MemberListPresenterProps {
   members: MentoringMemberRow[]
   page: number
   totalPages: number
   totalLabel: string
-  pendingApprovalCount: number
   onPageChange: (page: number) => void
   onStatusChange: (id: string, status: MentoringMemberStatus) => void
+  onDelete: (id: string) => void
 }
 
 export const MemberListPresenter = ({
@@ -28,9 +21,9 @@ export const MemberListPresenter = ({
   page,
   totalPages,
   totalLabel,
-  pendingApprovalCount,
   onPageChange,
   onStatusChange,
+  onDelete,
 }: MemberListPresenterProps) => {
   const navigate = useNavigate()
 
@@ -41,13 +34,13 @@ export const MemberListPresenter = ({
           <span className="text-label-normal">회원 관리</span>
         </nav>
         <Button
-          variant={pendingApprovalCount === 0 ? 'disable' : 'strong'}
+          variant="strong"
           size="m"
           onClick={() => {
             void navigate('/members/approval')
           }}
         >
-          승인 요청 {pendingApprovalCount}
+          승인 요청 3
         </Button>
       </div>
       <MentoringMemberTable
@@ -55,9 +48,9 @@ export const MemberListPresenter = ({
         page={page}
         totalPages={totalPages}
         totalLabel={totalLabel}
-        statusOptions={LIST_STATUS_OPTIONS}
         onPageChange={onPageChange}
         onStatusChange={onStatusChange}
+        onDelete={onDelete}
       />
     </>
   )
