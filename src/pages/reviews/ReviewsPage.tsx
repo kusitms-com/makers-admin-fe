@@ -6,7 +6,11 @@ import { ReviewTable } from '@components/common/ReviewTable'
 import { type PartBadgeType } from '@components/common/PartBadge'
 import type { SelectFieldOption } from '@components/common/SelectField'
 import { ReviewModal } from '@components/reviews/ReviewModal'
-import { useCreateReviewMutation, useReviewsQuery } from '@hooks/reviews/useReviews'
+import {
+  useCreateReviewMutation,
+  useDeleteReviewMutation,
+  useReviewsQuery,
+} from '@hooks/reviews/useReviews'
 import { useToast } from '@hooks/common/useToast'
 import { CURRENT_GENERATION, type ReviewRow } from './ReviewsPage.mock'
 
@@ -50,9 +54,9 @@ function toReviewRow(item: ReviewListItem): ReviewRow {
 export function ReviewsPage() {
   const reviewsQuery = useReviewsQuery()
   const createReviewMutation = useCreateReviewMutation()
+  const deleteReviewMutation = useDeleteReviewMutation()
   const addToast = useToast()
 
-  const [localRows, setLocalRows] = useState<ReviewRow[]>()
   const [page, setPage] = useState(1)
 
   const [modalOpen, setModalOpen] = useState(false)
@@ -60,7 +64,7 @@ export function ReviewsPage() {
   const [name, setName] = useState('')
   const [review, setReview] = useState('')
 
-  const rows = localRows ?? reviewsQuery.data?.review_list.map(toReviewRow) ?? []
+  const rows = reviewsQuery.data?.review_list.map(toReviewRow) ?? []
 
   const totalPages = Math.max(1, Math.ceil(rows.length / PAGE_SIZE))
   const pagedRows = rows.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE)
@@ -72,12 +76,20 @@ export function ReviewsPage() {
   }
 
   function handleDeleteRow(id: string) {
-    const nextRows = rows.filter((row) => row.id !== id)
+    if (!window.confirm('이 후기를 삭제하시겠습니까?')) {
+      return
+    }
 
-    setLocalRows(nextRows)
-    setPage((currentPage) =>
-      Math.min(currentPage, Math.max(1, Math.ceil(nextRows.length / PAGE_SIZE))),
-    )
+    deleteReviewMutation.mutate(Number(id), {
+      onSuccess: () => {
+        setPage((currentPage) =>
+          Math.min(currentPage, Math.max(1, Math.ceil((rows.length - 1) / PAGE_SIZE))),
+        )
+      },
+      onError: () => {
+        addToast({ type: 'error', message: '삭제하지 못했습니다. 다시 시도해주세요.' })
+      },
+    })
   }
 
   function handleTeamChange(value: string) {
