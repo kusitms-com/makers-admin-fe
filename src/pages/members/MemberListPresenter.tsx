@@ -10,7 +10,7 @@ import {
 const LIST_STATUS_OPTIONS: SelectFieldOption[] = [
   { value: 'PENDING', label: '대기' },
   { value: 'APPROVED', label: '승인' },
-  { value: 'WITHDRAWN', label: '탈퇴' },
+  { value: 'REJECTED', label: '반려' },
 ]
 
 interface MemberListPresenterProps {
@@ -20,7 +20,6 @@ interface MemberListPresenterProps {
   totalLabel: string
   onPageChange: (page: number) => void
   onStatusChange: (id: string, status: MentoringMemberStatus) => void
-  onDelete: (id: string) => void
 }
 
 export const MemberListPresenter = ({
@@ -30,7 +29,6 @@ export const MemberListPresenter = ({
   totalLabel,
   onPageChange,
   onStatusChange,
-  onDelete,
 }: MemberListPresenterProps) => {
   const navigate = useNavigate()
 
@@ -58,7 +56,6 @@ export const MemberListPresenter = ({
         statusOptions={LIST_STATUS_OPTIONS}
         onPageChange={onPageChange}
         onStatusChange={onStatusChange}
-        onDelete={onDelete}
       />
     </>
   )

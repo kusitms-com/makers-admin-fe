@@ -35,3 +35,33 @@ export function getMembers({
     adminMemberListResponseSchema,
   )
 }
+
+export function approveMember(
+  userId: number,
+  { accessToken, refreshAccessToken }: RequestContext,
+): Promise<unknown> {
+  return apiRequest(
+    {
+      method: 'POST',
+      path: `/admin/members/${String(userId)}/approve`,
+      accessToken,
+      refreshAccessToken,
+    },
+    z.unknown(),
+  )
+}
+
+export function rejectMember(
+  userId: number,
+  { accessToken, refreshAccessToken }: RequestContext,
+): Promise<unknown> {
+  return apiRequest(
+    {
+      method: 'POST',
+      path: `/admin/members/${String(userId)}/reject`,
+      accessToken,
+      refreshAccessToken,
+    },
+    z.unknown(),
+  )
+}

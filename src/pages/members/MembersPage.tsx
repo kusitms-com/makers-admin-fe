@@ -5,7 +5,11 @@ import type { AdminMemberResponse } from '@api/members'
 import { Button, Modal, PageHeader } from '@/components/common'
 import type { PartBadgeType } from '@/components/common/PartBadge'
 import { type MentoringMemberRow, type MentoringMemberStatus } from '@/components/members'
-import { useMembersQuery } from '@hooks/members/useMembers'
+import {
+  useApproveMemberMutation,
+  useMembersQuery,
+  useRejectMemberMutation,
+} from '@hooks/members/useMembers'
 import { MemberApprovalPresenter } from './MemberApprovalPresenter'
 import { MemberListPresenter } from './MemberListPresenter'
 
@@ -85,17 +89,9 @@ export const MentoringMembersPage = () => {
   const { pathname } = useLocation()
   const isApprovalPage = pathname === '/members/approval'
   const membersQuery = useMembersQuery()
-  // 실제 변경/삭제 API가 아직 없어서, 지금 목록 탭도 승인 대기 탭과 같은 로컬 전용(새로고침하면
-  // 사라지는) 상태변경·삭제 버튼을 둔다. 조회 결과(membersQuery.data) 위에 로컬 override만 얹는다.
-  const [statusOverrides, setStatusOverrides] = useState<Record<string, MentoringMemberStatus>>({})
-  const [deletedMemberIds, setDeletedMemberIds] = useState<string[]>([])
-  const members = (membersQuery.data ?? [])
-    .map(toMemberRow)
-    .filter((member) => !deletedMemberIds.includes(member.id))
-    .map((member) => {
-      const hasOverride = Object.prototype.hasOwnProperty.call(statusOverrides, member.id)
-      return hasOverride ? { ...member, status: statusOverrides[member.id] } : member
-    })
+  const approveMemberMutation = useApproveMemberMutation()
+  const rejectMemberMutation = useRejectMemberMutation()
+  const members = (membersQuery.data ?? []).map(toMemberRow)
   const [approvals, setApprovals] = useState(INITIAL_APPROVALS)
   const [membersPage, setMembersPage] = useState(1)
   const [approvalPage, setApprovalPage] = useState(1)
@@ -113,7 +109,16 @@ export const MentoringMembersPage = () => {
       )
       return
     }
-    setStatusOverrides((current) => ({ ...current, [id]: status }))
+    if (status === 'APPROVED') {
+      approveMemberMutation.mutate(Number(id))
+      return
+    }
+    if (status === 'REJECTED') {
+      const target = members.find((member) => member.id === id)
+      if (target && window.confirm(`${target.name} 회원의 가입을 반려하시겠습니까?`)) {
+        rejectMemberMutation.mutate(Number(id))
+      }
+    }
   }
 
   function handleDeleteRequest(id: string) {
@@ -126,17 +131,6 @@ export const MentoringMembersPage = () => {
 
   function handleConfirmDelete() {
     if (!deleteTarget) {
-      return
-    }
-
-    if (!isApprovalPage) {
-      const { id } = deleteTarget
-      setDeletedMemberIds((current) => [...current, id])
-      setMembersPage((currentPage) => {
-        const nextLength = members.filter((member) => member.id !== id).length
-        return Math.min(currentPage, Math.max(1, Math.ceil(nextLength / PAGE_SIZE)))
-      })
-      setDeleteTarget(null)
       return
     }
 
@@ -205,7 +199,6 @@ export const MentoringMembersPage = () => {
             totalLabel={`총 ${String(members.length)}명`}
             onPageChange={setPage}
             onStatusChange={handleStatusChange}
-            onDelete={handleDeleteRequest}
           />
         )}
       </div>

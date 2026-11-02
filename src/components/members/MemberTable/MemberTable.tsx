@@ -30,7 +30,9 @@ interface MentoringMemberTableProps {
   showMentoringAndRemark?: boolean
   onPageChange: (page: number) => void
   onStatusChange: (id: string, status: MentoringMemberStatus) => void
-  onDelete: (id: string) => void
+  // 멘토링 여부/비고 컬럼과 마찬가지로 삭제 컬럼도 승인 대기(mock) 화면만 쓴다.
+  // 실제 회원 목록은 상태 드롭다운에서 반려를 선택해 처리한다.
+  onDelete?: (id: string) => void
 }
 
 const COLUMNS_BASIC = [
@@ -41,7 +43,6 @@ const COLUMNS_BASIC = [
   ['이메일', 'px-3'],
   ['가입일', 'px-3'],
   ['상태', 'px-3'],
-  ['삭제', 'justify-center px-3'],
 ] as const
 
 const COLUMNS_FULL = [
@@ -60,10 +61,10 @@ const COLUMNS_FULL = [
 // 열 최소 너비 합계 + 행 px-1(8px) = 행 min-w.
 // 1440px 화면의 본문 폭(1156px) 안에 들어가야 가로 스크롤이 생기지 않는다.
 const TABLE_GRID_CLASS_BASIC =
-  'grid-cols-[minmax(140px,1.4fr)_minmax(64px,0.55fr)_minmax(100px,0.8fr)_minmax(156px,1.3fr)_minmax(160px,1.5fr)_minmax(132px,1.1fr)_minmax(108px,0.9fr)_minmax(72px,0.6fr)]'
+  'grid-cols-[minmax(140px,1.4fr)_minmax(64px,0.55fr)_minmax(100px,0.8fr)_minmax(156px,1.3fr)_minmax(160px,1.5fr)_minmax(132px,1.1fr)_minmax(108px,0.9fr)]'
 const TABLE_GRID_CLASS_FULL =
   'grid-cols-[minmax(140px,1.4fr)_minmax(64px,0.55fr)_minmax(100px,0.8fr)_minmax(156px,1.3fr)_minmax(160px,1.5fr)_minmax(132px,1.1fr)_minmax(72px,0.6fr)_minmax(108px,0.9fr)_minmax(72px,0.6fr)_minmax(140px,1.3fr)]'
-const ROW_MIN_WIDTH_BASIC = 'min-w-[940px]'
+const ROW_MIN_WIDTH_BASIC = 'min-w-[868px]'
 const ROW_MIN_WIDTH_FULL = 'min-w-[1152px]'
 
 function MentoringMemberTableRow({
@@ -77,7 +78,7 @@ function MentoringMemberTableRow({
   statusOptions: SelectFieldOption[]
   showMentoringAndRemark: boolean
   onStatusChange: (status: MentoringMemberStatus) => void
-  onDelete: () => void
+  onDelete?: () => void
 }) {
   const gridClassName = showMentoringAndRemark ? TABLE_GRID_CLASS_FULL : TABLE_GRID_CLASS_BASIC
   const minWidthClassName = showMentoringAndRemark ? ROW_MIN_WIDTH_FULL : ROW_MIN_WIDTH_BASIC
@@ -127,6 +128,7 @@ function MentoringMemberTableRow({
             value={member.status}
             options={statusOptions}
             variant="compact"
+            disabled={member.status === 'APPROVED' || member.status === 'REJECTED'}
             onValueChange={(value) => {
               if (statusOptions.some((option) => option.value === value)) {
                 onStatusChange(value as MentoringMemberStatus)
@@ -139,16 +141,18 @@ function MentoringMemberTableRow({
           <span className="text-label-14m text-label-alternative">-</span>
         )}
       </div>
-      <div role="cell" className="flex min-w-0 justify-center px-3">
-        <button
-          type="button"
-          onClick={onDelete}
-          aria-label={`${member.name} 삭제`}
-          className="flex size-9 items-center justify-center rounded-full bg-[#fdf2f2]"
-        >
-          <MentoringDeleteIcon className="size-6" aria-hidden="true" />
-        </button>
-      </div>
+      {showMentoringAndRemark && (
+        <div role="cell" className="flex min-w-0 justify-center px-3">
+          <button
+            type="button"
+            onClick={onDelete}
+            aria-label={`${member.name} 삭제`}
+            className="flex size-9 items-center justify-center rounded-full bg-[#fdf2f2]"
+          >
+            <MentoringDeleteIcon className="size-6" aria-hidden="true" />
+          </button>
+        </div>
+      )}
       {showMentoringAndRemark && (
         <div role="cell" className="flex min-w-0 px-3">
           {member.remark && <FileChip fileName={member.remark} className="w-full" />}
@@ -205,9 +209,12 @@ export const MentoringMemberTable = ({
               onStatusChange={(status) => {
                 onStatusChange(member.id, status)
               }}
-              onDelete={() => {
-                onDelete(member.id)
-              }}
+              onDelete={
+                onDelete &&
+                (() => {
+                  onDelete(member.id)
+                })
+              }
             />
           ))
         ) : (
