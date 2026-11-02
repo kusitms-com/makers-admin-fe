@@ -4,7 +4,9 @@ import {
   deleteMeetupProject,
   getMeetupProject,
   getMeetupProjects,
+  updateMeetupProject,
   type MeetupProjectCreateRequest,
+  type MeetupProjectUpdateRequest,
 } from '@api/projects'
 import { useAuthStore } from '@hooks/auth/useAuth'
 
@@ -62,6 +64,29 @@ export function useCreateMeetupProjectMutation() {
     },
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: meetupProjectsQueryKey })
+    },
+  })
+}
+
+export function useUpdateMeetupProjectMutation() {
+  const queryClient = useQueryClient()
+  const accessToken = useAuthStore((state) =>
+    state.session.status === 'authenticated' ? state.session.accessToken : undefined,
+  )
+  const refreshAccessToken = useAuthStore((state) => state.refreshAccessToken)
+
+  return useMutation({
+    mutationFn: (request: MeetupProjectUpdateRequest) => {
+      if (!accessToken) {
+        return Promise.reject(new Error('로그인이 필요합니다.'))
+      }
+      return updateMeetupProject(request, { accessToken, refreshAccessToken })
+    },
+    onSuccess: (_data, request) => {
+      void queryClient.invalidateQueries({ queryKey: meetupProjectsQueryKey })
+      void queryClient.invalidateQueries({
+        queryKey: [...meetupProjectsQueryKey, request.meetupId],
+      })
     },
   })
 }

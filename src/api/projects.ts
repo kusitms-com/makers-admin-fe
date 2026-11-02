@@ -165,6 +165,76 @@ export function createMeetupProject(
   )
 }
 
+export interface MeetupProjectUpdateRequest {
+  meetupId: number
+  cardinal: number
+  name: string
+  intro: string
+  type: MeetupProjectType
+  oneLineIntro: string
+  teamName: string
+  startDate: string
+  endDate: string
+  instagramUrl?: string
+  githubUrl?: string
+  appUrl?: string
+  behanceUrl?: string
+  planner: string[]
+  designer: string[]
+  frontend: string[]
+  backend: string[]
+  ios: string[]
+  aos: string[]
+  logoFile?: File
+  posterFile?: File
+}
+
+// PUT의 updateMeetup은 uploadOrKeep를 쓰므로 logoFile/posterFile을 생략하면 기존 값을 유지한다.
+// 자세한 내용은 .claude/references/api/admin-projects.md 참고.
+function buildMeetupUpdateFormData(request: MeetupProjectUpdateRequest): FormData {
+  const formData = new FormData()
+
+  formData.append('meetupId', String(request.meetupId))
+  formData.append('cardinal', String(request.cardinal))
+  formData.append('name', request.name)
+  formData.append('intro', request.intro)
+  formData.append('type', request.type)
+  formData.append('oneLineIntro', request.oneLineIntro)
+  formData.append('teamName', request.teamName)
+  formData.append('startDate', request.startDate)
+  formData.append('endDate', request.endDate)
+  if (request.instagramUrl) formData.append('instagramUrl', request.instagramUrl)
+  if (request.githubUrl) formData.append('githubUrl', request.githubUrl)
+  if (request.appUrl) formData.append('appUrl', request.appUrl)
+  if (request.behanceUrl) formData.append('behanceUrl', request.behanceUrl)
+  appendStringList(formData, 'planner', request.planner)
+  appendStringList(formData, 'designer', request.designer)
+  appendStringList(formData, 'frontend', request.frontend)
+  appendStringList(formData, 'backend', request.backend)
+  appendStringList(formData, 'ios', request.ios)
+  appendStringList(formData, 'aos', request.aos)
+  if (request.logoFile) formData.append('logoFile', request.logoFile)
+  if (request.posterFile) formData.append('posterFile', request.posterFile)
+
+  return formData
+}
+
+export function updateMeetupProject(
+  request: MeetupProjectUpdateRequest,
+  { accessToken, refreshAccessToken }: RequestContext,
+): Promise<unknown> {
+  return apiRequest(
+    {
+      method: 'PUT',
+      path: '/admin/projects/meetup',
+      body: buildMeetupUpdateFormData(request),
+      accessToken,
+      refreshAccessToken,
+    },
+    z.unknown(),
+  )
+}
+
 export function deleteMeetupProject(
   id: number,
   { accessToken, refreshAccessToken }: RequestContext,

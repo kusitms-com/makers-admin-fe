@@ -55,6 +55,7 @@ interface MeetupProjectModalProps {
   onEndDateChange: (date: Date) => void
   onCancel: () => void
   onSave: () => void
+  onEdit?: () => void
   saveDisabled?: boolean
   readOnly?: boolean
   className?: string
@@ -100,6 +101,7 @@ export function MeetupProjectModal({
   onEndDateChange,
   onCancel,
   onSave,
+  onEdit,
   saveDisabled = true,
   readOnly = false,
   className,
@@ -120,10 +122,31 @@ export function MeetupProjectModal({
     <Modal
       open={open}
       onOpenChange={onOpenChange}
-      title={readOnly ? '밋업 프로젝트 상세' : '밋업 프로젝트 등록'}
+      title={readOnly ? '밋업 프로젝트 상세' : onEdit ? '밋업 프로젝트 수정' : '밋업 프로젝트 등록'}
       className={className ?? 'left-[calc(50%+20px)] w-[540px]'}
       footer={
-        readOnly ? (
+        onEdit ? (
+          <>
+            <Button variant="outlined" size="l" className="w-[140px]" onClick={onCancel}>
+              닫기
+            </Button>
+            {readOnly ? (
+              <Button variant="outlined" size="l" className="w-[140px]" onClick={onEdit}>
+                수정하기
+              </Button>
+            ) : (
+              <Button
+                variant={saveDisabled ? 'disable' : 'strong'}
+                size="l"
+                className="w-[140px]"
+                disabled={saveDisabled}
+                onClick={onSave}
+              >
+                확인
+              </Button>
+            )}
+          </>
+        ) : readOnly ? (
           <Button variant="outlined" size="l" className="w-[140px]" onClick={onCancel}>
             닫기
           </Button>
