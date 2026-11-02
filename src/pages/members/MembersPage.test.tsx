@@ -113,8 +113,23 @@ const MEMBER_ITEMS = [
   },
 ]
 
+let memberItems = MEMBER_ITEMS.map((member) => ({ ...member }))
+
+const approveMember = vi.fn((userId: number) => {
+  memberItems = memberItems.map((member) =>
+    member.userId === userId ? { ...member, status: 'APPROVED' } : member,
+  )
+  return Promise.resolve({})
+})
+const rejectMember = vi.fn((userId: number) => {
+  memberItems = memberItems.filter((member) => member.userId !== userId)
+  return Promise.resolve({})
+})
+
 vi.mock('@api/members', () => ({
-  getMembers: vi.fn().mockImplementation(() => Promise.resolve(MEMBER_ITEMS)),
+  getMembers: vi.fn().mockImplementation(() => Promise.resolve(memberItems)),
+  approveMember: (userId: number) => approveMember(userId),
+  rejectMember: (userId: number) => rejectMember(userId),
 }))
 
 function renderPage() {
@@ -146,24 +161,37 @@ describe('MentoringMembersPage', () => {
     expect(screen.getByText('서지민')).toBeTruthy()
   })
 
-  it('삭제 확인 후 회원을 삭제한다', async () => {
+  it('대기 회원을 반려하면 확인 후 반려 API를 호출하고 목록에서 제거한다', async () => {
     const user = userEvent.setup()
+    window.confirm = vi.fn().mockReturnValue(false)
     renderPage()
 
     await screen.findByText('서지민')
-    await user.click(screen.getByRole('button', { name: '서지민 삭제' }))
-    expect(screen.getByText('회원 삭제')).toBeTruthy()
-    expect(
-      screen.getByText('서지민 회원을 삭제하시겠습니까? 삭제된 회원 정보는 복구할 수 없습니다.'),
-    ).toBeTruthy()
-
-    await user.click(screen.getByRole('button', { name: '취소' }))
+    await user.click(screen.getByRole('combobox', { name: '서지민 회원 상태' }))
+    await user.click(await screen.findByRole('option', { name: '반려' }))
+    expect(window.confirm).toHaveBeenCalledWith('서지민 회원의 가입을 반려하시겠습니까?')
+    expect(rejectMember).not.toHaveBeenCalled()
     expect(screen.getByText('서지민')).toBeTruthy()
 
-    await user.click(screen.getByRole('button', { name: '서지민 삭제' }))
-    await user.click(screen.getByRole('button', { name: '삭제하기' }))
+    vi.mocked(window.confirm).mockReturnValue(true)
+    await user.click(screen.getByRole('combobox', { name: '서지민 회원 상태' }))
+    await user.click(await screen.findByRole('option', { name: '반려' }))
+    expect(rejectMember).toHaveBeenCalledWith(8)
+    expect(await screen.findByText('총 7명')).toBeTruthy()
     expect(screen.queryByText('서지민')).toBeNull()
-    expect(screen.getByText('총 7명')).toBeTruthy()
+  })
+
+  it('대기 회원을 승인하면 승인 API를 호출하고 더 이상 상태를 바꿀 수 없다', async () => {
+    const user = userEvent.setup()
+    renderPage()
+
+    await screen.findByText('이현진')
+    await user.click(screen.getByRole('combobox', { name: '이현진 회원 상태' }))
+    await user.click(await screen.findByRole('option', { name: '승인' }))
+
+    expect(approveMember).toHaveBeenCalledWith(1)
+    const trigger = await screen.findByRole('combobox', { name: '이현진 회원 상태' })
+    expect(trigger.hasAttribute('data-disabled')).toBe(true)
   })
 
   it('승인 요청 버튼을 누르면 승인 프레젠터를 표시한다', async () => {
