@@ -15,6 +15,7 @@ interface ReviewTableRowProps {
   category?: string
   phone?: string
   fileName?: string
+  onEdit?: () => void
   onDelete?: () => void
   onTitleClick?: () => void
   className?: string
@@ -39,6 +40,7 @@ export function ReviewTableRow({
   category,
   phone,
   fileName,
+  onEdit,
   onDelete,
   onTitleClick,
   className,
@@ -131,7 +133,16 @@ export function ReviewTableRow({
         </div>
       </div>
 
-      <div className="flex h-full shrink-0 items-center py-5 pr-[18px]">
+      <div className="flex h-full shrink-0 items-center gap-2 py-5 pr-[18px]">
+        {onEdit && (
+          <button
+            type="button"
+            onClick={onEdit}
+            className="text-label-13sb text-label-alternative hover:text-label-normal cursor-pointer whitespace-nowrap"
+          >
+            수정
+          </button>
+        )}
         <button
           type="button"
           onClick={onDelete}

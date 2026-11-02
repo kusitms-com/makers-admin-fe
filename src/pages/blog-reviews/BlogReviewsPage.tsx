@@ -9,6 +9,7 @@ import type { SelectFieldOption } from '@components/common/SelectField'
 import {
   useBlogReviewsQuery,
   useCreateBlogReviewMutation,
+  useUpdateBlogReviewMutation,
 } from '@hooks/blog-reviews/useBlogReviews'
 import { useToast } from '@hooks/common/useToast'
 import { ACTIVITY_OPTIONS, CURRENT_GENERATION, type BlogReviewRow } from './BlogReviewsPage.mock'
@@ -60,11 +61,23 @@ function toBlogReviewRow(item: BlogReviewListItem): BlogReviewRow {
   }
 }
 
+interface EditingSnapshot {
+  blogReviewId: number
+  cardinal: number
+  part: PartBadgeType
+  activity: string
+  title: string
+  previewText: string
+  link: string
+  thumbnailUrl?: string
+}
+
 export function BlogReviewsPage() {
   const blogReviewsQuery = useBlogReviewsQuery()
   const [deletedIds, setDeletedIds] = useState<ReadonlySet<string>>(new Set())
   const [page, setPage] = useState(1)
   const [modalOpen, setModalOpen] = useState(false)
+  const [editingSnapshot, setEditingSnapshot] = useState<EditingSnapshot>()
   const [part, setPart] = useState<PartBadgeType>('PLAN')
   const [activity, setActivity] = useState('')
   const [title, setTitle] = useState('')
@@ -74,6 +87,7 @@ export function BlogReviewsPage() {
   const [thumbnailFile, setThumbnailFile] = useState<File>()
 
   const createBlogReviewMutation = useCreateBlogReviewMutation()
+  const updateBlogReviewMutation = useUpdateBlogReviewMutation()
   const addToast = useToast()
 
   const rows = (blogReviewsQuery.data?.blog_review_list ?? [])
@@ -84,6 +98,7 @@ export function BlogReviewsPage() {
   const pagedRows = rows.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE)
 
   function resetForm() {
+    setEditingSnapshot(undefined)
     setPart('PLAN')
     setActivity('')
     setTitle('')
@@ -92,6 +107,43 @@ export function BlogReviewsPage() {
     setThumbnailUrl(undefined)
     setThumbnailFile(undefined)
   }
+
+  function handleEditRow(id: string) {
+    const item = blogReviewsQuery.data?.blog_review_list.find(
+      (reviewItem) => String(reviewItem.blog_review_id) === id,
+    )
+    if (!item) return
+
+    const mappedPart = BACKEND_TO_PART[item.part] ?? 'PLAN'
+
+    setEditingSnapshot({
+      blogReviewId: item.blog_review_id,
+      cardinal: item.cardinal,
+      part: mappedPart,
+      activity: item.activity,
+      title: item.title,
+      previewText: item.previewText,
+      link: item.blogLink,
+      thumbnailUrl: item.thumbnailUrl,
+    })
+    setPart(mappedPart)
+    setActivity(isBlogReviewActivity(item.activity) ? item.activity : '')
+    setTitle(item.title)
+    setPreviewText(item.previewText)
+    setLink(item.blogLink)
+    setThumbnailUrl(item.thumbnailUrl)
+    setThumbnailFile(undefined)
+    setModalOpen(true)
+  }
+
+  const isDirty = editingSnapshot
+    ? part !== editingSnapshot.part ||
+      activity !== editingSnapshot.activity ||
+      title !== editingSnapshot.title ||
+      previewText !== editingSnapshot.previewText ||
+      link !== editingSnapshot.link ||
+      thumbnailUrl !== editingSnapshot.thumbnailUrl
+    : true
 
   function handleDeleteRow(id: string) {
     setDeletedIds((previousIds) => new Set(previousIds).add(id))
@@ -129,6 +181,31 @@ export function BlogReviewsPage() {
     const trimmedLink = link.trim()
 
     if (!isBlogReviewActivity(activityValue) || !activityLabel || !trimmedTitle || !trimmedLink) {
+      return
+    }
+
+    if (editingSnapshot) {
+      updateBlogReviewMutation.mutate(
+        {
+          blogReviewId: editingSnapshot.blogReviewId,
+          cardinal: editingSnapshot.cardinal,
+          part: PART_TO_BACKEND[part],
+          activity: activityValue,
+          title: trimmedTitle,
+          previewText: previewText.trim(),
+          blogLink: trimmedLink,
+          thumbnailFile,
+        },
+        {
+          onSuccess: () => {
+            resetForm()
+            setModalOpen(false)
+          },
+          onError: () => {
+            addToast({ type: 'error', message: '수정하지 못했습니다. 다시 시도해주세요.' })
+          },
+        },
+      )
       return
     }
 
@@ -202,6 +279,7 @@ export function BlogReviewsPage() {
             variant="outlined"
             size="l"
             onClick={() => {
+              resetForm()
               setModalOpen(true)
             }}
           >
@@ -214,6 +292,7 @@ export function BlogReviewsPage() {
           <ReviewTable
             type="blogReview"
             rows={pagedRows.map((row) => ({ ...row, category: row.activity }))}
+            onEditRow={handleEditRow}
             onDeleteRow={handleDeleteRow}
             page={page}
             totalPages={totalPages}
@@ -226,7 +305,8 @@ export function BlogReviewsPage() {
       <BlogReviewModal
         open={modalOpen}
         onOpenChange={setModalOpen}
-        cardinal={CURRENT_GENERATION}
+        mode={editingSnapshot ? 'edit' : 'create'}
+        cardinal={editingSnapshot?.cardinal ?? CURRENT_GENERATION}
         part={part}
         partOptions={PART_OPTIONS}
         onPartChange={handlePartChange}
@@ -245,7 +325,12 @@ export function BlogReviewsPage() {
         onCancel={handleCancel}
         onSave={handleSave}
         saveDisabled={
-          !activity || !title.trim() || !link.trim() || createBlogReviewMutation.isPending
+          !activity ||
+          !title.trim() ||
+          !link.trim() ||
+          createBlogReviewMutation.isPending ||
+          updateBlogReviewMutation.isPending ||
+          (editingSnapshot ? !isDirty : false)
         }
       />
     </div>

@@ -27,6 +27,10 @@ export interface BlogReviewCreateRequest {
   thumbnailFile?: File
 }
 
+export interface BlogReviewUpdateRequest extends BlogReviewCreateRequest {
+  blogReviewId: number
+}
+
 const blogReviewListItemSchema = z.object({
   blog_review_id: z.number(),
   cardinal: z.number(),
@@ -46,9 +50,12 @@ const blogReviewListResponseSchema = z.object({
 export type BlogReviewListItem = z.infer<typeof blogReviewListItemSchema>
 export type BlogReviewListResponse = z.infer<typeof blogReviewListResponseSchema>
 
-function buildBlogReviewFormData(request: BlogReviewCreateRequest): FormData {
+function buildBlogReviewFormData(
+  request: BlogReviewCreateRequest | BlogReviewUpdateRequest,
+): FormData {
   const formData = new FormData()
 
+  if ('blogReviewId' in request) formData.append('blogReviewId', String(request.blogReviewId))
   formData.append('cardinal', String(request.cardinal))
   formData.append('part', request.part)
   formData.append('activity', request.activity)
@@ -77,6 +84,22 @@ export function addBlogReview(
   return apiRequest(
     {
       method: 'POST',
+      path: '/admin/blog-review',
+      body: buildBlogReviewFormData(request),
+      accessToken,
+      refreshAccessToken,
+    },
+    z.unknown(),
+  )
+}
+
+export function updateBlogReview(
+  request: BlogReviewUpdateRequest,
+  { accessToken, refreshAccessToken }: RequestContext,
+): Promise<unknown> {
+  return apiRequest(
+    {
+      method: 'PUT',
       path: '/admin/blog-review',
       body: buildBlogReviewFormData(request),
       accessToken,

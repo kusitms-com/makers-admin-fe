@@ -19,6 +19,7 @@ interface ReviewTableRowData {
 interface ReviewTableProps {
   type: 'blogReview' | 'memberReview' | 'review'
   rows: ReviewTableRowData[]
+  onEditRow?: (id: string) => void
   onDeleteRow?: (id: string) => void
   onTitleClick?: (id: string) => void
   page: number
@@ -56,6 +57,7 @@ const REVIEW_COLUMNS = [
 export function ReviewTable({
   type,
   rows,
+  onEditRow,
   onDeleteRow,
   onTitleClick,
   page,
@@ -110,6 +112,13 @@ export function ReviewTable({
               fileName={row.fileName}
               title={row.title}
               link={row.link}
+              onEdit={
+                onEditRow
+                  ? () => {
+                      onEditRow(row.id)
+                    }
+                  : undefined
+              }
               onDelete={() => onDeleteRow?.(row.id)}
               onTitleClick={
                 onTitleClick

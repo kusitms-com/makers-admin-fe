@@ -11,6 +11,7 @@ import { TextareaField } from '@components/common/TextareaField'
 interface BlogReviewModalProps {
   open: boolean
   onOpenChange: (open: boolean) => void
+  mode?: 'create' | 'edit'
   cardinal: number
   part: string
   partOptions: SelectFieldOption[]
@@ -36,6 +37,7 @@ interface BlogReviewModalProps {
 export function BlogReviewModal({
   open,
   onOpenChange,
+  mode = 'create',
   cardinal,
   part,
   partOptions,
@@ -57,13 +59,22 @@ export function BlogReviewModal({
   saveDisabled = true,
   className,
 }: BlogReviewModalProps) {
+  const isEdit = mode === 'edit'
+
   return (
     <Modal
       open={open}
       onOpenChange={onOpenChange}
-      title="블로그 후기 등록"
+      title={isEdit ? '블로그 후기 수정' : '블로그 후기 등록'}
       className={className}
-      footer={<ModalActions onCancel={onCancel} onSave={onSave} saveDisabled={saveDisabled} />}
+      footer={
+        <ModalActions
+          onCancel={onCancel}
+          onSave={onSave}
+          saveDisabled={saveDisabled}
+          saveLabel={isEdit ? '수정하기' : '저장하기'}
+        />
+      }
     >
       <div className="flex items-stretch gap-3">
         <CardinalField cardinal={cardinal} className="flex-1" />
