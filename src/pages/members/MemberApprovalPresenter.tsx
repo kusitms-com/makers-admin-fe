@@ -22,7 +22,6 @@ interface MemberApprovalPresenterProps {
   isSaving: boolean
   onPageChange: (page: number) => void
   onStatusChange: (id: string, status: MentoringMemberStatus) => void
-  onDelete: (id: string) => void
   onSave: () => void
 }
 
@@ -35,7 +34,6 @@ export const MemberApprovalPresenter = ({
   isSaving,
   onPageChange,
   onStatusChange,
-  onDelete,
   onSave,
 }: MemberApprovalPresenterProps) => {
   return (
@@ -68,7 +66,6 @@ export const MemberApprovalPresenter = ({
         isApprovalView
         onPageChange={onPageChange}
         onStatusChange={onStatusChange}
-        onDelete={onDelete}
       />
     </>
   )

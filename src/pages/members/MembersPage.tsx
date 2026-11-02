@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { useLocation, useNavigate } from 'react-router'
 import dayjs from 'dayjs'
 import type { AdminMemberResponse, PendingMemberResponse } from '@api/members'
-import { Button, Modal, PageHeader } from '@/components/common'
+import { Button, PageHeader } from '@/components/common'
 import type { PartBadgeType } from '@/components/common/PartBadge'
 import { type MentoringMemberRow, type MentoringMemberStatus } from '@/components/members'
 import { useToast } from '@hooks/common/useToast'
@@ -62,19 +62,16 @@ export const MentoringMembersPage = () => {
   const approveMemberMutation = useApproveMemberMutation()
   const rejectMemberMutation = useRejectMemberMutation()
   const members = (membersQuery.data ?? []).map(toMemberRow)
-  // 승인 대기 목록은 "저장하기"를 누르기 전까지 상태 변경/삭제를 화면에서만 반영한다.
+  // 승인 대기 목록은 "저장하기"를 누르기 전까지 상태 변경을 화면에서만 반영한다.
   const [approvalEdits, setApprovalEdits] = useState<Record<string, Partial<MentoringMemberRow>>>(
     {},
   )
-  const [deletedApprovalIds, setDeletedApprovalIds] = useState<ReadonlySet<string>>(new Set())
   const [isSavingApprovals, setIsSavingApprovals] = useState(false)
   const approvals = (pendingMembersQuery.data ?? [])
     .map(toPendingMemberRow)
-    .filter((member) => !deletedApprovalIds.has(member.id))
     .map((member) => ({ ...member, ...approvalEdits[member.id] }))
   const [membersPage, setMembersPage] = useState(1)
   const [approvalPage, setApprovalPage] = useState(1)
-  const [deleteTarget, setDeleteTarget] = useState<MentoringMemberRow | null>(null)
   const currentMembers = isApprovalPage ? approvals : members
   const activeQuery = isApprovalPage ? pendingMembersQuery : membersQuery
   const page = isApprovalPage ? approvalPage : membersPage
@@ -123,27 +120,6 @@ export const MentoringMembersPage = () => {
     void navigate('/members')
   }
 
-  function handleDeleteRequest(id: string) {
-    const target = currentMembers.find((member) => member.id === id)
-
-    if (target) {
-      setDeleteTarget(target)
-    }
-  }
-
-  function handleConfirmDelete() {
-    if (!deleteTarget) {
-      return
-    }
-
-    const { id } = deleteTarget
-    setDeletedApprovalIds((current) => new Set(current).add(id))
-    setApprovalPage((currentPage) =>
-      Math.min(currentPage, Math.max(1, Math.ceil((approvals.length - 1) / PAGE_SIZE))),
-    )
-    setDeleteTarget(null)
-  }
-
   if (activeQuery.isLoading) {
     return (
       <div className="flex min-h-screen min-w-0 flex-col">
@@ -190,7 +166,6 @@ export const MentoringMembersPage = () => {
             isSaving={isSavingApprovals}
             onPageChange={setPage}
             onStatusChange={handleApprovalStatusChange}
-            onDelete={handleDeleteRequest}
             onSave={() => {
               void handleSaveApprovals()
             }}
@@ -206,36 +181,6 @@ export const MentoringMembersPage = () => {
           />
         )}
       </div>
-
-      <Modal
-        open={deleteTarget !== null}
-        onOpenChange={(open) => {
-          if (!open) {
-            setDeleteTarget(null)
-          }
-        }}
-        title="회원 삭제"
-        footer={
-          <>
-            <Button
-              variant="outlined"
-              size="m"
-              onClick={() => {
-                setDeleteTarget(null)
-              }}
-            >
-              취소
-            </Button>
-            <Button variant="error" size="m" onClick={handleConfirmDelete}>
-              삭제하기
-            </Button>
-          </>
-        }
-      >
-        <p className="text-label-14m text-label-normal">
-          {deleteTarget?.name} 회원을 삭제하시겠습니까? 삭제된 회원 정보는 복구할 수 없습니다.
-        </p>
-      </Modal>
     </div>
   )
 }
