@@ -47,6 +47,10 @@ function isBlogReviewActivity(value: string): value is BlogReviewActivity {
   return ACTIVITY_OPTIONS.some((option) => option.value === value)
 }
 
+function isKnownBackendPart(value: string): boolean {
+  return Object.prototype.hasOwnProperty.call(BACKEND_TO_PART, value)
+}
+
 // 작성자 이름은 API 응답에 없어 '관리자'로 고정 표시한다.
 function toBlogReviewRow(item: BlogReviewListItem): BlogReviewRow {
   return {
@@ -114,7 +118,11 @@ export function BlogReviewsPage() {
     )
     if (!item) return
 
-    const mappedPart = BACKEND_TO_PART[item.part] ?? 'PLAN'
+    if (!isKnownBackendPart(item.part)) {
+      addToast({ type: 'error', message: '지원하지 않는 파트의 후기는 수정할 수 없습니다.' })
+      return
+    }
+    const mappedPart = BACKEND_TO_PART[item.part]
 
     setEditingSnapshot({
       blogReviewId: item.blog_review_id,
