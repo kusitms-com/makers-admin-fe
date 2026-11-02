@@ -252,7 +252,7 @@ export function ReviewsPage() {
         onReviewChange={setReview}
         onCancel={handleCancel}
         onSave={handleSave}
-        saveDisabled={!name || !review}
+        saveDisabled={!name || !review || createReviewMutation.isPending}
       />
 
       {editingRow && (
