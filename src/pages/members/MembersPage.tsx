@@ -1,10 +1,11 @@
 import { useState } from 'react'
-import { useLocation } from 'react-router'
+import { useLocation, useNavigate } from 'react-router'
 import dayjs from 'dayjs'
 import type { AdminMemberResponse, PendingMemberResponse } from '@api/members'
 import { Button, Modal, PageHeader } from '@/components/common'
 import type { PartBadgeType } from '@/components/common/PartBadge'
 import { type MentoringMemberRow, type MentoringMemberStatus } from '@/components/members'
+import { useToast } from '@hooks/common/useToast'
 import {
   useApproveMemberMutation,
   useMembersQuery,
@@ -53,17 +54,20 @@ function toPendingMemberRow(member: PendingMemberResponse): MentoringMemberRow {
 
 export const MentoringMembersPage = () => {
   const { pathname } = useLocation()
+  const navigate = useNavigate()
+  const addToast = useToast()
   const isApprovalPage = pathname === '/members/approval'
   const membersQuery = useMembersQuery()
   const pendingMembersQuery = usePendingMembersQuery()
   const approveMemberMutation = useApproveMemberMutation()
   const rejectMemberMutation = useRejectMemberMutation()
   const members = (membersQuery.data ?? []).map(toMemberRow)
-  // 승인 대기 목록은 "저장하기" 연동 전까지 상태 변경/삭제를 화면에서만 반영한다.
+  // 승인 대기 목록은 "저장하기"를 누르기 전까지 상태 변경/삭제를 화면에서만 반영한다.
   const [approvalEdits, setApprovalEdits] = useState<Record<string, Partial<MentoringMemberRow>>>(
     {},
   )
   const [deletedApprovalIds, setDeletedApprovalIds] = useState<ReadonlySet<string>>(new Set())
+  const [isSavingApprovals, setIsSavingApprovals] = useState(false)
   const approvals = (pendingMembersQuery.data ?? [])
     .map(toPendingMemberRow)
     .filter((member) => !deletedApprovalIds.has(member.id))
@@ -77,22 +81,46 @@ export const MentoringMembersPage = () => {
   const setPage = isApprovalPage ? setApprovalPage : setMembersPage
   const totalPages = Math.max(1, Math.ceil(currentMembers.length / PAGE_SIZE))
   const pagedMembers = currentMembers.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE)
+  const changedApprovalEntries = Object.entries(approvalEdits).filter(
+    (entry): entry is [string, { status: 'APPROVED' | 'REJECTED' }] =>
+      entry[1].status === 'APPROVED' || entry[1].status === 'REJECTED',
+  )
 
-  function handleStatusChange(id: string, status: MentoringMemberStatus) {
-    if (isApprovalPage) {
-      setApprovalEdits((current) => ({ ...current, [id]: { ...current[id], status } }))
+  function handleApprovalStatusChange(id: string, status: MentoringMemberStatus) {
+    setApprovalEdits((current) => ({ ...current, [id]: { ...current[id], status } }))
+  }
+
+  async function handleSaveApprovals() {
+    if (changedApprovalEntries.length === 0) {
       return
     }
-    if (status === 'APPROVED') {
-      approveMemberMutation.mutate(Number(id))
+
+    const hasRejected = changedApprovalEntries.some(([, edit]) => edit.status === 'REJECTED')
+    if (
+      hasRejected &&
+      !window.confirm('반려로 선택한 회원은 계정이 삭제됩니다. 저장하시겠습니까?')
+    ) {
       return
     }
-    if (status === 'REJECTED') {
-      const target = members.find((member) => member.id === id)
-      if (target && window.confirm(`${target.name} 회원의 가입을 반려하시겠습니까?`)) {
-        rejectMemberMutation.mutate(Number(id))
-      }
+
+    setIsSavingApprovals(true)
+    const results = await Promise.allSettled(
+      changedApprovalEntries.map(([id, edit]) =>
+        edit.status === 'APPROVED'
+          ? approveMemberMutation.mutateAsync(Number(id))
+          : rejectMemberMutation.mutateAsync(Number(id)),
+      ),
+    )
+    setIsSavingApprovals(false)
+
+    if (results.some((result) => result.status === 'rejected')) {
+      addToast({ type: 'error', message: '일부 회원 처리에 실패했습니다. 다시 시도해주세요.' })
+      return
     }
+
+    setApprovalEdits({})
+    addToast({ type: 'complete', message: '승인 처리가 완료됐습니다.' })
+    void navigate('/members')
   }
 
   function handleDeleteRequest(id: string) {
@@ -158,9 +186,14 @@ export const MentoringMembersPage = () => {
             page={page}
             totalPages={totalPages}
             totalLabel={`총 ${String(approvals.length)}명`}
+            hasChanges={changedApprovalEntries.length > 0}
+            isSaving={isSavingApprovals}
             onPageChange={setPage}
-            onStatusChange={handleStatusChange}
+            onStatusChange={handleApprovalStatusChange}
             onDelete={handleDeleteRequest}
+            onSave={() => {
+              void handleSaveApprovals()
+            }}
           />
         ) : (
           <MemberListPresenter
@@ -170,7 +203,6 @@ export const MentoringMembersPage = () => {
             totalLabel={`총 ${String(members.length)}명`}
             pendingApprovalCount={pendingMembersQuery.data?.length ?? 0}
             onPageChange={setPage}
-            onStatusChange={handleStatusChange}
           />
         )}
       </div>

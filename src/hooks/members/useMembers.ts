@@ -17,7 +17,8 @@ export function useMembersQuery() {
       if (!accessToken) {
         return Promise.reject(new Error('로그인이 필요합니다.'))
       }
-      return getMembers({ accessToken, refreshAccessToken })
+      // 회원 관리 화면은 승인된 회원만 보여준다. 대기 중인 회원은 승인 대기 화면에서 다룬다.
+      return getMembers({ accessToken, refreshAccessToken, status: 'APPROVED' })
     },
     enabled: accessToken !== undefined,
   })
@@ -56,7 +57,10 @@ export function useApproveMemberMutation() {
       return approveMember(userId, { accessToken, refreshAccessToken })
     },
     onSuccess: () => {
-      return queryClient.invalidateQueries({ queryKey: membersQueryKey })
+      return Promise.all([
+        queryClient.invalidateQueries({ queryKey: membersQueryKey }),
+        queryClient.invalidateQueries({ queryKey: pendingMembersQueryKey }),
+      ])
     },
   })
 }
@@ -76,7 +80,10 @@ export function useRejectMemberMutation() {
       return rejectMember(userId, { accessToken, refreshAccessToken })
     },
     onSuccess: () => {
-      return queryClient.invalidateQueries({ queryKey: membersQueryKey })
+      return Promise.all([
+        queryClient.invalidateQueries({ queryKey: membersQueryKey }),
+        queryClient.invalidateQueries({ queryKey: pendingMembersQueryKey }),
+      ])
     },
   })
 }

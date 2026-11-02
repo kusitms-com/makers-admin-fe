@@ -25,13 +25,20 @@ const adminMemberResponseSchema = z.object({
 const adminMemberListResponseSchema = z.array(adminMemberResponseSchema)
 
 export type AdminMemberResponse = z.infer<typeof adminMemberResponseSchema>
+export type AdminMemberStatus = NonNullable<AdminMemberResponse['status']>
 
 export function getMembers({
   accessToken,
   refreshAccessToken,
-}: RequestContext): Promise<AdminMemberResponse[]> {
+  status,
+}: RequestContext & { status?: AdminMemberStatus }): Promise<AdminMemberResponse[]> {
   return apiRequest(
-    { method: 'GET', path: '/admin/members', accessToken, refreshAccessToken },
+    {
+      method: 'GET',
+      path: status ? `/admin/members?status=${status}` : '/admin/members',
+      accessToken,
+      refreshAccessToken,
+    },
     adminMemberListResponseSchema,
   )
 }

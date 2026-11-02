@@ -24,14 +24,12 @@ interface MentoringMemberTableProps {
   page: number
   totalPages: number
   totalLabel: string
-  statusOptions: SelectFieldOption[]
-  // 승인 대기(mock) 화면만 멘토링 여부/비고(수료증) 컬럼을 쓴다.
-  // 실제 회원 목록 API(GET /admin/members) 응답에는 두 필드가 없다.
-  showMentoringAndRemark?: boolean
+  // 승인 대기 화면만 멘토링 여부/상태/삭제/비고 컬럼을 쓴다.
+  // 회원 목록(GET /admin/members, APPROVED만 조회)은 이미 승인된 회원만 보여주므로 상태 변경이 필요 없다.
+  isApprovalView?: boolean
+  statusOptions?: SelectFieldOption[]
   onPageChange: (page: number) => void
-  onStatusChange: (id: string, status: MentoringMemberStatus) => void
-  // 멘토링 여부/비고 컬럼과 마찬가지로 삭제 컬럼도 승인 대기(mock) 화면만 쓴다.
-  // 실제 회원 목록은 상태 드롭다운에서 반려를 선택해 처리한다.
+  onStatusChange?: (id: string, status: MentoringMemberStatus) => void
   onDelete?: (id: string) => void
 }
 
@@ -42,7 +40,6 @@ const COLUMNS_BASIC = [
   ['전화번호', 'px-3'],
   ['이메일', 'px-3'],
   ['가입일', 'px-3'],
-  ['상태', 'px-3'],
 ] as const
 
 const COLUMNS_FULL = [
@@ -61,27 +58,27 @@ const COLUMNS_FULL = [
 // 열 최소 너비 합계 + 행 px-1(8px) = 행 min-w.
 // 1440px 화면의 본문 폭(1156px) 안에 들어가야 가로 스크롤이 생기지 않는다.
 const TABLE_GRID_CLASS_BASIC =
-  'grid-cols-[minmax(140px,1.4fr)_minmax(64px,0.55fr)_minmax(100px,0.8fr)_minmax(156px,1.3fr)_minmax(160px,1.5fr)_minmax(132px,1.1fr)_minmax(108px,0.9fr)]'
+  'grid-cols-[minmax(140px,1.4fr)_minmax(64px,0.55fr)_minmax(100px,0.8fr)_minmax(156px,1.3fr)_minmax(160px,1.5fr)_minmax(132px,1.1fr)]'
 const TABLE_GRID_CLASS_FULL =
   'grid-cols-[minmax(140px,1.4fr)_minmax(64px,0.55fr)_minmax(100px,0.8fr)_minmax(156px,1.3fr)_minmax(160px,1.5fr)_minmax(132px,1.1fr)_minmax(72px,0.6fr)_minmax(108px,0.9fr)_minmax(72px,0.6fr)_minmax(140px,1.3fr)]'
-const ROW_MIN_WIDTH_BASIC = 'min-w-[868px]'
+const ROW_MIN_WIDTH_BASIC = 'min-w-[760px]'
 const ROW_MIN_WIDTH_FULL = 'min-w-[1152px]'
 
 function MentoringMemberTableRow({
   member,
   statusOptions,
-  showMentoringAndRemark,
+  isApprovalView,
   onStatusChange,
   onDelete,
 }: {
   member: MentoringMemberRow
-  statusOptions: SelectFieldOption[]
-  showMentoringAndRemark: boolean
-  onStatusChange: (status: MentoringMemberStatus) => void
+  statusOptions?: SelectFieldOption[]
+  isApprovalView: boolean
+  onStatusChange?: (status: MentoringMemberStatus) => void
   onDelete?: () => void
 }) {
-  const gridClassName = showMentoringAndRemark ? TABLE_GRID_CLASS_FULL : TABLE_GRID_CLASS_BASIC
-  const minWidthClassName = showMentoringAndRemark ? ROW_MIN_WIDTH_FULL : ROW_MIN_WIDTH_BASIC
+  const gridClassName = isApprovalView ? TABLE_GRID_CLASS_FULL : TABLE_GRID_CLASS_BASIC
+  const minWidthClassName = isApprovalView ? ROW_MIN_WIDTH_FULL : ROW_MIN_WIDTH_BASIC
 
   return (
     <div
@@ -114,7 +111,7 @@ function MentoringMemberTableRow({
       <span role="cell" className="text-label-14m text-label-normal min-w-0 truncate px-3">
         {member.registeredAt}
       </span>
-      {showMentoringAndRemark && (
+      {isApprovalView && (
         <span
           role="cell"
           className="text-label-14m text-label-normal flex min-w-0 justify-center px-3"
@@ -122,26 +119,23 @@ function MentoringMemberTableRow({
           {member.isMentoringMember ? 'Y' : 'N'}
         </span>
       )}
-      <div role="cell" className="min-w-0 px-3">
-        {member.status ? (
+      {isApprovalView && (
+        <div role="cell" className="min-w-0 px-3">
           <SelectField
-            value={member.status}
-            options={statusOptions}
+            value={member.status ?? 'PENDING'}
+            options={statusOptions ?? []}
             variant="compact"
-            disabled={member.status === 'APPROVED' || member.status === 'REJECTED'}
             onValueChange={(value) => {
-              if (statusOptions.some((option) => option.value === value)) {
-                onStatusChange(value as MentoringMemberStatus)
+              if (statusOptions?.some((option) => option.value === value)) {
+                onStatusChange?.(value as MentoringMemberStatus)
               }
             }}
             aria-label={`${member.name} 회원 상태`}
             className="text-label-14sb border-fill-netural h-8 w-[84px] rounded-md py-1.5 pr-2"
           />
-        ) : (
-          <span className="text-label-14m text-label-alternative">-</span>
-        )}
-      </div>
-      {showMentoringAndRemark && (
+        </div>
+      )}
+      {isApprovalView && (
         <div role="cell" className="flex min-w-0 justify-center px-3">
           <button
             type="button"
@@ -153,7 +147,7 @@ function MentoringMemberTableRow({
           </button>
         </div>
       )}
-      {showMentoringAndRemark && (
+      {isApprovalView && (
         <div role="cell" className="flex min-w-0 px-3">
           {member.remark && <FileChip fileName={member.remark} className="w-full" />}
         </div>
@@ -168,14 +162,14 @@ export const MentoringMemberTable = ({
   totalPages,
   totalLabel,
   statusOptions,
-  showMentoringAndRemark = false,
+  isApprovalView = false,
   onPageChange,
   onStatusChange,
   onDelete,
 }: MentoringMemberTableProps) => {
-  const columns = showMentoringAndRemark ? COLUMNS_FULL : COLUMNS_BASIC
-  const gridClassName = showMentoringAndRemark ? TABLE_GRID_CLASS_FULL : TABLE_GRID_CLASS_BASIC
-  const minWidthClassName = showMentoringAndRemark ? ROW_MIN_WIDTH_FULL : ROW_MIN_WIDTH_BASIC
+  const columns = isApprovalView ? COLUMNS_FULL : COLUMNS_BASIC
+  const gridClassName = isApprovalView ? TABLE_GRID_CLASS_FULL : TABLE_GRID_CLASS_BASIC
+  const minWidthClassName = isApprovalView ? ROW_MIN_WIDTH_FULL : ROW_MIN_WIDTH_BASIC
 
   return (
     <section
@@ -205,9 +199,9 @@ export const MentoringMemberTable = ({
               key={member.id}
               member={member}
               statusOptions={statusOptions}
-              showMentoringAndRemark={showMentoringAndRemark}
+              isApprovalView={isApprovalView}
               onStatusChange={(status) => {
-                onStatusChange(member.id, status)
+                onStatusChange?.(member.id, status)
               }}
               onDelete={
                 onDelete &&

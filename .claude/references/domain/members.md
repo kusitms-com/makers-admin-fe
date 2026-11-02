@@ -24,6 +24,7 @@ src/hooks/useMembers.ts
 
 ## 주요 액션
 
+- 회원 목록 조회(승인된 회원만, `status=APPROVED`)
 - 승인 대기 목록 조회
 - 회원 승인
 - 회원 반려 및 계정 삭제
@@ -32,5 +33,7 @@ src/hooks/useMembers.ts
 
 - endpoint path, request, response shape는 API reference를 기준으로 합니다.
 - 목록 서버 상태는 TanStack Query로 관리합니다.
-- 승인/반려 이후 승인 대기 목록 query를 invalidate합니다.
+- 회원 관리(`/members`) 화면은 승인된 회원만 보여주므로 상태 컬럼/변경 UI가 없습니다.
+- 승인 대기(`/members/approval`) 화면은 상태 변경을 화면 로컬 상태로만 모았다가, "저장하기"를 누르면 변경된 항목만 승인/반려 API로 일괄 요청합니다.
+- 승인/반려 이후 회원 목록과 승인 대기 목록 query를 모두 invalidate합니다.
 - 반려는 계정 삭제 성격이 있으므로 confirmation을 둡니다.

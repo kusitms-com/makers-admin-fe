@@ -1,17 +1,6 @@
 import { useNavigate } from 'react-router'
 import { Button } from '@/components/common'
-import type { SelectFieldOption } from '@/components/common/SelectField'
-import {
-  MentoringMemberTable,
-  type MentoringMemberRow,
-  type MentoringMemberStatus,
-} from '@/components/members'
-
-const LIST_STATUS_OPTIONS: SelectFieldOption[] = [
-  { value: 'PENDING', label: '대기' },
-  { value: 'APPROVED', label: '승인' },
-  { value: 'REJECTED', label: '반려' },
-]
+import { MentoringMemberTable, type MentoringMemberRow } from '@/components/members'
 
 interface MemberListPresenterProps {
   members: MentoringMemberRow[]
@@ -20,7 +9,6 @@ interface MemberListPresenterProps {
   totalLabel: string
   pendingApprovalCount: number
   onPageChange: (page: number) => void
-  onStatusChange: (id: string, status: MentoringMemberStatus) => void
 }
 
 export const MemberListPresenter = ({
@@ -30,7 +18,6 @@ export const MemberListPresenter = ({
   totalLabel,
   pendingApprovalCount,
   onPageChange,
-  onStatusChange,
 }: MemberListPresenterProps) => {
   const navigate = useNavigate()
 
@@ -55,9 +42,7 @@ export const MemberListPresenter = ({
         page={page}
         totalPages={totalPages}
         totalLabel={totalLabel}
-        statusOptions={LIST_STATUS_OPTIONS}
         onPageChange={onPageChange}
-        onStatusChange={onStatusChange}
       />
     </>
   )

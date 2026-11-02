@@ -4,6 +4,7 @@ import userEvent from '@testing-library/user-event'
 import { MemoryRouter } from 'react-router'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { useAuthStore } from '@hooks/auth/useAuth'
+import { useToastStore } from '@hooks/common/useToast'
 import { MentoringMembersPage } from './MembersPage'
 
 const MEMBER_ITEMS = [
@@ -156,22 +157,27 @@ const PENDING_ITEMS = [
   },
 ]
 
-let memberItems = MEMBER_ITEMS.map((member) => ({ ...member }))
+const memberItems = MEMBER_ITEMS.map((member) => ({ ...member }))
+let pendingItems = PENDING_ITEMS.map((member) => ({ ...member }))
 
 const approveMember = vi.fn((userId: number) => {
-  memberItems = memberItems.map((member) =>
-    member.userId === userId ? { ...member, status: 'APPROVED' } : member,
-  )
+  pendingItems = pendingItems.filter((member) => member.userId !== userId)
   return Promise.resolve({})
 })
 const rejectMember = vi.fn((userId: number) => {
-  memberItems = memberItems.filter((member) => member.userId !== userId)
+  pendingItems = pendingItems.filter((member) => member.userId !== userId)
   return Promise.resolve({})
 })
-const getPendingMembers = vi.fn(() => Promise.resolve(PENDING_ITEMS))
+// 회원 관리 화면은 status=APPROVED로 필터링해서 조회한다.
+const getMembers = vi.fn((params: { status?: string }) =>
+  Promise.resolve(
+    params.status ? memberItems.filter((member) => member.status === params.status) : memberItems,
+  ),
+)
+const getPendingMembers = vi.fn(() => Promise.resolve(pendingItems))
 
 vi.mock('@api/members', () => ({
-  getMembers: vi.fn().mockImplementation(() => Promise.resolve(memberItems)),
+  getMembers: (params: { status?: string }) => getMembers(params),
   getPendingMembers: () => getPendingMembers(),
   approveMember: (userId: number) => approveMember(userId),
   rejectMember: (userId: number) => rejectMember(userId),
@@ -193,71 +199,102 @@ describe('MentoringMembersPage', () => {
     useAuthStore.setState({
       session: { status: 'authenticated', accessToken: 'test-token', authority: 'MANAGER' },
     })
+    pendingItems = PENDING_ITEMS.map((member) => ({ ...member }))
+    useToastStore.setState({ toasts: [] })
+    vi.clearAllMocks()
   })
 
-  it('회원 수와 첫 페이지 목록을 표시한다', async () => {
+  it('승인된 회원만 필터링해서 조회하고 표시한다', async () => {
     renderPage()
 
     expect(screen.getByRole('heading', { name: '회원 관리' })).toBeTruthy()
-    expect(await screen.findByText('이현진')).toBeTruthy()
+    expect(await screen.findByText('김서연')).toBeTruthy()
+    expect(getMembers).toHaveBeenCalledWith(expect.objectContaining({ status: 'APPROVED' }))
     expect(screen.getByLabelText('현재 위치')).toBeTruthy()
     expect(screen.getByRole('button', { name: '승인 요청 4' })).toBeTruthy()
-    expect(screen.getByText('총 8명')).toBeTruthy()
-    expect(screen.getByText('서지민')).toBeTruthy()
+    expect(screen.getByText('총 3명')).toBeTruthy()
+    expect(screen.getByText('정하늘')).toBeTruthy()
+    expect(screen.getByText('한도윤')).toBeTruthy()
+    expect(screen.queryByText('이현진')).toBeNull()
   })
 
   it('승인 대기 회원이 없으면 승인 요청 버튼이 비활성화된다', async () => {
     getPendingMembers.mockResolvedValueOnce([])
     renderPage()
 
-    await screen.findByText('이현진')
+    await screen.findByText('김서연')
     const button = screen.getByRole('button', { name: '승인 요청 0' })
     expect(button.hasAttribute('disabled')).toBe(true)
   })
 
-  it('대기 회원을 반려하면 확인 후 반려 API를 호출하고 목록에서 제거한다', async () => {
-    const user = userEvent.setup()
-    window.confirm = vi.fn().mockReturnValue(false)
+  it('회원 목록 화면에는 상태 컬럼이 없다', async () => {
     renderPage()
 
-    await screen.findByText('서지민')
-    await user.click(screen.getByRole('combobox', { name: '서지민 회원 상태' }))
-    await user.click(await screen.findByRole('option', { name: '반려' }))
-    expect(window.confirm).toHaveBeenCalledWith('서지민 회원의 가입을 반려하시겠습니까?')
-    expect(rejectMember).not.toHaveBeenCalled()
-    expect(screen.getByText('서지민')).toBeTruthy()
-
-    vi.mocked(window.confirm).mockReturnValue(true)
-    await user.click(screen.getByRole('combobox', { name: '서지민 회원 상태' }))
-    await user.click(await screen.findByRole('option', { name: '반려' }))
-    expect(rejectMember).toHaveBeenCalledWith(8)
-    expect(await screen.findByText('총 7명')).toBeTruthy()
-    expect(screen.queryByText('서지민')).toBeNull()
-  })
-
-  it('대기 회원을 승인하면 승인 API를 호출하고 더 이상 상태를 바꿀 수 없다', async () => {
-    const user = userEvent.setup()
-    renderPage()
-
-    await screen.findByText('이현진')
-    await user.click(screen.getByRole('combobox', { name: '이현진 회원 상태' }))
-    await user.click(await screen.findByRole('option', { name: '승인' }))
-
-    expect(approveMember).toHaveBeenCalledWith(1)
-    const trigger = await screen.findByRole('combobox', { name: '이현진 회원 상태' })
-    expect(trigger.hasAttribute('data-disabled')).toBe(true)
+    await screen.findByText('김서연')
+    expect(screen.queryByRole('columnheader', { name: '상태' })).toBeNull()
+    expect(screen.queryByRole('combobox')).toBeNull()
   })
 
   it('승인 요청 버튼을 누르면 승인 프레젠터를 표시한다', async () => {
     const user = userEvent.setup()
     renderPage()
 
-    await screen.findByText('이현진')
+    await screen.findByText('김서연')
     await user.click(screen.getByRole('button', { name: '승인 요청 4' }))
 
     expect(screen.getByRole('link', { name: '회원 관리' }).getAttribute('href')).toBe('/members')
-    expect(screen.getByRole('button', { name: '저장하기' })).toBeTruthy()
+    expect(screen.getByRole('columnheader', { name: '상태' })).toBeTruthy()
     expect(screen.getByText('총 4명')).toBeTruthy()
     expect(screen.getByText('수료증_김서연.pdf')).toBeTruthy()
+    const saveButton = screen.getByRole('button', { name: '저장하기' })
+    expect(saveButton.hasAttribute('disabled')).toBe(true)
+  })
+
+  it('승인/반려를 선택해도 저장 전에는 API가 호출되지 않고, 저장하기를 누르면 일괄 호출된다', async () => {
+    const user = userEvent.setup()
+    window.confirm = vi.fn().mockReturnValue(true)
+    renderPage()
+
+    await screen.findByText('김서연')
+    await user.click(screen.getByRole('button', { name: '승인 요청 4' }))
+
+    await user.click(screen.getByRole('combobox', { name: '이현진 회원 상태' }))
+    await user.click(await screen.findByRole('option', { name: '완료' }))
+    await user.click(screen.getByRole('combobox', { name: '김서연 회원 상태' }))
+    await user.click(await screen.findByRole('option', { name: '거절' }))
+
+    expect(approveMember).not.toHaveBeenCalled()
+    expect(rejectMember).not.toHaveBeenCalled()
+    const saveButton = screen.getByRole('button', { name: '저장하기' })
+    expect(saveButton.hasAttribute('disabled')).toBe(false)
+
+    await user.click(saveButton)
+
+    expect(window.confirm).toHaveBeenCalledWith(
+      '반려로 선택한 회원은 계정이 삭제됩니다. 저장하시겠습니까?',
+    )
+    expect(approveMember).toHaveBeenCalledWith(101)
+    expect(rejectMember).toHaveBeenCalledWith(102)
+    expect(await screen.findByRole('button', { name: '승인 요청 2' })).toBeTruthy()
+    expect(useToastStore.getState().toasts.map((toast) => toast.message)).toContain(
+      '승인 처리가 완료됐습니다.',
+    )
+  })
+
+  it('반려 확인을 취소하면 API를 호출하지 않고 승인 화면에 머문다', async () => {
+    const user = userEvent.setup()
+    window.confirm = vi.fn().mockReturnValue(false)
+    renderPage()
+
+    await screen.findByText('김서연')
+    await user.click(screen.getByRole('button', { name: '승인 요청 4' }))
+
+    await user.click(screen.getByRole('combobox', { name: '박민준 회원 상태' }))
+    await user.click(await screen.findByRole('option', { name: '거절' }))
+    await user.click(screen.getByRole('button', { name: '저장하기' }))
+
+    expect(window.confirm).toHaveBeenCalled()
+    expect(rejectMember).not.toHaveBeenCalled()
+    expect(screen.getByText('회원가입 승인')).toBeTruthy()
   })
 })
