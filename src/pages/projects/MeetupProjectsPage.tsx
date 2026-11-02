@@ -1,10 +1,13 @@
 import { useEffect, useRef, useState } from 'react'
+import dayjs from 'dayjs'
 import type {
   MeetupProjectCreateRequest,
+  MeetupProjectDetail,
   MeetupProjectListItem,
   MeetupProjectType,
 } from '@api/projects'
 import { Button } from '@components/common/Button'
+import { Modal } from '@components/common/Modal'
 import { PageHeader } from '@components/common/PageHeader'
 import { SegmentedControl } from '@components/common/SegmentedControl'
 import { MeetupProjectModal } from '@components/projects/MeetupProjectModal'
@@ -17,6 +20,7 @@ import {
 import {
   useCreateMeetupProjectMutation,
   useDeleteMeetupProjectMutation,
+  useMeetupProjectQuery,
   useMeetupProjectsQuery,
 } from '@hooks/projects/useMeetupProjects'
 import { toAbsoluteS3Url } from '@lib/s3'
@@ -48,15 +52,25 @@ function toProjectCard(item: MeetupProjectListItem): MeetupProjectCard {
   }
 }
 
+const TEAM_PART_KEYS = ['planner', 'designer', 'frontend', 'backend', 'ios', 'aos'] as const
+
+function teamToMembers(team: MeetupProjectDetail['team']): MeetupProjectFormValues['members'] {
+  return TEAM_PART_KEYS.flatMap((part) =>
+    (team[part] ?? []).map((name, index) => ({ id: `${part}-${String(index)}`, part, name })),
+  )
+}
+
 export function MeetupProjectsPage() {
   const projectsQuery = useMeetupProjectsQuery()
   const [cohort, setCohort] = useState(String(CURRENT_GENERATION))
   const [modalOpen, setModalOpen] = useState(false)
+  const [detailId, setDetailId] = useState<number | null>(null)
 
   const form = useMeetupProjectForm()
   const addToast = useToast()
   const createMutation = useCreateMeetupProjectMutation()
   const deleteMutation = useDeleteMeetupProjectMutation()
+  const detailQuery = useMeetupProjectQuery(detailId ?? undefined)
 
   const projects = (projectsQuery.data?.meetup_list ?? []).map(toProjectCard)
 
@@ -73,6 +87,14 @@ export function MeetupProjectsPage() {
   }, [])
 
   const visibleProjects = projects.filter((project) => project.cardinal === Number(cohort))
+
+  function openDetail(id: string) {
+    setDetailId(Number(id))
+  }
+
+  function closeDetail() {
+    setDetailId(null)
+  }
 
   function openModal() {
     form.reset()
@@ -190,6 +212,9 @@ export function MeetupProjectsPage() {
                   key={project.id}
                   imageUrl={project.imageUrl}
                   serviceName={project.serviceName}
+                  onViewDetail={() => {
+                    openDetail(project.id)
+                  }}
                   onDelete={() => {
                     handleDelete(project.id)
                   }}
@@ -244,6 +269,84 @@ export function MeetupProjectsPage() {
         onSave={handleSave}
         saveDisabled={!form.isValid || createMutation.isPending}
       />
+
+      {detailId !== null && detailQuery.isPending && (
+        <Modal
+          open
+          onOpenChange={closeDetail}
+          title="밋업 프로젝트 상세"
+          footer={
+            <Button variant="outlined" size="l" className="w-[140px]" onClick={closeDetail}>
+              닫기
+            </Button>
+          }
+        >
+          <p className="text-label-14m text-label-alternative py-10 text-center">
+            불러오는 중입니다...
+          </p>
+        </Modal>
+      )}
+
+      {detailId !== null && detailQuery.isError && (
+        <Modal
+          open
+          onOpenChange={closeDetail}
+          title="밋업 프로젝트 상세"
+          footer={
+            <Button variant="outlined" size="l" className="w-[140px]" onClick={closeDetail}>
+              닫기
+            </Button>
+          }
+        >
+          <p className="text-label-14m text-label-alternative py-10 text-center">
+            상세 정보를 불러오지 못했습니다.
+          </p>
+        </Modal>
+      )}
+
+      {detailQuery.data && (
+        <MeetupProjectModal
+          open={detailId !== null}
+          onOpenChange={(open) => {
+            if (!open) closeDetail()
+          }}
+          readOnly
+          cardinal={detailQuery.data.cardinal}
+          type={detailQuery.data.type.toUpperCase()}
+          typeOptions={TYPE_OPTIONS}
+          onTypeChange={() => {}}
+          name={detailQuery.data.name}
+          onNameChange={() => {}}
+          oneLineIntro={detailQuery.data.one_line_intro}
+          onOneLineIntroChange={() => {}}
+          intro={detailQuery.data.intro}
+          onIntroChange={() => {}}
+          teamName={detailQuery.data.team.name}
+          onTeamNameChange={() => {}}
+          members={teamToMembers(detailQuery.data.team)}
+          partOptions={PART_OPTIONS}
+          onMemberPartChange={() => {}}
+          onMemberRemove={() => {}}
+          onMemberAdd={() => {}}
+          logoUrl={toAbsoluteS3Url(detailQuery.data.logo_url)}
+          posterUrl={toAbsoluteS3Url(detailQuery.data.poster_url)}
+          githubUrl={detailQuery.data.github_url ?? ''}
+          onGithubUrlChange={() => {}}
+          behanceUrl={detailQuery.data.behance_url ?? ''}
+          onBehanceUrlChange={() => {}}
+          appUrl={detailQuery.data.app_url ?? ''}
+          onAppUrlChange={() => {}}
+          instagramUrl={detailQuery.data.instagram_url ?? ''}
+          onInstagramUrlChange={() => {}}
+          startDate={dayjs(detailQuery.data.start_date).toDate()}
+          onStartDateChange={() => {}}
+          endDate={dayjs(detailQuery.data.end_date).toDate()}
+          onEndDateChange={() => {}}
+          onCancel={closeDetail}
+          onSave={() => {}}
+          saveDisabled
+        />
+      )}
     </div>
   )
 }

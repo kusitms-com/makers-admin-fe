@@ -4,6 +4,7 @@ import { cn } from '@lib/utils'
 interface ProjectThumbnailCardProps {
   imageUrl: string
   serviceName: string
+  onViewDetail?: () => void
   onDelete?: () => void
   className?: string
 }
@@ -11,6 +12,7 @@ interface ProjectThumbnailCardProps {
 export function ProjectThumbnailCard({
   imageUrl,
   serviceName,
+  onViewDetail,
   onDelete,
   className,
 }: ProjectThumbnailCardProps) {
@@ -27,7 +29,12 @@ export function ProjectThumbnailCard({
         className="relative h-[150px] w-full bg-cover bg-center"
         style={{ backgroundImage: `url(${imageUrl})` }}
       >
-        <div className="bg-fill-transparent-black absolute inset-0 flex items-center justify-center opacity-0 transition-opacity group-focus-within:opacity-100 group-hover:opacity-100">
+        <div className="bg-fill-transparent-black absolute inset-0 flex flex-col items-center justify-center gap-2 opacity-0 transition-opacity group-focus-within:opacity-100 group-hover:opacity-100">
+          {onViewDetail && (
+            <Button variant="primary" size="m" className="w-[100px]" onClick={onViewDetail}>
+              상세보기
+            </Button>
+          )}
           <Button variant="error" size="m" className="w-[100px]" onClick={onDelete}>
             삭제하기
           </Button>

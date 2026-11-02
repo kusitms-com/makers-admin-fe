@@ -31,12 +31,44 @@ const INITIAL_MEETUP_ITEMS = [
 
 const meetupList = [...INITIAL_MEETUP_ITEMS]
 
+const MEETUP_DETAIL = {
+  meetup_id: 1,
+  cardinal: 33,
+  name: '큐첵',
+  intro: '프로젝트 소개',
+  type: 'web',
+  team: {
+    name: '큐첵팀',
+    planner: ['기획자'],
+    designer: null,
+    frontend: ['프론트개발자'],
+    backend: null,
+    ios: null,
+    aos: null,
+  },
+  one_line_intro: '한 줄 소개',
+  logo_url: null,
+  poster_url: null,
+  web_thumbnail_url: null,
+  behance_url: null,
+  instagram_url: null,
+  github_url: null,
+  app_url: null,
+  start_date: '2026-01-01',
+  end_date: '2026-02-01',
+  tags: [],
+}
+
 vi.mock('@api/projects', () => ({
   getMeetupProjects: vi
     .fn()
     .mockImplementation(() =>
       Promise.resolve({ meetup_count: meetupList.length, meetup_list: meetupList }),
     ),
+  getMeetupProject: vi.fn().mockImplementation((id: number) => {
+    if (id !== MEETUP_DETAIL.meetup_id) return Promise.reject(new Error('not found'))
+    return Promise.resolve(MEETUP_DETAIL)
+  }),
   createMeetupProject: vi.fn().mockResolvedValue(undefined),
   deleteMeetupProject: vi.fn().mockImplementation((id: number) => {
     const index = meetupList.findIndex((item) => item.meetup_id === id)
@@ -179,5 +211,26 @@ describe('MeetupProjectsPage', () => {
       expect(screen.queryByText('모먼트')).toBeFalsy()
     })
     expect(screen.getByText('등록된 프로젝트가 없습니다')).toBeTruthy()
+  })
+
+  it('상세보기를 클릭하면 상세 정보를 읽기 전용으로 보여준다', async () => {
+    const user = userEvent.setup()
+    renderPage()
+
+    const card = (await screen.findByText('큐첵')).closest('[role="group"]')
+    if (!card) throw new Error('큐첵 카드를 찾을 수 없습니다')
+    await user.hover(card)
+    await user.click(within(card as HTMLElement).getByRole('button', { name: '상세보기' }))
+
+    const dialog = await screen.findByRole('dialog')
+    expect(within(dialog).getByText('밋업 프로젝트 상세')).toBeTruthy()
+    expect(within(dialog).getByDisplayValue('큐첵')).toBeTruthy()
+    expect(within(dialog).getByLabelText('기획자 이름')).toBeTruthy()
+    expect(within(dialog).queryByRole('button', { name: '저장하기' })).toBeFalsy()
+    expect(within(dialog).queryByRole('button', { name: '기획자 삭제' })).toBeFalsy()
+
+    await user.click(within(dialog).getByRole('button', { name: '닫기' }))
+
+    expect(screen.queryByRole('dialog')).toBeFalsy()
   })
 })

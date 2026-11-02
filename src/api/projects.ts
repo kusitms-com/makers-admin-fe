@@ -44,6 +44,51 @@ export function getMeetupProjects({
   )
 }
 
+const meetupProjectTeamSchema = z.object({
+  name: z.string(),
+  planner: z.array(z.string()).nullable(),
+  designer: z.array(z.string()).nullable(),
+  frontend: z.array(z.string()).nullable(),
+  backend: z.array(z.string()).nullable(),
+  ios: z.array(z.string()).nullable(),
+  aos: z.array(z.string()).nullable(),
+})
+
+// 상세 조회(isDetail=true)에서만 내려오는 intro/type/start_date/end_date/team을 포함한다.
+// type은 ProjectType enum 상수명과 달리 응답에서 소문자로 내려오는 경우가 있어 string으로만 검증한다.
+const meetupProjectDetailSchema = z.object({
+  meetup_id: z.number(),
+  cardinal: z.number(),
+  name: z.string(),
+  intro: z.string(),
+  type: z.string(),
+  team: meetupProjectTeamSchema,
+  one_line_intro: z.string(),
+  logo_url: z.string().nullable(),
+  poster_url: z.string().nullable(),
+  web_thumbnail_url: z.string().nullable(),
+  behance_url: z.string().nullable(),
+  instagram_url: z.string().nullable(),
+  github_url: z.string().nullable(),
+  app_url: z.string().nullable(),
+  start_date: z.string(),
+  end_date: z.string(),
+  tags: z.array(z.string()).nullable(),
+})
+
+export type MeetupProjectTeam = z.infer<typeof meetupProjectTeamSchema>
+export type MeetupProjectDetail = z.infer<typeof meetupProjectDetailSchema>
+
+export function getMeetupProject(
+  id: number,
+  { accessToken, refreshAccessToken }: RequestContext,
+): Promise<MeetupProjectDetail> {
+  return apiRequest(
+    { method: 'GET', path: `/admin/meetup/${String(id)}`, accessToken, refreshAccessToken },
+    meetupProjectDetailSchema,
+  )
+}
+
 export interface MeetupProjectCreateRequest {
   cardinal: number
   name: string

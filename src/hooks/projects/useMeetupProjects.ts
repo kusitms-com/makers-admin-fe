@@ -2,6 +2,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import {
   createMeetupProject,
   deleteMeetupProject,
+  getMeetupProject,
   getMeetupProjects,
   type MeetupProjectCreateRequest,
 } from '@api/projects'
@@ -24,6 +25,24 @@ export function useMeetupProjectsQuery() {
       return getMeetupProjects({ accessToken, refreshAccessToken })
     },
     enabled: accessToken !== undefined,
+  })
+}
+
+export function useMeetupProjectQuery(id: number | undefined) {
+  const accessToken = useAuthStore((state) =>
+    state.session.status === 'authenticated' ? state.session.accessToken : undefined,
+  )
+  const refreshAccessToken = useAuthStore((state) => state.refreshAccessToken)
+
+  return useQuery({
+    queryKey: [...meetupProjectsQueryKey, id],
+    queryFn: () => {
+      if (!accessToken || id === undefined) {
+        return Promise.reject(new Error('로그인이 필요합니다.'))
+      }
+      return getMeetupProject(id, { accessToken, refreshAccessToken })
+    },
+    enabled: accessToken !== undefined && id !== undefined,
   })
 }
 

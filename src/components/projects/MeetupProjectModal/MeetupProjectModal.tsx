@@ -56,6 +56,7 @@ interface MeetupProjectModalProps {
   onCancel: () => void
   onSave: () => void
   saveDisabled?: boolean
+  readOnly?: boolean
   className?: string
 }
 
@@ -100,6 +101,7 @@ export function MeetupProjectModal({
   onCancel,
   onSave,
   saveDisabled = true,
+  readOnly = false,
   className,
 }: MeetupProjectModalProps) {
   const [draftPart, setDraftPart] = useState(partOptions[0]?.value ?? '')
@@ -118,9 +120,17 @@ export function MeetupProjectModal({
     <Modal
       open={open}
       onOpenChange={onOpenChange}
-      title="밋업 프로젝트 등록"
+      title={readOnly ? '밋업 프로젝트 상세' : '밋업 프로젝트 등록'}
       className={className ?? 'left-[calc(50%+20px)] w-[540px]'}
-      footer={<ModalActions onCancel={onCancel} onSave={onSave} saveDisabled={saveDisabled} />}
+      footer={
+        readOnly ? (
+          <Button variant="outlined" size="l" className="w-[140px]" onClick={onCancel}>
+            닫기
+          </Button>
+        ) : (
+          <ModalActions onCancel={onCancel} onSave={onSave} saveDisabled={saveDisabled} />
+        )
+      }
     >
       <div className="flex items-stretch gap-3">
         <CardinalField cardinal={cardinal} className="w-[130px] shrink-0" />
@@ -129,6 +139,7 @@ export function MeetupProjectModal({
             value={type}
             options={typeOptions}
             onValueChange={onTypeChange}
+            disabled={readOnly}
             className="w-24"
           />
         </FormField>
@@ -138,6 +149,7 @@ export function MeetupProjectModal({
             onChange={(event: ChangeEvent<HTMLInputElement>) => {
               onNameChange(event.target.value)
             }}
+            readOnly={readOnly}
             placeholder="서비스 이름을 입력해주세요"
           />
         </FormField>
@@ -148,6 +160,7 @@ export function MeetupProjectModal({
           onChange={(event: ChangeEvent<HTMLInputElement>) => {
             onOneLineIntroChange(event.target.value)
           }}
+          readOnly={readOnly}
           placeholder="한 줄 소개를 입력해주세요"
         />
       </FormField>
@@ -157,6 +170,7 @@ export function MeetupProjectModal({
           onChange={(event: ChangeEvent<HTMLInputElement>) => {
             onIntroChange(event.target.value)
           }}
+          readOnly={readOnly}
           placeholder="프로젝트 소개를 입력해주세요"
         />
       </FormField>
@@ -167,46 +181,49 @@ export function MeetupProjectModal({
             onChange={(event: ChangeEvent<HTMLInputElement>) => {
               onTeamNameChange(event.target.value)
             }}
+            readOnly={readOnly}
             placeholder="팀명을 입력해주세요"
           />
         </FormField>
         <FormField label="진행 기간" className="shrink-0">
           <div className="flex items-center gap-2">
-            <DatePicker value={startDate} onChange={onStartDateChange} />
+            <DatePicker value={startDate} onChange={onStartDateChange} disabled={readOnly} />
             <span className="text-label-14m text-label-alternative">~</span>
-            <DatePicker value={endDate} onChange={onEndDateChange} />
+            <DatePicker value={endDate} onChange={onEndDateChange} disabled={readOnly} />
           </div>
         </FormField>
       </div>
       <FormField label="팀원 관리">
         <div className="flex flex-col items-stretch gap-3">
-          <div className="flex w-full items-center gap-2">
-            <SelectField
-              value={draftPart}
-              options={partOptions}
-              onValueChange={setDraftPart}
-              aria-label="추가할 팀원 파트"
-              className="w-[130px] shrink-0"
-            />
-            <Inputfield
-              value={draftName}
-              onChange={(event: ChangeEvent<HTMLInputElement>) => {
-                setDraftName(event.target.value)
-              }}
-              placeholder="이름"
-              aria-label="추가할 팀원 이름"
-              className="flex-1"
-            />
-            <Button
-              variant={draftName.trim() ? 'primary' : 'disable'}
-              size="m"
-              disabled={!draftName.trim()}
-              className="w-[100px] shrink-0"
-              onClick={handleAddMember}
-            >
-              추가하기
-            </Button>
-          </div>
+          {!readOnly && (
+            <div className="flex w-full items-center gap-2">
+              <SelectField
+                value={draftPart}
+                options={partOptions}
+                onValueChange={setDraftPart}
+                aria-label="추가할 팀원 파트"
+                className="w-[130px] shrink-0"
+              />
+              <Inputfield
+                value={draftName}
+                onChange={(event: ChangeEvent<HTMLInputElement>) => {
+                  setDraftName(event.target.value)
+                }}
+                placeholder="이름"
+                aria-label="추가할 팀원 이름"
+                className="flex-1"
+              />
+              <Button
+                variant={draftName.trim() ? 'primary' : 'disable'}
+                size="m"
+                disabled={!draftName.trim()}
+                className="w-[100px] shrink-0"
+                onClick={handleAddMember}
+              >
+                추가하기
+              </Button>
+            </div>
+          )}
           {members.map((member) => (
             <div key={member.id} className="flex w-full items-center gap-2">
               <SelectField
@@ -215,6 +232,7 @@ export function MeetupProjectModal({
                 onValueChange={(value) => {
                   onMemberPartChange(member.id, value)
                 }}
+                disabled={readOnly}
                 aria-label={`${member.name} 파트`}
                 className="w-[130px] shrink-0"
               />
@@ -224,29 +242,37 @@ export function MeetupProjectModal({
                 aria-label={`${member.name} 이름`}
                 className="flex-1"
               />
-              <Button
-                variant="error"
-                size="m"
-                aria-label={`${member.name} 삭제`}
-                className="w-[100px] shrink-0"
-                onClick={() => {
-                  onMemberRemove(member.id)
-                }}
-              >
-                삭제하기
-              </Button>
+              {!readOnly && (
+                <Button
+                  variant="error"
+                  size="m"
+                  aria-label={`${member.name} 삭제`}
+                  className="w-[100px] shrink-0"
+                  onClick={() => {
+                    onMemberRemove(member.id)
+                  }}
+                >
+                  삭제하기
+                </Button>
+              )}
             </div>
           ))}
         </div>
       </FormField>
       <FormField label="로고 이미지">
-        <ImageUploadBox imageUrl={logoUrl} onFileChange={onLogoChange} onDelete={onLogoDelete} />
+        <ImageUploadBox
+          imageUrl={logoUrl}
+          onFileChange={onLogoChange}
+          onDelete={onLogoDelete}
+          readOnly={readOnly}
+        />
       </FormField>
       <FormField label="포스터 이미지">
         <ImageUploadBox
           imageUrl={posterUrl}
           onFileChange={onPosterChange}
           onDelete={onPosterDelete}
+          readOnly={readOnly}
         />
       </FormField>
       <FormField label="링크">
@@ -258,6 +284,7 @@ export function MeetupProjectModal({
               onChange={(event: ChangeEvent<HTMLInputElement>) => {
                 onGithubUrlChange(event.target.value)
               }}
+              readOnly={readOnly}
               placeholder="링크를 붙여넣어주세요"
               aria-label="깃허브 URL"
             />
@@ -269,6 +296,7 @@ export function MeetupProjectModal({
               onChange={(event: ChangeEvent<HTMLInputElement>) => {
                 onBehanceUrlChange(event.target.value)
               }}
+              readOnly={readOnly}
               placeholder="링크를 붙여넣어주세요"
               aria-label="비핸스 URL"
             />
@@ -280,6 +308,7 @@ export function MeetupProjectModal({
               onChange={(event: ChangeEvent<HTMLInputElement>) => {
                 onAppUrlChange(event.target.value)
               }}
+              readOnly={readOnly}
               placeholder="링크를 붙여넣어주세요"
               aria-label="서비스 URL"
             />
@@ -291,6 +320,7 @@ export function MeetupProjectModal({
               onChange={(event: ChangeEvent<HTMLInputElement>) => {
                 onInstagramUrlChange(event.target.value)
               }}
+              readOnly={readOnly}
               placeholder="링크를 붙여넣어주세요"
               aria-label="인스타그램 URL"
             />

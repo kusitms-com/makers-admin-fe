@@ -14,6 +14,7 @@ type PickerView = 'day' | 'month' | 'year'
 interface DatePickerProps {
   value: Date
   onChange: (date: Date) => void
+  disabled?: boolean
   className?: string
 }
 
@@ -39,7 +40,7 @@ function withYearMonth(date: Dayjs, year: number, month: number) {
 const cellClassName =
   'text-label-13m flex items-center justify-center rounded-lg py-[9px] text-center transition-colors'
 
-export function DatePicker({ value, onChange, className }: DatePickerProps) {
+export function DatePicker({ value, onChange, disabled, className }: DatePickerProps) {
   const [open, setOpen] = useState(false)
   const [view, setView] = useState<PickerView>('day')
   const [cursor, setCursor] = useState(() => dayjs(value).date(1))
@@ -47,6 +48,7 @@ export function DatePicker({ value, onChange, className }: DatePickerProps) {
   const today = dayjs()
 
   function handleOpenChange(nextOpen: boolean) {
+    if (disabled) return
     setOpen(nextOpen)
     if (nextOpen) {
       setCursor(dayjs(value).date(1))
@@ -82,8 +84,10 @@ export function DatePicker({ value, onChange, className }: DatePickerProps) {
   return (
     <Popover.Root open={open} onOpenChange={handleOpenChange}>
       <Popover.Trigger
+        disabled={disabled}
         className={cn(
           'border-line-alternative text-label-light flex items-center gap-[7px] rounded-lg border px-4 py-2 outline-none',
+          disabled && 'cursor-not-allowed opacity-60',
           className,
         )}
       >
