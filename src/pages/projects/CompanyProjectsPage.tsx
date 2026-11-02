@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import type { CorporateProjectCreateRequest, CorporateProjectListItem } from '@api/projects'
 import { Button } from '@components/common/Button'
+import { Modal } from '@components/common/Modal'
 import { PageHeader } from '@components/common/PageHeader'
 import { SegmentedControl } from '@components/common/SegmentedControl'
 import { CompanyProjectModal } from '@components/projects/CompanyProjectModal'
@@ -8,6 +9,7 @@ import { ProjectThumbnailCard } from '@components/projects/ProjectThumbnailCard'
 import { useToast } from '@hooks/common/useToast'
 import { useCompanyProjectForm } from '@hooks/projects/useCompanyProjectForm'
 import {
+  useCompanyProjectQuery,
   useCompanyProjectsQuery,
   useCreateCompanyProjectMutation,
   useDeleteCompanyProjectMutation,
@@ -39,11 +41,13 @@ export function CompanyProjectsPage() {
   const projectsQuery = useCompanyProjectsQuery()
   const [cohort, setCohort] = useState(String(CURRENT_GENERATION))
   const [modalOpen, setModalOpen] = useState(false)
+  const [detailId, setDetailId] = useState<number | null>(null)
 
   const form = useCompanyProjectForm()
   const addToast = useToast()
   const createMutation = useCreateCompanyProjectMutation()
   const deleteMutation = useDeleteCompanyProjectMutation()
+  const detailQuery = useCompanyProjectQuery(detailId ?? undefined)
 
   const projects = (projectsQuery.data?.corporateList ?? []).map(toProjectCard)
 
@@ -60,6 +64,14 @@ export function CompanyProjectsPage() {
   }, [])
 
   const visibleProjects = projects.filter((project) => project.cardinal === Number(cohort))
+
+  function openDetail(id: string) {
+    setDetailId(Number(id))
+  }
+
+  function closeDetail() {
+    setDetailId(null)
+  }
 
   function openModal() {
     form.reset()
@@ -167,6 +179,9 @@ export function CompanyProjectsPage() {
                   key={project.id}
                   imageUrl={project.imageUrl}
                   serviceName={project.serviceName}
+                  onViewDetail={() => {
+                    openDetail(project.id)
+                  }}
                   onDelete={() => {
                     handleDelete(project.id)
                   }}
@@ -199,6 +214,59 @@ export function CompanyProjectsPage() {
         onSave={handleSave}
         saveDisabled={!form.isValid || createMutation.isPending}
       />
+
+      {detailId !== null && detailQuery.isPending && (
+        <Modal
+          open
+          onOpenChange={closeDetail}
+          title="기업 프로젝트 상세"
+          footer={
+            <Button variant="outlined" size="l" className="w-[140px]" onClick={closeDetail}>
+              닫기
+            </Button>
+          }
+        >
+          <p className="text-label-14m text-label-alternative py-10 text-center">
+            불러오는 중입니다...
+          </p>
+        </Modal>
+      )}
+
+      {detailId !== null && detailQuery.isError && (
+        <Modal
+          open
+          onOpenChange={closeDetail}
+          title="기업 프로젝트 상세"
+          footer={
+            <Button variant="outlined" size="l" className="w-[140px]" onClick={closeDetail}>
+              닫기
+            </Button>
+          }
+        >
+          <p className="text-label-14m text-label-alternative py-10 text-center">
+            상세 정보를 불러오지 못했습니다.
+          </p>
+        </Modal>
+      )}
+
+      {detailQuery.data && (
+        <CompanyProjectModal
+          open={detailId !== null}
+          onOpenChange={(open) => {
+            if (!open) closeDetail()
+          }}
+          readOnly
+          cardinal={detailQuery.data.cardinal}
+          name={detailQuery.data.name}
+          onNameChange={() => {}}
+          content={detailQuery.data.content}
+          onContentChange={() => {}}
+          logoUrl={toAbsoluteS3Url(detailQuery.data.logo_url)}
+          bannerUrl={toAbsoluteS3Url(detailQuery.data.banner_url)}
+          onCancel={closeDetail}
+          onSave={closeDetail}
+        />
+      )}
     </div>
   )
 }

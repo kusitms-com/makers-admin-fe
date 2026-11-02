@@ -86,6 +86,23 @@ Swagger 출처: `.env`의 `VITE_API_BASE_URL` + `/api-docs/json`
 }
 ```
 
+## Response Fields (`GET /admin/corporate/{id}`, `CorporateDetailResponse`) — 확정됨
+
+실제 응답으로 확인(2026-11-02). 목록 조회와 동일하게 `logo_url`/`banner_url`은 `toAbsoluteS3Url()`로 정규화해야 합니다.
+
+```
+{
+  "cardinal": number,
+  "name": string,
+  "content": string,
+  "category": string[],
+  "corporate_id": number,
+  "logo_url": string | null,
+  "banner_url": string | null,
+  "tags": string[] | null
+}
+```
+
 ## Request Fields
 
 ### `MeetupRequest`

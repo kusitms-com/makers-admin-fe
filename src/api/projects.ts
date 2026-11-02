@@ -282,6 +282,29 @@ export function getCorporateProjects({
   )
 }
 
+const corporateProjectDetailSchema = z.object({
+  corporate_id: z.number(),
+  cardinal: z.number(),
+  name: z.string(),
+  content: z.string(),
+  category: z.array(z.string()),
+  logo_url: z.string().nullable(),
+  banner_url: z.string().nullable(),
+  tags: z.array(z.string()).nullable(),
+})
+
+export type CorporateProjectDetail = z.infer<typeof corporateProjectDetailSchema>
+
+export function getCorporateProject(
+  id: number,
+  { accessToken, refreshAccessToken }: RequestContext,
+): Promise<CorporateProjectDetail> {
+  return apiRequest(
+    { method: 'GET', path: `/admin/corporate/${String(id)}`, accessToken, refreshAccessToken },
+    corporateProjectDetailSchema,
+  )
+}
+
 export interface CorporateProjectCreateRequest {
   cardinal: number
   name: string
