@@ -94,7 +94,8 @@ export function BlogReviewsPage() {
   const rows = (blogReviewsQuery.data?.blog_review_list ?? []).map(toBlogReviewRow)
 
   const totalPages = Math.max(1, Math.ceil(rows.length / PAGE_SIZE))
-  const pagedRows = rows.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE)
+  const currentPage = Math.min(page, totalPages)
+  const pagedRows = rows.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE)
 
   function resetForm() {
     setEditingSnapshot(undefined)
@@ -150,11 +151,6 @@ export function BlogReviewsPage() {
     }
 
     deleteBlogReviewMutation.mutate(Number(id), {
-      onSuccess: () => {
-        setPage((currentPage) =>
-          Math.min(currentPage, Math.max(1, Math.ceil((rows.length - 1) / PAGE_SIZE))),
-        )
-      },
       onError: () => {
         addToast({ type: 'error', message: '삭제하지 못했습니다. 다시 시도해주세요.' })
       },
@@ -303,7 +299,7 @@ export function BlogReviewsPage() {
             rows={pagedRows.map((row) => ({ ...row, category: row.activity }))}
             onEditRow={handleEditRow}
             onDeleteRow={handleDeleteRow}
-            page={page}
+            page={currentPage}
             totalPages={totalPages}
             onPageChange={setPage}
             totalLabel={`총 ${String(rows.length)}개의 후기`}
