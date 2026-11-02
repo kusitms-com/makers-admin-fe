@@ -1,4 +1,5 @@
 import type { ChangeEvent } from 'react'
+import { Button } from '@components/common/Button'
 import { CardinalField } from '@components/common/CardinalField'
 import { FormField } from '@components/common/FormField'
 import { Inputfield } from '@components/common/Inputfield'
@@ -20,7 +21,9 @@ interface ReviewModalProps {
   onReviewChange: (value: string) => void
   onCancel: () => void
   onSave: () => void
+  onEdit?: () => void
   saveDisabled?: boolean
+  readOnly?: boolean
   className?: string
 }
 
@@ -37,21 +40,53 @@ export function ReviewModal({
   onReviewChange,
   onCancel,
   onSave,
+  onEdit,
   saveDisabled = true,
+  readOnly = false,
   className,
 }: ReviewModalProps) {
   return (
     <Modal
       open={open}
       onOpenChange={onOpenChange}
-      title="활동 후기 등록"
+      title={readOnly ? '활동 후기 상세' : onEdit ? '활동 후기 수정' : '활동 후기 등록'}
       className={className}
-      footer={<ModalActions onCancel={onCancel} onSave={onSave} saveDisabled={saveDisabled} />}
+      footer={
+        onEdit ? (
+          <>
+            <Button variant="outlined" size="l" className="w-[140px]" onClick={onCancel}>
+              닫기
+            </Button>
+            {readOnly ? (
+              <Button variant="outlined" size="l" className="w-[140px]" onClick={onEdit}>
+                수정하기
+              </Button>
+            ) : (
+              <Button
+                variant={saveDisabled ? 'disable' : 'strong'}
+                size="l"
+                className="w-[140px]"
+                disabled={saveDisabled}
+                onClick={onSave}
+              >
+                확인
+              </Button>
+            )}
+          </>
+        ) : (
+          <ModalActions onCancel={onCancel} onSave={onSave} saveDisabled={saveDisabled} />
+        )
+      }
     >
       <div className="flex items-stretch gap-3">
         <CardinalField cardinal={cardinal} className="flex-1" />
         <FormField label="파트" className="flex-1">
-          <SelectField value={team} options={teamOptions} onValueChange={onTeamChange} />
+          <SelectField
+            value={team}
+            options={teamOptions}
+            onValueChange={onTeamChange}
+            disabled={readOnly}
+          />
         </FormField>
       </div>
       <FormField label="이름">
@@ -60,6 +95,7 @@ export function ReviewModal({
           onChange={(event: ChangeEvent<HTMLInputElement>) => {
             onNameChange(event.target.value)
           }}
+          readOnly={readOnly}
           placeholder="이름을 입력해주세요"
         />
       </FormField>
@@ -69,6 +105,7 @@ export function ReviewModal({
           onChange={(event) => {
             onReviewChange(event.target.value)
           }}
+          readOnly={readOnly}
           placeholder="내용을 입력해주세요"
         />
       </FormField>

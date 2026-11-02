@@ -5,16 +5,18 @@ import { FileChip } from '../FileChip/FileChip'
 import { PartBadge, type PartBadgeType } from '../PartBadge/PartBadge'
 
 interface ReviewTableRowProps {
-  type: 'blogReview' | 'memberReview'
+  type: 'blogReview' | 'memberReview' | 'review'
   name: string
   generation: number
-  part: PartBadgeType
+  part?: PartBadgeType
+  team?: string
   title: string
   link?: string
   category?: string
   phone?: string
   fileName?: string
   onDelete?: () => void
+  onTitleClick?: () => void
   className?: string
 }
 
@@ -31,15 +33,18 @@ export function ReviewTableRow({
   name,
   generation,
   part,
+  team,
   title,
   link,
   category,
   phone,
   fileName,
   onDelete,
+  onTitleClick,
   className,
 }: ReviewTableRowProps) {
   const isMemberReview = type === 'memberReview'
+  const isReview = type === 'review'
   const extraLabel = isMemberReview ? phone : category
 
   return (
@@ -75,17 +80,27 @@ export function ReviewTableRow({
             isMemberReview && 'pr-[18px]',
           )}
         >
-          <PartBadge part={part} />
+          {isReview ? (
+            part ? (
+              <PartBadge part={part} label={team} />
+            ) : (
+              team && <Label>{team}</Label>
+            )
+          ) : (
+            part && <PartBadge part={part} />
+          )}
         </div>
 
-        <div
-          className={cn(
-            'flex h-full shrink-0 flex-col items-start justify-center py-[21px]',
-            isMemberReview ? 'w-[140px] px-[18px]' : 'w-[90px] pr-9 pl-[18px]',
-          )}
-        >
-          {extraLabel && <Label>{extraLabel}</Label>}
-        </div>
+        {!isReview && (
+          <div
+            className={cn(
+              'flex h-full shrink-0 flex-col items-start justify-center py-[21px]',
+              isMemberReview ? 'w-[140px] px-[18px]' : 'w-[90px] pr-9 pl-[18px]',
+            )}
+          >
+            {extraLabel && <Label>{extraLabel}</Label>}
+          </div>
+        )}
 
         <div
           className={cn(
@@ -93,7 +108,15 @@ export function ReviewTableRow({
             isMemberReview ? 'px-[18px]' : 'pl-3',
           )}
         >
-          {isMemberReview || !link ? (
+          {isReview && onTitleClick ? (
+            <button
+              type="button"
+              onClick={onTitleClick}
+              className="text-label-14m text-label-normal w-full truncate text-left hover:underline"
+            >
+              {title}
+            </button>
+          ) : isMemberReview || !link ? (
             <Label className="w-full truncate">{title}</Label>
           ) : (
             <a
