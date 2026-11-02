@@ -1,23 +1,31 @@
 import { useState } from 'react'
-import type { ReviewListItem } from '@api/reviews'
+import type { ReviewListItem, ReviewTeam } from '@api/reviews'
 import { Button } from '@components/common/Button'
 import { PageHeader } from '@components/common/PageHeader'
 import { ReviewTable } from '@components/common/ReviewTable'
-import { PART_LABELS, type PartBadgeType } from '@components/common/PartBadge'
+import { type PartBadgeType } from '@components/common/PartBadge'
 import type { SelectFieldOption } from '@components/common/SelectField'
 import { ReviewModal } from '@components/reviews/ReviewModal'
-import { useReviewsQuery } from '@hooks/reviews/useReviews'
+import { useCreateReviewMutation, useReviewsQuery } from '@hooks/reviews/useReviews'
+import { useToast } from '@hooks/common/useToast'
 import { CURRENT_GENERATION, type ReviewRow } from './ReviewsPage.mock'
 
-const PART_OPTIONS: SelectFieldOption[] = Object.entries(PART_LABELS).map(([value, label]) => ({
+// ReviewRequest.team enum(Swagger) 중 관리자 폼이 다루는 기획/디자인/개발 3파트만 노출한다.
+const TEAM_LABELS: Record<ReviewTeam, string> = {
+  PLANNER: '기획팀',
+  DESIGNER: '디자인팀',
+  DEVELOPER: '개발팀',
+}
+
+const TEAM_OPTIONS: SelectFieldOption[] = Object.entries(TEAM_LABELS).map(([value, label]) => ({
   value,
   label,
 }))
 
 const PAGE_SIZE = 7
 
-function isPartBadgeType(value: string): value is PartBadgeType {
-  return Object.prototype.hasOwnProperty.call(PART_LABELS, value)
+function isReviewTeam(value: string): value is ReviewTeam {
+  return Object.prototype.hasOwnProperty.call(TEAM_LABELS, value)
 }
 
 // 서버는 소속팀을 PLAN/DE/FE/BE enum이 아니라 "기획팀"/"디자인팀"/"개발팀" 3종 자유 텍스트로 내려준다.
@@ -41,12 +49,14 @@ function toReviewRow(item: ReviewListItem): ReviewRow {
 
 export function ReviewsPage() {
   const reviewsQuery = useReviewsQuery()
+  const createReviewMutation = useCreateReviewMutation()
+  const addToast = useToast()
 
   const [localRows, setLocalRows] = useState<ReviewRow[]>()
   const [page, setPage] = useState(1)
 
   const [modalOpen, setModalOpen] = useState(false)
-  const [part, setPart] = useState<PartBadgeType>('PLAN')
+  const [team, setTeam] = useState<ReviewTeam>('PLANNER')
   const [name, setName] = useState('')
   const [review, setReview] = useState('')
 
@@ -56,7 +66,7 @@ export function ReviewsPage() {
   const pagedRows = rows.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE)
 
   function resetForm() {
-    setPart('PLAN')
+    setTeam('PLANNER')
     setName('')
     setReview('')
   }
@@ -70,26 +80,25 @@ export function ReviewsPage() {
     )
   }
 
-  function handlePartChange(value: string) {
-    if (isPartBadgeType(value)) {
-      setPart(value)
+  function handleTeamChange(value: string) {
+    if (isReviewTeam(value)) {
+      setTeam(value)
     }
   }
 
   function handleSave() {
-    setLocalRows([
-      ...rows,
+    createReviewMutation.mutate(
+      { name, cardinal: CURRENT_GENERATION, team, review },
       {
-        id: crypto.randomUUID(),
-        name,
-        generation: CURRENT_GENERATION,
-        team: PART_LABELS[part],
-        part: part === 'BE' ? 'FE' : part,
-        title: review,
+        onSuccess: () => {
+          resetForm()
+          setModalOpen(false)
+        },
+        onError: () => {
+          addToast({ type: 'error', message: '등록하지 못했습니다. 다시 시도해주세요.' })
+        },
       },
-    ])
-    resetForm()
-    setModalOpen(false)
+    )
   }
 
   function handleCancel() {
@@ -164,9 +173,9 @@ export function ReviewsPage() {
         open={modalOpen}
         onOpenChange={setModalOpen}
         cardinal={CURRENT_GENERATION}
-        team={part}
-        teamOptions={PART_OPTIONS}
-        onTeamChange={handlePartChange}
+        team={team}
+        teamOptions={TEAM_OPTIONS}
+        onTeamChange={handleTeamChange}
         name={name}
         onNameChange={setName}
         review={review}
