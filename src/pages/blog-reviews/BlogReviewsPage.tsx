@@ -6,6 +6,7 @@ import { PageHeader } from '@components/common/PageHeader'
 import { PART_LABELS, type PartBadgeType } from '@components/common/PartBadge'
 import { ReviewTable } from '@components/common/ReviewTable'
 import type { SelectFieldOption } from '@components/common/SelectField'
+import { useCurrentCardinalQuery } from '@hooks/auth/useCurrentCardinal'
 import {
   useBlogReviewsQuery,
   useCreateBlogReviewMutation,
@@ -13,7 +14,7 @@ import {
   useUpdateBlogReviewMutation,
 } from '@hooks/blog-reviews/useBlogReviews'
 import { useToast } from '@hooks/common/useToast'
-import { ACTIVITY_OPTIONS, CURRENT_GENERATION, type BlogReviewRow } from './BlogReviewsPage.mock'
+import { ACTIVITY_OPTIONS, type BlogReviewRow } from './BlogReviewsPage.mock'
 
 const PART_OPTIONS: SelectFieldOption[] = Object.entries(PART_LABELS).map(([value, label]) => ({
   value,
@@ -79,6 +80,7 @@ interface EditingSnapshot {
 
 export function BlogReviewsPage() {
   const blogReviewsQuery = useBlogReviewsQuery()
+  const currentCardinalQuery = useCurrentCardinalQuery()
   const [page, setPage] = useState(1)
   const [modalOpen, setModalOpen] = useState(false)
   const [editingSnapshot, setEditingSnapshot] = useState<EditingSnapshot>()
@@ -222,9 +224,14 @@ export function BlogReviewsPage() {
       return
     }
 
+    const currentCardinal = currentCardinalQuery.data
+    if (currentCardinal === undefined) {
+      return
+    }
+
     createBlogReviewMutation.mutate(
       {
-        cardinal: CURRENT_GENERATION,
+        cardinal: currentCardinal,
         part: PART_TO_BACKEND[part],
         activity: activityValue,
         title: trimmedTitle,
@@ -291,6 +298,7 @@ export function BlogReviewsPage() {
           <Button
             variant="outlined"
             size="l"
+            disabled={currentCardinalQuery.data === undefined}
             onClick={() => {
               resetForm()
               setModalOpen(true)
@@ -319,7 +327,7 @@ export function BlogReviewsPage() {
         open={modalOpen}
         onOpenChange={setModalOpen}
         mode={editingSnapshot ? 'edit' : 'create'}
-        cardinal={editingSnapshot?.cardinal ?? CURRENT_GENERATION}
+        cardinal={editingSnapshot?.cardinal ?? currentCardinalQuery.data ?? 0}
         part={part}
         partOptions={PART_OPTIONS}
         onPartChange={handlePartChange}
@@ -343,7 +351,7 @@ export function BlogReviewsPage() {
           !link.trim() ||
           createBlogReviewMutation.isPending ||
           updateBlogReviewMutation.isPending ||
-          (editingSnapshot ? !isDirty : false)
+          (editingSnapshot ? !isDirty : currentCardinalQuery.data === undefined)
         }
       />
     </div>

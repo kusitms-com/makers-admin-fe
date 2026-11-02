@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { z } from 'zod'
-import { refreshSession, signIn, signOut } from './auth'
+import { getCurrentCardinal, refreshSession, signIn, signOut } from './auth'
 import { apiRequest, type ApiError } from './client'
 
 const signInData = {
@@ -122,6 +122,18 @@ describe('인증 API', () => {
     })
 
     await expect(signIn('admin', 'password')).rejects.toThrow()
+  })
+
+  it('현재 기수를 조회한다', async () => {
+    const fetchMock = mockResponse({ currentCardinal: 34 })
+
+    const result = await getCurrentCardinal()
+
+    expect(result).toBe(34)
+    expect(fetchMock).toHaveBeenCalledWith(
+      new URL('https://api.example.test/api/auth/current-cardinal'),
+      expect.objectContaining({ method: 'GET' }),
+    )
   })
 })
 
