@@ -36,6 +36,31 @@ export function getMembers({
   )
 }
 
+const pendingMemberResponseSchema = z.object({
+  userId: z.number(),
+  id: z.string(),
+  name: z.string(),
+  phone: z.string(),
+  cardinal: z.number(),
+  part: z.enum(['PLANNER', 'DESIGNER', 'FRONTEND', 'BACKEND']),
+  profileImageUrl: z.string(),
+  certificateImageUrl: z.string(),
+})
+
+const pendingMemberListResponseSchema = z.array(pendingMemberResponseSchema)
+
+export type PendingMemberResponse = z.infer<typeof pendingMemberResponseSchema>
+
+export function getPendingMembers({
+  accessToken,
+  refreshAccessToken,
+}: RequestContext): Promise<PendingMemberResponse[]> {
+  return apiRequest(
+    { method: 'GET', path: '/admin/members/pending', accessToken, refreshAccessToken },
+    pendingMemberListResponseSchema,
+  )
+}
+
 export function approveMember(
   userId: number,
   { accessToken, refreshAccessToken }: RequestContext,

@@ -113,6 +113,49 @@ const MEMBER_ITEMS = [
   },
 ]
 
+const PENDING_ITEMS = [
+  {
+    userId: 101,
+    id: 'hyunjin-pending',
+    name: '이현진',
+    phone: '010-1234-5678',
+    cardinal: 33,
+    part: 'PLANNER',
+    profileImageUrl: 'https://cdn.example.com/profiles/1.png',
+    certificateImageUrl: 'https://cdn.example.com/certs/1.pdf',
+  },
+  {
+    userId: 102,
+    id: 'seoyeon-pending',
+    name: '김서연',
+    phone: '010-2048-1357',
+    cardinal: 33,
+    part: 'FRONTEND',
+    profileImageUrl: 'https://cdn.example.com/profiles/2.png',
+    certificateImageUrl: 'https://cdn.example.com/certs/수료증_김서연.pdf',
+  },
+  {
+    userId: 103,
+    id: 'minjun-pending',
+    name: '박민준',
+    phone: '010-9876-5432',
+    cardinal: 32,
+    part: 'DESIGNER',
+    profileImageUrl: 'https://cdn.example.com/profiles/3.png',
+    certificateImageUrl: 'https://cdn.example.com/certs/수료증_박민준.pdf',
+  },
+  {
+    userId: 104,
+    id: 'yujin-pending',
+    name: '최유진',
+    phone: '010-2468-1357',
+    cardinal: 33,
+    part: 'BACKEND',
+    profileImageUrl: 'https://cdn.example.com/profiles/4.png',
+    certificateImageUrl: 'https://cdn.example.com/certs/수료증_최유진.pdf',
+  },
+]
+
 let memberItems = MEMBER_ITEMS.map((member) => ({ ...member }))
 
 const approveMember = vi.fn((userId: number) => {
@@ -125,9 +168,11 @@ const rejectMember = vi.fn((userId: number) => {
   memberItems = memberItems.filter((member) => member.userId !== userId)
   return Promise.resolve({})
 })
+const getPendingMembers = vi.fn(() => Promise.resolve(PENDING_ITEMS))
 
 vi.mock('@api/members', () => ({
   getMembers: vi.fn().mockImplementation(() => Promise.resolve(memberItems)),
+  getPendingMembers: () => getPendingMembers(),
   approveMember: (userId: number) => approveMember(userId),
   rejectMember: (userId: number) => rejectMember(userId),
 }))
@@ -156,9 +201,18 @@ describe('MentoringMembersPage', () => {
     expect(screen.getByRole('heading', { name: '회원 관리' })).toBeTruthy()
     expect(await screen.findByText('이현진')).toBeTruthy()
     expect(screen.getByLabelText('현재 위치')).toBeTruthy()
-    expect(screen.getByRole('button', { name: '승인 요청 3' })).toBeTruthy()
+    expect(screen.getByRole('button', { name: '승인 요청 4' })).toBeTruthy()
     expect(screen.getByText('총 8명')).toBeTruthy()
     expect(screen.getByText('서지민')).toBeTruthy()
+  })
+
+  it('승인 대기 회원이 없으면 승인 요청 버튼이 비활성화된다', async () => {
+    getPendingMembers.mockResolvedValueOnce([])
+    renderPage()
+
+    await screen.findByText('이현진')
+    const button = screen.getByRole('button', { name: '승인 요청 0' })
+    expect(button.hasAttribute('disabled')).toBe(true)
   })
 
   it('대기 회원을 반려하면 확인 후 반려 API를 호출하고 목록에서 제거한다', async () => {
@@ -199,7 +253,7 @@ describe('MentoringMembersPage', () => {
     renderPage()
 
     await screen.findByText('이현진')
-    await user.click(screen.getByRole('button', { name: '승인 요청 3' }))
+    await user.click(screen.getByRole('button', { name: '승인 요청 4' }))
 
     expect(screen.getByRole('link', { name: '회원 관리' }).getAttribute('href')).toBe('/members')
     expect(screen.getByRole('button', { name: '저장하기' })).toBeTruthy()
