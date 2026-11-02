@@ -1,10 +1,17 @@
 import { Link } from 'react-router'
 import { Button } from '@/components/common'
+import type { SelectFieldOption } from '@/components/common/SelectField'
 import {
   MentoringMemberTable,
   type MentoringMemberRow,
   type MentoringMemberStatus,
 } from '@/components/members'
+
+const APPROVAL_STATUS_OPTIONS: SelectFieldOption[] = [
+  { value: 'PENDING', label: '대기' },
+  { value: 'APPROVED', label: '완료' },
+  { value: 'REJECTED', label: '거절' },
+]
 
 interface MemberApprovalPresenterProps {
   members: MentoringMemberRow[]
@@ -47,6 +54,8 @@ export const MemberApprovalPresenter = ({
         page={page}
         totalPages={totalPages}
         totalLabel={totalLabel}
+        statusOptions={APPROVAL_STATUS_OPTIONS}
+        showMentoringAndRemark
         onPageChange={onPageChange}
         onStatusChange={onStatusChange}
         onDelete={onDelete}

@@ -3,5 +3,6 @@
 export * from './auth'
 export * from './common'
 export * from './introductions'
+export * from './members'
 export * from './projects'
 export * from './reviews'
