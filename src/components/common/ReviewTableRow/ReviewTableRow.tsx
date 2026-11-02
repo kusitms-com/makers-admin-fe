@@ -138,6 +138,7 @@ export function ReviewTableRow({
           <button
             type="button"
             onClick={onEdit}
+            aria-label={`${title} 수정`}
             className="text-label-13sb text-label-alternative hover:text-label-normal cursor-pointer whitespace-nowrap"
           >
             수정
@@ -146,7 +147,7 @@ export function ReviewTableRow({
         <button
           type="button"
           onClick={onDelete}
-          aria-label="삭제"
+          aria-label={`${title} 삭제`}
           className="bg-fill-netural border-line-neutral flex size-[26px] cursor-pointer items-center justify-center rounded-full border"
         >
           <CancelIcon className="text-label-alternative size-4" aria-hidden="true" />
