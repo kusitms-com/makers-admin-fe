@@ -1,10 +1,13 @@
 import { useState } from 'react'
+import type { BlogReviewActivity, BlogReviewPart } from '@api/blogReviews'
 import { BlogReviewModal } from '@components/blog-reviews'
 import { Button } from '@components/common/Button'
 import { PageHeader } from '@components/common/PageHeader'
 import { PART_LABELS, type PartBadgeType } from '@components/common/PartBadge'
 import { ReviewTable } from '@components/common/ReviewTable'
 import type { SelectFieldOption } from '@components/common/SelectField'
+import { useCreateBlogReviewMutation } from '@hooks/blog-reviews/useBlogReviews'
+import { useToast } from '@hooks/common/useToast'
 import {
   ACTIVITY_OPTIONS,
   CURRENT_GENERATION,
@@ -17,10 +20,22 @@ const PART_OPTIONS: SelectFieldOption[] = Object.entries(PART_LABELS).map(([valu
   label,
 }))
 
+// PartBadgeType -> BlogReviewRequest.part enum(Swagger) 매핑
+const PART_TO_BACKEND: Record<PartBadgeType, BlogReviewPart> = {
+  PLAN: 'PLANNER',
+  DE: 'DESIGNER',
+  FE: 'FRONTEND',
+  BE: 'BACKEND',
+}
+
 const PAGE_SIZE = 7
 
 function isPartBadgeType(value: string): value is PartBadgeType {
   return Object.prototype.hasOwnProperty.call(PART_LABELS, value)
+}
+
+function isBlogReviewActivity(value: string): value is BlogReviewActivity {
+  return ACTIVITY_OPTIONS.some((option) => option.value === value)
 }
 
 export function BlogReviewsPage() {
@@ -30,8 +45,13 @@ export function BlogReviewsPage() {
   const [part, setPart] = useState<PartBadgeType>('PLAN')
   const [activity, setActivity] = useState('')
   const [title, setTitle] = useState('')
+  const [previewText, setPreviewText] = useState('')
   const [link, setLink] = useState('')
   const [thumbnailUrl, setThumbnailUrl] = useState<string>()
+  const [thumbnailFile, setThumbnailFile] = useState<File>()
+
+  const createBlogReviewMutation = useCreateBlogReviewMutation()
+  const addToast = useToast()
 
   const totalPages = Math.max(1, Math.ceil(rows.length / PAGE_SIZE))
   const pagedRows = rows.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE)
@@ -40,8 +60,10 @@ export function BlogReviewsPage() {
     setPart('PLAN')
     setActivity('')
     setTitle('')
+    setPreviewText('')
     setLink('')
     setThumbnailUrl(undefined)
+    setThumbnailFile(undefined)
   }
 
   function handleDeleteRow(id: string) {
@@ -59,39 +81,66 @@ export function BlogReviewsPage() {
     }
   }
 
+  function handleActivityChange(value: string) {
+    if (isBlogReviewActivity(value)) {
+      setActivity(value)
+    }
+  }
+
   function handleThumbnailChange(file: File) {
     setThumbnailUrl(URL.createObjectURL(file))
+    setThumbnailFile(file)
   }
 
   function handleThumbnailDelete() {
     setThumbnailUrl(undefined)
+    setThumbnailFile(undefined)
   }
 
   function handleSave() {
+    const activityValue = activity
     const activityLabel = ACTIVITY_OPTIONS.find((option) => option.value === activity)?.label
     const trimmedTitle = title.trim()
     const trimmedLink = link.trim()
 
-    if (!activityLabel || !trimmedTitle || !trimmedLink) {
+    if (!isBlogReviewActivity(activityValue) || !activityLabel || !trimmedTitle || !trimmedLink) {
       return
     }
 
-    setRows((previousRows) => [
+    createBlogReviewMutation.mutate(
       {
-        id: crypto.randomUUID(),
-        name: '관리자',
-        generation: CURRENT_GENERATION,
-        part,
-        activity: activityLabel,
+        cardinal: CURRENT_GENERATION,
+        part: PART_TO_BACKEND[part],
+        activity: activityValue,
         title: trimmedTitle,
-        link: trimmedLink,
-        thumbnailUrl,
+        previewText: previewText.trim(),
+        blogLink: trimmedLink,
+        thumbnailFile,
       },
-      ...previousRows,
-    ])
-    setPage(1)
-    resetForm()
-    setModalOpen(false)
+      {
+        onSuccess: () => {
+          setRows((previousRows) => [
+            {
+              id: crypto.randomUUID(),
+              name: '관리자',
+              generation: CURRENT_GENERATION,
+              part,
+              activity: activityLabel,
+              title: trimmedTitle,
+              link: trimmedLink,
+              thumbnailUrl,
+            },
+            ...previousRows,
+          ])
+          setPage(1)
+          resetForm()
+          setModalOpen(false)
+        },
+        onError: () => {
+          addToast({ type: 'error', message: '등록하지 못했습니다. 다시 시도해주세요.' })
+        },
+      },
+    )
   }
 
   function handleCancel() {
@@ -140,9 +189,11 @@ export function BlogReviewsPage() {
         onPartChange={handlePartChange}
         activity={activity}
         activityOptions={[...ACTIVITY_OPTIONS]}
-        onActivityChange={setActivity}
+        onActivityChange={handleActivityChange}
         title={title}
         onTitleChange={setTitle}
+        previewText={previewText}
+        onPreviewTextChange={setPreviewText}
         link={link}
         onLinkChange={setLink}
         thumbnailUrl={thumbnailUrl}
@@ -150,7 +201,9 @@ export function BlogReviewsPage() {
         onThumbnailDelete={handleThumbnailDelete}
         onCancel={handleCancel}
         onSave={handleSave}
-        saveDisabled={!activity || !title.trim() || !link.trim()}
+        saveDisabled={
+          !activity || !title.trim() || !link.trim() || createBlogReviewMutation.isPending
+        }
       />
     </div>
   )

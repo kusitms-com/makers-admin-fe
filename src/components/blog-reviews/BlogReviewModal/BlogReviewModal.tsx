@@ -6,6 +6,7 @@ import { Inputfield } from '@components/common/Inputfield'
 import { Modal } from '@components/common/Modal'
 import { ModalActions } from '@components/common/ModalActions'
 import { SelectField, type SelectFieldOption } from '@components/common/SelectField'
+import { TextareaField } from '@components/common/TextareaField'
 
 interface BlogReviewModalProps {
   open: boolean
@@ -19,6 +20,8 @@ interface BlogReviewModalProps {
   onActivityChange: (value: string) => void
   title: string
   onTitleChange: (value: string) => void
+  previewText: string
+  onPreviewTextChange: (value: string) => void
   link: string
   onLinkChange: (value: string) => void
   thumbnailUrl?: string
@@ -42,6 +45,8 @@ export function BlogReviewModal({
   onActivityChange,
   title,
   onTitleChange,
+  previewText,
+  onPreviewTextChange,
   link,
   onLinkChange,
   thumbnailUrl,
@@ -90,6 +95,15 @@ export function BlogReviewModal({
             onLinkChange(event.target.value)
           }}
           placeholder="링크를 입력해주세요"
+        />
+      </FormField>
+      <FormField label="미리보기 텍스트">
+        <TextareaField
+          value={previewText}
+          onChange={(event) => {
+            onPreviewTextChange(event.target.value)
+          }}
+          placeholder="미리보기 텍스트를 입력해주세요"
         />
       </FormField>
       <FormField label="미리보기 이미지">

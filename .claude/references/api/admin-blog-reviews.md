@@ -28,8 +28,9 @@ Swagger 출처: `.env`의 `VITE_API_BASE_URL` + `/api-docs/json`
 | --- | --- |
 | `blogReviewId` | `number` |
 | `cardinal` | `number` |
-| `part` | `string` |
-| `activity` | `string` |
+| `part` | `string` (enum: `BACKEND`, `FRONTEND`, `IOS`, `ANDROID`, `DESIGNER`, `PLANNER`, `DEVELOPER`) |
+| `activity` | `string` (enum: `DOCUMENT_REVIEW`, `INTERVIEW_REVIEW`, `COMPANY_PROJECT`, `ACTIVITY_REVIEW`, `MEETUP_PROJECT`) |
 | `thumbnailFile` | `File` |
+| `blogLink` | `string` (블로그 원문 링크) |
 | `title` | `string` |
 | `previewText` | `string` |

@@ -14,10 +14,14 @@ export interface BlogReviewRow {
 // TODO: API 연동 시 GET /api/auth/current-cardinal의 data.currentCardinal로 교체한다.
 export const CURRENT_GENERATION = 33
 
+// BlogReviewRequest.activity enum(Swagger): DOCUMENT_REVIEW, INTERVIEW_REVIEW, COMPANY_PROJECT,
+// ACTIVITY_REVIEW, MEETUP_PROJECT
 export const ACTIVITY_OPTIONS = [
-  { value: 'DOCUMENT', label: '서류 후기' },
-  { value: 'INTERVIEW', label: '면접 후기' },
-  { value: 'ACTIVITY', label: '활동 후기' },
+  { value: 'DOCUMENT_REVIEW', label: '서류 후기' },
+  { value: 'INTERVIEW_REVIEW', label: '면접 후기' },
+  { value: 'ACTIVITY_REVIEW', label: '활동 후기' },
+  { value: 'COMPANY_PROJECT', label: '기업 프로젝트' },
+  { value: 'MEETUP_PROJECT', label: '밋업 프로젝트' },
 ] as const
 
 export const INITIAL_ROWS: BlogReviewRow[] = [
