@@ -1,13 +1,14 @@
 import { useState } from 'react'
 import { useLocation } from 'react-router'
 import dayjs from 'dayjs'
-import type { AdminMemberResponse } from '@api/members'
+import type { AdminMemberResponse, PendingMemberResponse } from '@api/members'
 import { Button, Modal, PageHeader } from '@/components/common'
 import type { PartBadgeType } from '@/components/common/PartBadge'
 import { type MentoringMemberRow, type MentoringMemberStatus } from '@/components/members'
 import {
   useApproveMemberMutation,
   useMembersQuery,
+  usePendingMembersQuery,
   useRejectMemberMutation,
 } from '@hooks/members/useMembers'
 import { MemberApprovalPresenter } from './MemberApprovalPresenter'
@@ -35,68 +36,43 @@ function toMemberRow(member: AdminMemberResponse): MentoringMemberRow {
   }
 }
 
-const INITIAL_APPROVALS: MentoringMemberRow[] = [
-  {
-    id: 'approval-1',
-    name: '이현진',
-    generation: 33,
-    part: 'PLAN',
-    phone: '010-1234-5678',
-    email: 'abc12345@gmail.com',
-    registeredAt: '26.03.12 18:33',
-    isMentoringMember: true,
+// PendingMemberResponse(Swagger)에는 email/가입일 정보가 없어 '-'로 표시한다.
+function toPendingMemberRow(member: PendingMemberResponse): MentoringMemberRow {
+  return {
+    id: String(member.userId),
+    name: member.name,
+    generation: member.cardinal,
+    part: PART_BADGE_MAP[member.part],
+    phone: member.phone,
+    email: '-',
+    registeredAt: '-',
     status: 'PENDING',
-  },
-  {
-    id: 'approval-2',
-    name: '김서연',
-    generation: 33,
-    part: 'FE',
-    phone: '010-2048-1357',
-    email: 'seoyeon.kim@example.com',
-    registeredAt: '26.03.12 17:09',
-    isMentoringMember: true,
-    status: 'PENDING',
-    remark: '수료증_김서연.pdf',
-  },
-  {
-    id: 'approval-3',
-    name: '박민준',
-    generation: 32,
-    part: 'DE',
-    phone: '010-9876-5432',
-    email: 'minjun.park@example.com',
-    registeredAt: '26.03.11 14:42',
-    isMentoringMember: false,
-    status: 'PENDING',
-    remark: '수료증_박민준.pdf',
-  },
-  {
-    id: 'approval-4',
-    name: '최유진',
-    generation: 33,
-    part: 'BE',
-    phone: '010-2468-1357',
-    email: 'yujin.choi@example.com',
-    registeredAt: '26.03.10 11:21',
-    isMentoringMember: true,
-    status: 'PENDING',
-    remark: '수료증_최유진.pdf',
-  },
-]
+    remark: member.certificateImageUrl.split('/').pop(),
+  }
+}
 
 export const MentoringMembersPage = () => {
   const { pathname } = useLocation()
   const isApprovalPage = pathname === '/members/approval'
   const membersQuery = useMembersQuery()
+  const pendingMembersQuery = usePendingMembersQuery()
   const approveMemberMutation = useApproveMemberMutation()
   const rejectMemberMutation = useRejectMemberMutation()
   const members = (membersQuery.data ?? []).map(toMemberRow)
-  const [approvals, setApprovals] = useState(INITIAL_APPROVALS)
+  // 승인 대기 목록은 "저장하기" 연동 전까지 상태 변경/삭제를 화면에서만 반영한다.
+  const [approvalEdits, setApprovalEdits] = useState<Record<string, Partial<MentoringMemberRow>>>(
+    {},
+  )
+  const [deletedApprovalIds, setDeletedApprovalIds] = useState<ReadonlySet<string>>(new Set())
+  const approvals = (pendingMembersQuery.data ?? [])
+    .map(toPendingMemberRow)
+    .filter((member) => !deletedApprovalIds.has(member.id))
+    .map((member) => ({ ...member, ...approvalEdits[member.id] }))
   const [membersPage, setMembersPage] = useState(1)
   const [approvalPage, setApprovalPage] = useState(1)
   const [deleteTarget, setDeleteTarget] = useState<MentoringMemberRow | null>(null)
   const currentMembers = isApprovalPage ? approvals : members
+  const activeQuery = isApprovalPage ? pendingMembersQuery : membersQuery
   const page = isApprovalPage ? approvalPage : membersPage
   const setPage = isApprovalPage ? setApprovalPage : setMembersPage
   const totalPages = Math.max(1, Math.ceil(currentMembers.length / PAGE_SIZE))
@@ -104,9 +80,7 @@ export const MentoringMembersPage = () => {
 
   function handleStatusChange(id: string, status: MentoringMemberStatus) {
     if (isApprovalPage) {
-      setApprovals((current) =>
-        current.map((member) => (member.id === id ? { ...member, status } : member)),
-      )
+      setApprovalEdits((current) => ({ ...current, [id]: { ...current[id], status } }))
       return
     }
     if (status === 'APPROVED') {
@@ -135,17 +109,14 @@ export const MentoringMembersPage = () => {
     }
 
     const { id } = deleteTarget
-    setApprovals((current) => {
-      const nextApprovals = current.filter((member) => member.id !== id)
-      setApprovalPage((currentPage) =>
-        Math.min(currentPage, Math.max(1, Math.ceil(nextApprovals.length / PAGE_SIZE))),
-      )
-      return nextApprovals
-    })
+    setDeletedApprovalIds((current) => new Set(current).add(id))
+    setApprovalPage((currentPage) =>
+      Math.min(currentPage, Math.max(1, Math.ceil((approvals.length - 1) / PAGE_SIZE))),
+    )
     setDeleteTarget(null)
   }
 
-  if (!isApprovalPage && membersQuery.isLoading) {
+  if (activeQuery.isLoading) {
     return (
       <div className="flex min-h-screen min-w-0 flex-col">
         <PageHeader title="회원 관리" />
@@ -156,7 +127,7 @@ export const MentoringMembersPage = () => {
     )
   }
 
-  if (!isApprovalPage && membersQuery.isError) {
+  if (activeQuery.isError) {
     return (
       <div className="flex min-h-screen min-w-0 flex-col">
         <PageHeader title="회원 관리" />
@@ -166,7 +137,7 @@ export const MentoringMembersPage = () => {
             variant="primary"
             size="s"
             onClick={() => {
-              void membersQuery.refetch()
+              void activeQuery.refetch()
             }}
           >
             다시 시도
@@ -197,6 +168,7 @@ export const MentoringMembersPage = () => {
             page={page}
             totalPages={totalPages}
             totalLabel={`총 ${String(members.length)}명`}
+            pendingApprovalCount={pendingMembersQuery.data?.length ?? 0}
             onPageChange={setPage}
             onStatusChange={handleStatusChange}
           />

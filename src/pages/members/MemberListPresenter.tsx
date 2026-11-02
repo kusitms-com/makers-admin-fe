@@ -18,6 +18,7 @@ interface MemberListPresenterProps {
   page: number
   totalPages: number
   totalLabel: string
+  pendingApprovalCount: number
   onPageChange: (page: number) => void
   onStatusChange: (id: string, status: MentoringMemberStatus) => void
 }
@@ -27,6 +28,7 @@ export const MemberListPresenter = ({
   page,
   totalPages,
   totalLabel,
+  pendingApprovalCount,
   onPageChange,
   onStatusChange,
 }: MemberListPresenterProps) => {
@@ -39,13 +41,13 @@ export const MemberListPresenter = ({
           <span className="text-label-normal">회원 관리</span>
         </nav>
         <Button
-          variant="strong"
+          variant={pendingApprovalCount === 0 ? 'disable' : 'strong'}
           size="m"
           onClick={() => {
             void navigate('/members/approval')
           }}
         >
-          승인 요청 3
+          승인 요청 {pendingApprovalCount}
         </Button>
       </div>
       <MentoringMemberTable
