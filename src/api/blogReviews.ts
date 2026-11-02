@@ -108,3 +108,18 @@ export function updateBlogReview(
     z.unknown(),
   )
 }
+
+export function deleteBlogReview(
+  id: number,
+  { accessToken, refreshAccessToken }: RequestContext,
+): Promise<unknown> {
+  return apiRequest(
+    {
+      method: 'DELETE',
+      path: `/admin/blog-review/${String(id)}`,
+      accessToken,
+      refreshAccessToken,
+    },
+    z.unknown(),
+  )
+}

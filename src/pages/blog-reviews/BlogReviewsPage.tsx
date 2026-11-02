@@ -9,6 +9,7 @@ import type { SelectFieldOption } from '@components/common/SelectField'
 import {
   useBlogReviewsQuery,
   useCreateBlogReviewMutation,
+  useDeleteBlogReviewMutation,
   useUpdateBlogReviewMutation,
 } from '@hooks/blog-reviews/useBlogReviews'
 import { useToast } from '@hooks/common/useToast'
@@ -74,7 +75,6 @@ interface EditingSnapshot {
 
 export function BlogReviewsPage() {
   const blogReviewsQuery = useBlogReviewsQuery()
-  const [deletedIds, setDeletedIds] = useState<ReadonlySet<string>>(new Set())
   const [page, setPage] = useState(1)
   const [modalOpen, setModalOpen] = useState(false)
   const [editingSnapshot, setEditingSnapshot] = useState<EditingSnapshot>()
@@ -88,11 +88,10 @@ export function BlogReviewsPage() {
 
   const createBlogReviewMutation = useCreateBlogReviewMutation()
   const updateBlogReviewMutation = useUpdateBlogReviewMutation()
+  const deleteBlogReviewMutation = useDeleteBlogReviewMutation()
   const addToast = useToast()
 
-  const rows = (blogReviewsQuery.data?.blog_review_list ?? [])
-    .map(toBlogReviewRow)
-    .filter((row) => !deletedIds.has(row.id))
+  const rows = (blogReviewsQuery.data?.blog_review_list ?? []).map(toBlogReviewRow)
 
   const totalPages = Math.max(1, Math.ceil(rows.length / PAGE_SIZE))
   const pagedRows = rows.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE)
@@ -146,10 +145,20 @@ export function BlogReviewsPage() {
     : true
 
   function handleDeleteRow(id: string) {
-    setDeletedIds((previousIds) => new Set(previousIds).add(id))
-    setPage((currentPage) =>
-      Math.min(currentPage, Math.max(1, Math.ceil((rows.length - 1) / PAGE_SIZE))),
-    )
+    if (!window.confirm('이 후기를 삭제하시겠습니까?')) {
+      return
+    }
+
+    deleteBlogReviewMutation.mutate(Number(id), {
+      onSuccess: () => {
+        setPage((currentPage) =>
+          Math.min(currentPage, Math.max(1, Math.ceil((rows.length - 1) / PAGE_SIZE))),
+        )
+      },
+      onError: () => {
+        addToast({ type: 'error', message: '삭제하지 못했습니다. 다시 시도해주세요.' })
+      },
+    })
   }
 
   function handlePartChange(value: string) {
