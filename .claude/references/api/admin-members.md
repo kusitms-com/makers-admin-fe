@@ -62,5 +62,5 @@ Swagger 출처: `.env`의 `VITE_API_BASE_URL` + `/api-docs/json`
 
 - API 함수는 `src/api/members.ts`에 둡니다.
 - 전체 목록 query key는 `['admin', 'members']`, 승인 대기 목록 query key는 `['admin', 'members', 'pending']`을 우선합니다.
-- 승인/반려 mutation 이후 `['admin', 'members', 'pending']`을 invalidate합니다.
+- 승인/반려 mutation 이후 `['admin', 'members']`와 `['admin', 'members', 'pending']`을 모두 invalidate합니다.
 - destructive action인 반려는 UI에서 확인 절차를 둡니다.
