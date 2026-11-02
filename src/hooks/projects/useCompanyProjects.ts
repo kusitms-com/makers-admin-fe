@@ -82,11 +82,8 @@ export function useUpdateCompanyProjectMutation() {
       }
       return updateCorporateProject(request, { accessToken, refreshAccessToken })
     },
-    onSuccess: (_data, request) => {
-      void queryClient.invalidateQueries({ queryKey: companyProjectsQueryKey })
-      void queryClient.invalidateQueries({
-        queryKey: [...companyProjectsQueryKey, request.corporateId],
-      })
+    onSuccess: () => {
+      return queryClient.invalidateQueries({ queryKey: companyProjectsQueryKey })
     },
   })
 }

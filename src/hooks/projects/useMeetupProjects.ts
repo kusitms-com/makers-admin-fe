@@ -82,11 +82,8 @@ export function useUpdateMeetupProjectMutation() {
       }
       return updateMeetupProject(request, { accessToken, refreshAccessToken })
     },
-    onSuccess: (_data, request) => {
-      void queryClient.invalidateQueries({ queryKey: meetupProjectsQueryKey })
-      void queryClient.invalidateQueries({
-        queryKey: [...meetupProjectsQueryKey, request.meetupId],
-      })
+    onSuccess: () => {
+      return queryClient.invalidateQueries({ queryKey: meetupProjectsQueryKey })
     },
   })
 }
