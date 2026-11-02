@@ -1,10 +1,14 @@
 import { useEffect, useRef, useState } from 'react'
+import dayjs from 'dayjs'
 import type {
   MeetupProjectCreateRequest,
+  MeetupProjectDetail,
   MeetupProjectListItem,
   MeetupProjectType,
+  MeetupProjectUpdateRequest,
 } from '@api/projects'
 import { Button } from '@components/common/Button'
+import { Modal } from '@components/common/Modal'
 import { PageHeader } from '@components/common/PageHeader'
 import { SegmentedControl } from '@components/common/SegmentedControl'
 import { MeetupProjectModal } from '@components/projects/MeetupProjectModal'
@@ -17,7 +21,9 @@ import {
 import {
   useCreateMeetupProjectMutation,
   useDeleteMeetupProjectMutation,
+  useMeetupProjectQuery,
   useMeetupProjectsQuery,
+  useUpdateMeetupProjectMutation,
 } from '@hooks/projects/useMeetupProjects'
 import { toAbsoluteS3Url } from '@lib/s3'
 import {
@@ -48,15 +54,47 @@ function toProjectCard(item: MeetupProjectListItem): MeetupProjectCard {
   }
 }
 
+const TEAM_PART_KEYS = ['planner', 'designer', 'frontend', 'backend', 'ios', 'aos'] as const
+
+function teamToMembers(team: MeetupProjectDetail['team']): MeetupProjectFormValues['members'] {
+  return TEAM_PART_KEYS.flatMap((part) =>
+    (team[part] ?? []).map((name, index) => ({ id: `${part}-${String(index)}`, part, name })),
+  )
+}
+
+function detailToFormValues(detail: MeetupProjectDetail): MeetupProjectFormValues {
+  return {
+    type: detail.type.toUpperCase(),
+    name: detail.name,
+    oneLineIntro: detail.one_line_intro,
+    intro: detail.intro,
+    teamName: detail.team.name,
+    members: teamToMembers(detail.team),
+    logoUrl: toAbsoluteS3Url(detail.logo_url) ?? '',
+    posterUrl: toAbsoluteS3Url(detail.poster_url) ?? '',
+    githubUrl: detail.github_url ?? '',
+    behanceUrl: detail.behance_url ?? '',
+    appUrl: detail.app_url ?? '',
+    instagramUrl: detail.instagram_url ?? '',
+    startDate: detail.start_date,
+    endDate: detail.end_date,
+  }
+}
+
 export function MeetupProjectsPage() {
   const projectsQuery = useMeetupProjectsQuery()
   const [cohort, setCohort] = useState(String(CURRENT_GENERATION))
   const [modalOpen, setModalOpen] = useState(false)
+  const [detailId, setDetailId] = useState<number | null>(null)
+  const [isEditing, setIsEditing] = useState(false)
 
   const form = useMeetupProjectForm()
+  const editForm = useMeetupProjectForm()
   const addToast = useToast()
   const createMutation = useCreateMeetupProjectMutation()
+  const updateMutation = useUpdateMeetupProjectMutation()
   const deleteMutation = useDeleteMeetupProjectMutation()
+  const detailQuery = useMeetupProjectQuery(detailId ?? undefined)
 
   const projects = (projectsQuery.data?.meetup_list ?? []).map(toProjectCard)
 
@@ -73,6 +111,61 @@ export function MeetupProjectsPage() {
   }, [])
 
   const visibleProjects = projects.filter((project) => project.cardinal === Number(cohort))
+
+  function openDetail(id: string) {
+    setDetailId(Number(id))
+  }
+
+  function closeDetail() {
+    setDetailId(null)
+    setIsEditing(false)
+    editForm.reset()
+  }
+
+  function startEdit() {
+    if (!detailQuery.data) return
+    editForm.loadValues(detailToFormValues(detailQuery.data))
+    setIsEditing(true)
+  }
+
+  function handleUpdate() {
+    void editForm.handleSubmit((values) => {
+      if (detailId === null || !detailQuery.data) return
+
+      const request: MeetupProjectUpdateRequest = {
+        meetupId: detailId,
+        cardinal: detailQuery.data.cardinal,
+        name: values.name,
+        intro: values.intro,
+        type: values.type as MeetupProjectType,
+        oneLineIntro: values.oneLineIntro,
+        teamName: values.teamName,
+        startDate: editForm.startDateIso,
+        endDate: editForm.endDateIso,
+        instagramUrl: values.instagramUrl,
+        githubUrl: values.githubUrl,
+        appUrl: values.appUrl,
+        behanceUrl: values.behanceUrl,
+        planner: membersByPart(values.members, 'planner'),
+        designer: membersByPart(values.members, 'designer'),
+        frontend: membersByPart(values.members, 'frontend'),
+        backend: membersByPart(values.members, 'backend'),
+        ios: membersByPart(values.members, 'ios'),
+        aos: membersByPart(values.members, 'aos'),
+        logoFile: editForm.logoFile,
+        posterFile: editForm.posterFile,
+      }
+
+      updateMutation.mutate(request, {
+        onSuccess: () => {
+          setIsEditing(false)
+        },
+        onError: () => {
+          addToast({ type: 'error', message: '수정하지 못했습니다. 다시 시도해주세요.' })
+        },
+      })
+    })()
+  }
 
   function openModal() {
     form.reset()
@@ -190,6 +283,9 @@ export function MeetupProjectsPage() {
                   key={project.id}
                   imageUrl={project.imageUrl}
                   serviceName={project.serviceName}
+                  onViewDetail={() => {
+                    openDetail(project.id)
+                  }}
                   onDelete={() => {
                     handleDelete(project.id)
                   }}
@@ -244,6 +340,89 @@ export function MeetupProjectsPage() {
         onSave={handleSave}
         saveDisabled={!form.isValid || createMutation.isPending}
       />
+
+      {detailId !== null && detailQuery.isPending && (
+        <Modal
+          open
+          onOpenChange={closeDetail}
+          title="밋업 프로젝트 상세"
+          footer={
+            <Button variant="outlined" size="l" className="w-[140px]" onClick={closeDetail}>
+              닫기
+            </Button>
+          }
+        >
+          <p className="text-label-14m text-label-alternative py-10 text-center">
+            불러오는 중입니다...
+          </p>
+        </Modal>
+      )}
+
+      {detailId !== null && detailQuery.isError && (
+        <Modal
+          open
+          onOpenChange={closeDetail}
+          title="밋업 프로젝트 상세"
+          footer={
+            <Button variant="outlined" size="l" className="w-[140px]" onClick={closeDetail}>
+              닫기
+            </Button>
+          }
+        >
+          <p className="text-label-14m text-label-alternative py-10 text-center">
+            상세 정보를 불러오지 못했습니다.
+          </p>
+        </Modal>
+      )}
+
+      {detailQuery.data && (
+        <MeetupProjectModal
+          open={detailId !== null}
+          onOpenChange={(open) => {
+            if (!open) closeDetail()
+          }}
+          readOnly={!isEditing}
+          onEdit={startEdit}
+          cardinal={detailQuery.data.cardinal}
+          type={isEditing ? editForm.type : detailQuery.data.type.toUpperCase()}
+          typeOptions={TYPE_OPTIONS}
+          onTypeChange={isEditing ? editForm.setType : () => {}}
+          name={isEditing ? editForm.name : detailQuery.data.name}
+          onNameChange={isEditing ? editForm.setName : () => {}}
+          oneLineIntro={isEditing ? editForm.oneLineIntro : detailQuery.data.one_line_intro}
+          onOneLineIntroChange={isEditing ? editForm.setOneLineIntro : () => {}}
+          intro={isEditing ? editForm.intro : detailQuery.data.intro}
+          onIntroChange={isEditing ? editForm.setIntro : () => {}}
+          teamName={isEditing ? editForm.teamName : detailQuery.data.team.name}
+          onTeamNameChange={isEditing ? editForm.setTeamName : () => {}}
+          members={isEditing ? editForm.members : teamToMembers(detailQuery.data.team)}
+          partOptions={PART_OPTIONS}
+          onMemberPartChange={isEditing ? editForm.onMemberPartChange : () => {}}
+          onMemberRemove={isEditing ? editForm.onMemberRemove : () => {}}
+          onMemberAdd={isEditing ? editForm.onMemberAdd : () => {}}
+          logoUrl={isEditing ? editForm.logoUrl : toAbsoluteS3Url(detailQuery.data.logo_url)}
+          onLogoChange={isEditing ? editForm.onLogoChange : undefined}
+          onLogoDelete={isEditing ? editForm.onLogoDelete : undefined}
+          posterUrl={isEditing ? editForm.posterUrl : toAbsoluteS3Url(detailQuery.data.poster_url)}
+          onPosterChange={isEditing ? editForm.onPosterChange : undefined}
+          onPosterDelete={isEditing ? editForm.onPosterDelete : undefined}
+          githubUrl={isEditing ? editForm.githubUrl : (detailQuery.data.github_url ?? '')}
+          onGithubUrlChange={isEditing ? editForm.setGithubUrl : () => {}}
+          behanceUrl={isEditing ? editForm.behanceUrl : (detailQuery.data.behance_url ?? '')}
+          onBehanceUrlChange={isEditing ? editForm.setBehanceUrl : () => {}}
+          appUrl={isEditing ? editForm.appUrl : (detailQuery.data.app_url ?? '')}
+          onAppUrlChange={isEditing ? editForm.setAppUrl : () => {}}
+          instagramUrl={isEditing ? editForm.instagramUrl : (detailQuery.data.instagram_url ?? '')}
+          onInstagramUrlChange={isEditing ? editForm.setInstagramUrl : () => {}}
+          startDate={isEditing ? editForm.startDate : dayjs(detailQuery.data.start_date).toDate()}
+          onStartDateChange={isEditing ? editForm.setStartDate : () => {}}
+          endDate={isEditing ? editForm.endDate : dayjs(detailQuery.data.end_date).toDate()}
+          onEndDateChange={isEditing ? editForm.setEndDate : () => {}}
+          onCancel={closeDetail}
+          onSave={handleUpdate}
+          saveDisabled={!editForm.isValid || updateMutation.isPending}
+        />
+      )}
     </div>
   )
 }

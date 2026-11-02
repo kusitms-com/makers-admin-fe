@@ -95,6 +95,14 @@ export function useCompanyProjectForm() {
     setBannerFile(undefined)
   }
 
+  function loadValues(nextValues: CompanyProjectFormValues) {
+    revokeIfBlobUrl(values.logoUrl)
+    revokeIfBlobUrl(values.bannerUrl)
+    setLogoFile(undefined)
+    setBannerFile(undefined)
+    reset(nextValues)
+  }
+
   function resetForm() {
     revokeIfBlobUrl(values.logoUrl)
     revokeIfBlobUrl(values.bannerUrl)
@@ -134,5 +142,6 @@ export function useCompanyProjectForm() {
     handleSubmit,
     reset: resetForm,
     resetAfterSave,
+    loadValues,
   }
 }

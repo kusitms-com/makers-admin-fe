@@ -166,6 +166,14 @@ export function useMeetupProjectForm() {
     )
   }
 
+  function loadValues(nextValues: MeetupProjectFormValues) {
+    revokeIfBlobUrl(values.posterUrl)
+    revokeIfBlobUrl(values.logoUrl)
+    setPosterFile(undefined)
+    setLogoFile(undefined)
+    reset(nextValues)
+  }
+
   function resetForm() {
     revokeIfBlobUrl(values.posterUrl)
     revokeIfBlobUrl(values.logoUrl)
@@ -247,5 +255,6 @@ export function useMeetupProjectForm() {
     handleSubmit,
     reset: resetForm,
     resetAfterSave,
+    loadValues,
   }
 }

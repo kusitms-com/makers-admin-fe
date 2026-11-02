@@ -9,6 +9,7 @@ interface ImageUploadBoxProps {
   alt?: string
   onFileChange?: (file: File) => void
   onDelete?: () => void
+  readOnly?: boolean
   className?: string
 }
 
@@ -18,27 +19,34 @@ export function ImageUploadBox({
   alt = '',
   onFileChange,
   onDelete,
+  readOnly,
   className,
 }: ImageUploadBoxProps) {
   const { inputId, inputProps, openFilePicker } = useImageFileInput({ id, onFileChange })
 
   return (
     <div className={cn('flex w-full flex-col gap-3', className)}>
-      <input {...inputProps} />
+      {!readOnly && <input {...inputProps} />}
       {imageUrl ? (
         <>
           <div className="border-brand-tertiary h-[318px] w-full overflow-hidden rounded-lg border border-dashed">
             <img src={imageUrl} alt={alt} className="h-full w-full object-cover" />
           </div>
-          <div className="flex h-10 w-full items-start justify-center gap-3">
-            <Button variant="error" size="m" className="w-[120px]" onClick={onDelete}>
-              삭제하기
-            </Button>
-            <Button variant="primary" size="m" className="w-[120px]" onClick={openFilePicker}>
-              교체하기
-            </Button>
-          </div>
+          {!readOnly && (
+            <div className="flex h-10 w-full items-start justify-center gap-3">
+              <Button variant="error" size="m" className="w-[120px]" onClick={onDelete}>
+                삭제하기
+              </Button>
+              <Button variant="primary" size="m" className="w-[120px]" onClick={openFilePicker}>
+                교체하기
+              </Button>
+            </div>
+          )}
         </>
+      ) : readOnly ? (
+        <p className="text-label-14m text-label-alternative flex h-[90px] w-full items-center justify-center">
+          등록된 이미지가 없습니다
+        </p>
       ) : (
         <label
           htmlFor={inputId}
