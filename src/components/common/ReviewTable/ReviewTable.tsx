@@ -7,7 +7,8 @@ interface ReviewTableRowData {
   id: string
   name: string
   generation: number
-  part: PartBadgeType
+  part?: PartBadgeType
+  team?: string
   title: string
   link?: string
   category?: string
@@ -16,7 +17,7 @@ interface ReviewTableRowData {
 }
 
 interface ReviewTableProps {
-  type: 'blogReview' | 'memberReview'
+  type: 'blogReview' | 'memberReview' | 'review'
   rows: ReviewTableRowData[]
   onDeleteRow?: (id: string) => void
   page: number
@@ -44,6 +45,13 @@ const MEMBER_REVIEW_COLUMNS = [
   { label: '제목', className: 'min-w-px flex-1' },
 ] as const
 
+const REVIEW_COLUMNS = [
+  { label: '이름', className: 'w-[74px]' },
+  { label: '기수', className: 'w-[90px]' },
+  { label: '소속팀', className: 'w-[100px]' },
+  { label: '후기', className: 'min-w-px flex-1 pl-3' },
+] as const
+
 export function ReviewTable({
   type,
   rows,
@@ -56,7 +64,12 @@ export function ReviewTable({
   className,
 }: ReviewTableProps) {
   const isMemberReview = type === 'memberReview'
-  const columns = isMemberReview ? MEMBER_REVIEW_COLUMNS : BLOG_REVIEW_COLUMNS
+  const columns =
+    type === 'review'
+      ? REVIEW_COLUMNS
+      : isMemberReview
+        ? MEMBER_REVIEW_COLUMNS
+        : BLOG_REVIEW_COLUMNS
 
   return (
     <div
@@ -89,6 +102,7 @@ export function ReviewTable({
               name={row.name}
               generation={row.generation}
               part={row.part}
+              team={row.team}
               category={row.category}
               phone={row.phone}
               fileName={row.fileName}

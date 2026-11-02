@@ -19,9 +19,12 @@ export type PartBadgeType = NonNullable<PartBadgeVariants['part']>
 
 interface PartBadgeProps {
   part: PartBadgeType
+  label?: string
   className?: string
 }
 
-export function PartBadge({ part, className }: PartBadgeProps) {
-  return <span className={partBadgeVariants({ part, className })}>{PART_LABELS[part]}</span>
+export function PartBadge({ part, label, className }: PartBadgeProps) {
+  return (
+    <span className={partBadgeVariants({ part, className })}>{label ?? PART_LABELS[part]}</span>
+  )
 }
