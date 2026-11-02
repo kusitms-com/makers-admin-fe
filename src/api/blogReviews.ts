@@ -27,6 +27,25 @@ export interface BlogReviewCreateRequest {
   thumbnailFile?: File
 }
 
+const blogReviewListItemSchema = z.object({
+  blog_review_id: z.number(),
+  cardinal: z.number(),
+  part: z.string(),
+  activity: z.string(),
+  title: z.string(),
+  previewText: z.string(),
+  blogLink: z.string(),
+  thumbnailUrl: z.string().optional(),
+})
+
+const blogReviewListResponseSchema = z.object({
+  blog_review_count: z.number(),
+  blog_review_list: z.array(blogReviewListItemSchema),
+})
+
+export type BlogReviewListItem = z.infer<typeof blogReviewListItemSchema>
+export type BlogReviewListResponse = z.infer<typeof blogReviewListResponseSchema>
+
 function buildBlogReviewFormData(request: BlogReviewCreateRequest): FormData {
   const formData = new FormData()
 
@@ -39,6 +58,16 @@ function buildBlogReviewFormData(request: BlogReviewCreateRequest): FormData {
   if (request.thumbnailFile) formData.append('thumbnailFile', request.thumbnailFile)
 
   return formData
+}
+
+export function getBlogReviews({
+  accessToken,
+  refreshAccessToken,
+}: RequestContext): Promise<BlogReviewListResponse> {
+  return apiRequest(
+    { method: 'GET', path: '/admin/blog-review', accessToken, refreshAccessToken },
+    blogReviewListResponseSchema,
+  )
 }
 
 export function addBlogReview(

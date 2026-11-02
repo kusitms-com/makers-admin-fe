@@ -1,19 +1,17 @@
 import { useState } from 'react'
-import type { BlogReviewActivity, BlogReviewPart } from '@api/blogReviews'
+import type { BlogReviewActivity, BlogReviewListItem, BlogReviewPart } from '@api/blogReviews'
 import { BlogReviewModal } from '@components/blog-reviews'
 import { Button } from '@components/common/Button'
 import { PageHeader } from '@components/common/PageHeader'
 import { PART_LABELS, type PartBadgeType } from '@components/common/PartBadge'
 import { ReviewTable } from '@components/common/ReviewTable'
 import type { SelectFieldOption } from '@components/common/SelectField'
-import { useCreateBlogReviewMutation } from '@hooks/blog-reviews/useBlogReviews'
-import { useToast } from '@hooks/common/useToast'
 import {
-  ACTIVITY_OPTIONS,
-  CURRENT_GENERATION,
-  INITIAL_ROWS,
-  type BlogReviewRow,
-} from './BlogReviewsPage.mock'
+  useBlogReviewsQuery,
+  useCreateBlogReviewMutation,
+} from '@hooks/blog-reviews/useBlogReviews'
+import { useToast } from '@hooks/common/useToast'
+import { ACTIVITY_OPTIONS, CURRENT_GENERATION, type BlogReviewRow } from './BlogReviewsPage.mock'
 
 const PART_OPTIONS: SelectFieldOption[] = Object.entries(PART_LABELS).map(([value, label]) => ({
   value,
@@ -28,6 +26,15 @@ const PART_TO_BACKEND: Record<PartBadgeType, BlogReviewPart> = {
   BE: 'BACKEND',
 }
 
+// BlogReviewRequest.part enum(Swagger) -> PartBadgeType 역매핑. 관리자 폼이 다루지 않는
+// IOS/ANDROID/DEVELOPER 값은 매핑되지 않아 뱃지 없이 표시된다.
+const BACKEND_TO_PART: Record<string, PartBadgeType> = {
+  PLANNER: 'PLAN',
+  DESIGNER: 'DE',
+  FRONTEND: 'FE',
+  BACKEND: 'BE',
+}
+
 const PAGE_SIZE = 7
 
 function isPartBadgeType(value: string): value is PartBadgeType {
@@ -38,8 +45,24 @@ function isBlogReviewActivity(value: string): value is BlogReviewActivity {
   return ACTIVITY_OPTIONS.some((option) => option.value === value)
 }
 
+// 작성자 이름은 API 응답에 없어 '관리자'로 고정 표시한다.
+function toBlogReviewRow(item: BlogReviewListItem): BlogReviewRow {
+  return {
+    id: String(item.blog_review_id),
+    name: '관리자',
+    generation: item.cardinal,
+    part: BACKEND_TO_PART[item.part],
+    activity:
+      ACTIVITY_OPTIONS.find((option) => option.value === item.activity)?.label ?? item.activity,
+    title: item.title,
+    link: item.blogLink,
+    thumbnailUrl: item.thumbnailUrl,
+  }
+}
+
 export function BlogReviewsPage() {
-  const [rows, setRows] = useState<BlogReviewRow[]>(INITIAL_ROWS)
+  const blogReviewsQuery = useBlogReviewsQuery()
+  const [deletedIds, setDeletedIds] = useState<ReadonlySet<string>>(new Set())
   const [page, setPage] = useState(1)
   const [modalOpen, setModalOpen] = useState(false)
   const [part, setPart] = useState<PartBadgeType>('PLAN')
@@ -52,6 +75,10 @@ export function BlogReviewsPage() {
 
   const createBlogReviewMutation = useCreateBlogReviewMutation()
   const addToast = useToast()
+
+  const rows = (blogReviewsQuery.data?.blog_review_list ?? [])
+    .map(toBlogReviewRow)
+    .filter((row) => !deletedIds.has(row.id))
 
   const totalPages = Math.max(1, Math.ceil(rows.length / PAGE_SIZE))
   const pagedRows = rows.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE)
@@ -67,11 +94,9 @@ export function BlogReviewsPage() {
   }
 
   function handleDeleteRow(id: string) {
-    const nextRows = rows.filter((row) => row.id !== id)
-
-    setRows(nextRows)
+    setDeletedIds((previousIds) => new Set(previousIds).add(id))
     setPage((currentPage) =>
-      Math.min(currentPage, Math.max(1, Math.ceil(nextRows.length / PAGE_SIZE))),
+      Math.min(currentPage, Math.max(1, Math.ceil((rows.length - 1) / PAGE_SIZE))),
     )
   }
 
@@ -119,19 +144,6 @@ export function BlogReviewsPage() {
       },
       {
         onSuccess: () => {
-          setRows((previousRows) => [
-            {
-              id: crypto.randomUUID(),
-              name: '관리자',
-              generation: CURRENT_GENERATION,
-              part,
-              activity: activityLabel,
-              title: trimmedTitle,
-              link: trimmedLink,
-              thumbnailUrl,
-            },
-            ...previousRows,
-          ])
           setPage(1)
           resetForm()
           setModalOpen(false)
@@ -146,6 +158,37 @@ export function BlogReviewsPage() {
   function handleCancel() {
     resetForm()
     setModalOpen(false)
+  }
+
+  if (blogReviewsQuery.isLoading) {
+    return (
+      <div className="flex min-h-screen flex-col">
+        <PageHeader title="블로그 후기 관리" />
+        <div className="text-label-14m text-label-alternative flex flex-1 items-center justify-center">
+          불러오는 중입니다...
+        </div>
+      </div>
+    )
+  }
+
+  if (blogReviewsQuery.isError) {
+    return (
+      <div className="flex min-h-screen flex-col">
+        <PageHeader title="블로그 후기 관리" />
+        <div className="flex flex-1 flex-col items-center justify-center gap-3">
+          <p className="text-label-14m text-label-alternative">후기 목록을 불러오지 못했습니다.</p>
+          <Button
+            variant="primary"
+            size="s"
+            onClick={() => {
+              void blogReviewsQuery.refetch()
+            }}
+          >
+            다시 시도
+          </Button>
+        </div>
+      </div>
+    )
   }
 
   return (
