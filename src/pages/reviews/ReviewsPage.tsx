@@ -33,9 +33,9 @@ function isReviewTeam(value: string): value is ReviewTeam {
   return Object.prototype.hasOwnProperty.call(TEAM_LABELS, value)
 }
 
-function labelToTeam(label: string): ReviewTeam {
+function labelToTeam(label: string): ReviewTeam | undefined {
   const value = TEAM_OPTIONS.find((option) => option.label === label)?.value
-  return value && isReviewTeam(value) ? value : 'PLANNER'
+  return value && isReviewTeam(value) ? value : undefined
 }
 
 // 서버는 소속팀을 PLAN/DE/FE/BE enum이 아니라 "기획팀"/"디자인팀"/"개발팀" 3종 자유 텍스트로 내려준다.
@@ -73,7 +73,7 @@ export function ReviewsPage() {
 
   const [editingRow, setEditingRow] = useState<ReviewRow | null>(null)
   const [isEditing, setIsEditing] = useState(false)
-  const [editTeam, setEditTeam] = useState<ReviewTeam>('PLANNER')
+  const [editTeam, setEditTeam] = useState<ReviewTeam | undefined>(undefined)
   const [editName, setEditName] = useState('')
   const [editReview, setEditReview] = useState('')
 
@@ -131,7 +131,7 @@ export function ReviewsPage() {
   }
 
   function handleUpdate() {
-    if (!editingRow) return
+    if (!editingRow || !editTeam) return
 
     updateReviewMutation.mutate(
       {
@@ -266,7 +266,7 @@ export function ReviewsPage() {
             setIsEditing(true)
           }}
           cardinal={editingRow.generation}
-          team={editTeam}
+          team={editTeam ?? ''}
           teamOptions={TEAM_OPTIONS}
           onTeamChange={handleEditTeamChange}
           name={editName}
@@ -275,7 +275,7 @@ export function ReviewsPage() {
           onReviewChange={setEditReview}
           onCancel={closeDetail}
           onSave={handleUpdate}
-          saveDisabled={!editName || !editReview || updateReviewMutation.isPending}
+          saveDisabled={!editName || !editReview || !editTeam || updateReviewMutation.isPending}
         />
       )}
     </div>
