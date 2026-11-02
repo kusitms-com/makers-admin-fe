@@ -16,6 +16,7 @@ interface ReviewTableRowProps {
   phone?: string
   fileName?: string
   onDelete?: () => void
+  onTitleClick?: () => void
   className?: string
 }
 
@@ -39,6 +40,7 @@ export function ReviewTableRow({
   phone,
   fileName,
   onDelete,
+  onTitleClick,
   className,
 }: ReviewTableRowProps) {
   const isMemberReview = type === 'memberReview'
@@ -106,7 +108,15 @@ export function ReviewTableRow({
             isMemberReview ? 'px-[18px]' : 'pl-3',
           )}
         >
-          {isMemberReview || !link ? (
+          {isReview && onTitleClick ? (
+            <button
+              type="button"
+              onClick={onTitleClick}
+              className="text-label-14m text-label-normal w-full truncate text-left hover:underline"
+            >
+              {title}
+            </button>
+          ) : isMemberReview || !link ? (
             <Label className="w-full truncate">{title}</Label>
           ) : (
             <a

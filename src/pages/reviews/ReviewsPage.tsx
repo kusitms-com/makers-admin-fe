@@ -10,6 +10,7 @@ import {
   useCreateReviewMutation,
   useDeleteReviewMutation,
   useReviewsQuery,
+  useUpdateReviewMutation,
 } from '@hooks/reviews/useReviews'
 import { useToast } from '@hooks/common/useToast'
 import { CURRENT_GENERATION, type ReviewRow } from './ReviewsPage.mock'
@@ -30,6 +31,11 @@ const PAGE_SIZE = 7
 
 function isReviewTeam(value: string): value is ReviewTeam {
   return Object.prototype.hasOwnProperty.call(TEAM_LABELS, value)
+}
+
+function labelToTeam(label: string): ReviewTeam {
+  const value = TEAM_OPTIONS.find((option) => option.label === label)?.value
+  return value && isReviewTeam(value) ? value : 'PLANNER'
 }
 
 // 서버는 소속팀을 PLAN/DE/FE/BE enum이 아니라 "기획팀"/"디자인팀"/"개발팀" 3종 자유 텍스트로 내려준다.
@@ -54,6 +60,7 @@ function toReviewRow(item: ReviewListItem): ReviewRow {
 export function ReviewsPage() {
   const reviewsQuery = useReviewsQuery()
   const createReviewMutation = useCreateReviewMutation()
+  const updateReviewMutation = useUpdateReviewMutation()
   const deleteReviewMutation = useDeleteReviewMutation()
   const addToast = useToast()
 
@@ -63,6 +70,12 @@ export function ReviewsPage() {
   const [team, setTeam] = useState<ReviewTeam>('PLANNER')
   const [name, setName] = useState('')
   const [review, setReview] = useState('')
+
+  const [editingRow, setEditingRow] = useState<ReviewRow | null>(null)
+  const [isEditing, setIsEditing] = useState(false)
+  const [editTeam, setEditTeam] = useState<ReviewTeam>('PLANNER')
+  const [editName, setEditName] = useState('')
+  const [editReview, setEditReview] = useState('')
 
   const rows = reviewsQuery.data?.review_list.map(toReviewRow) ?? []
 
@@ -96,6 +109,47 @@ export function ReviewsPage() {
     if (isReviewTeam(value)) {
       setTeam(value)
     }
+  }
+
+  function handleEditTeamChange(value: string) {
+    if (isReviewTeam(value)) {
+      setEditTeam(value)
+    }
+  }
+
+  function openDetail(row: ReviewRow) {
+    setEditingRow(row)
+    setEditName(row.name)
+    setEditReview(row.title)
+    setEditTeam(labelToTeam(row.team))
+    setIsEditing(false)
+  }
+
+  function closeDetail() {
+    setEditingRow(null)
+    setIsEditing(false)
+  }
+
+  function handleUpdate() {
+    if (!editingRow) return
+
+    updateReviewMutation.mutate(
+      {
+        reviewId: Number(editingRow.id),
+        name: editName,
+        cardinal: editingRow.generation,
+        team: editTeam,
+        review: editReview,
+      },
+      {
+        onSuccess: () => {
+          closeDetail()
+        },
+        onError: () => {
+          addToast({ type: 'error', message: '수정하지 못했습니다. 다시 시도해주세요.' })
+        },
+      },
+    )
   }
 
   function handleSave() {
@@ -173,6 +227,10 @@ export function ReviewsPage() {
             type="review"
             rows={pagedRows}
             onDeleteRow={handleDeleteRow}
+            onTitleClick={(id) => {
+              const row = rows.find((item) => item.id === id)
+              if (row) openDetail(row)
+            }}
             page={page}
             totalPages={totalPages}
             onPageChange={setPage}
@@ -196,6 +254,30 @@ export function ReviewsPage() {
         onSave={handleSave}
         saveDisabled={!name || !review}
       />
+
+      {editingRow && (
+        <ReviewModal
+          open
+          onOpenChange={(open) => {
+            if (!open) closeDetail()
+          }}
+          readOnly={!isEditing}
+          onEdit={() => {
+            setIsEditing(true)
+          }}
+          cardinal={editingRow.generation}
+          team={editTeam}
+          teamOptions={TEAM_OPTIONS}
+          onTeamChange={handleEditTeamChange}
+          name={editName}
+          onNameChange={setEditName}
+          review={editReview}
+          onReviewChange={setEditReview}
+          onCancel={closeDetail}
+          onSave={handleUpdate}
+          saveDisabled={!editName || !editReview || updateReviewMutation.isPending}
+        />
+      )}
     </div>
   )
 }

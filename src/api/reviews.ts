@@ -33,6 +33,14 @@ export interface ReviewCreateRequest {
   review: string
 }
 
+export interface ReviewUpdateRequest {
+  reviewId: number
+  name: string
+  cardinal: number
+  team: ReviewTeam
+  review: string
+}
+
 export function getReviews({
   accessToken,
   refreshAccessToken,
@@ -50,6 +58,22 @@ export function addReview(
   return apiRequest(
     {
       method: 'POST',
+      path: '/admin/review',
+      body: request,
+      accessToken,
+      refreshAccessToken,
+    },
+    z.unknown(),
+  )
+}
+
+export function updateReview(
+  request: ReviewUpdateRequest,
+  { accessToken, refreshAccessToken }: RequestContext,
+): Promise<unknown> {
+  return apiRequest(
+    {
+      method: 'PUT',
       path: '/admin/review',
       body: request,
       accessToken,

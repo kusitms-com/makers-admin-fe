@@ -1,5 +1,12 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { addReview, deleteReview, getReviews, type ReviewCreateRequest } from '@api/reviews'
+import {
+  addReview,
+  deleteReview,
+  getReviews,
+  updateReview,
+  type ReviewCreateRequest,
+  type ReviewUpdateRequest,
+} from '@api/reviews'
 import { useAuthStore } from '@hooks/auth/useAuth'
 
 export const reviewsQueryKey = ['admin', 'reviews'] as const
@@ -35,6 +42,26 @@ export function useCreateReviewMutation() {
         return Promise.reject(new Error('로그인이 필요합니다.'))
       }
       return addReview(request, { accessToken, refreshAccessToken })
+    },
+    onSuccess: () => {
+      return queryClient.invalidateQueries({ queryKey: reviewsQueryKey })
+    },
+  })
+}
+
+export function useUpdateReviewMutation() {
+  const queryClient = useQueryClient()
+  const accessToken = useAuthStore((state) =>
+    state.session.status === 'authenticated' ? state.session.accessToken : undefined,
+  )
+  const refreshAccessToken = useAuthStore((state) => state.refreshAccessToken)
+
+  return useMutation({
+    mutationFn: (request: ReviewUpdateRequest) => {
+      if (!accessToken) {
+        return Promise.reject(new Error('로그인이 필요합니다.'))
+      }
+      return updateReview(request, { accessToken, refreshAccessToken })
     },
     onSuccess: () => {
       return queryClient.invalidateQueries({ queryKey: reviewsQueryKey })

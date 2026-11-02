@@ -20,6 +20,7 @@ interface ReviewTableProps {
   type: 'blogReview' | 'memberReview' | 'review'
   rows: ReviewTableRowData[]
   onDeleteRow?: (id: string) => void
+  onTitleClick?: (id: string) => void
   page: number
   totalPages: number
   onPageChange: (page: number) => void
@@ -56,6 +57,7 @@ export function ReviewTable({
   type,
   rows,
   onDeleteRow,
+  onTitleClick,
   page,
   totalPages,
   onPageChange,
@@ -109,6 +111,13 @@ export function ReviewTable({
               title={row.title}
               link={row.link}
               onDelete={() => onDeleteRow?.(row.id)}
+              onTitleClick={
+                onTitleClick
+                  ? () => {
+                      onTitleClick(row.id)
+                    }
+                  : undefined
+              }
               className="w-full"
             />
           ))}
