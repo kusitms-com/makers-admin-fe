@@ -346,6 +346,48 @@ export function createCorporateProject(
   )
 }
 
+export interface CorporateProjectUpdateRequest {
+  corporateId: number
+  cardinal: number
+  name: string
+  content: string
+  logoFile?: File
+  bannerFile?: File
+}
+
+// PUT의 updateCorporate도 saveCorporate와 동일하게 tag를 null 체크 없이 바로 .size()를 호출하므로
+// (.claude/known-issues/records/api-corporate-create-tag-npe.md), 생성과 동일하게 빈 문자열을 보낸다.
+// logoFile/bannerFile은 Swagger 설명(uploadOrKeep)대로 생략 시 기존 이미지를 유지하므로 선택이다.
+function buildCorporateUpdateFormData(request: CorporateProjectUpdateRequest): FormData {
+  const formData = new FormData()
+
+  formData.append('corporateId', String(request.corporateId))
+  formData.append('cardinal', String(request.cardinal))
+  formData.append('name', request.name)
+  formData.append('content', request.content)
+  formData.append('tag', '')
+  if (request.logoFile) formData.append('logoFile', request.logoFile)
+  if (request.bannerFile) formData.append('bannerFile', request.bannerFile)
+
+  return formData
+}
+
+export function updateCorporateProject(
+  request: CorporateProjectUpdateRequest,
+  { accessToken, refreshAccessToken }: RequestContext,
+): Promise<unknown> {
+  return apiRequest(
+    {
+      method: 'PUT',
+      path: '/admin/projects/corporate',
+      body: buildCorporateUpdateFormData(request),
+      accessToken,
+      refreshAccessToken,
+    },
+    z.unknown(),
+  )
+}
+
 export function deleteCorporateProject(
   id: number,
   { accessToken, refreshAccessToken }: RequestContext,

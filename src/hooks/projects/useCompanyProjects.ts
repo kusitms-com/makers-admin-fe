@@ -4,7 +4,9 @@ import {
   deleteCorporateProject,
   getCorporateProject,
   getCorporateProjects,
+  updateCorporateProject,
   type CorporateProjectCreateRequest,
+  type CorporateProjectUpdateRequest,
 } from '@api/projects'
 import { useAuthStore } from '@hooks/auth/useAuth'
 
@@ -62,6 +64,29 @@ export function useCreateCompanyProjectMutation() {
     },
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: companyProjectsQueryKey })
+    },
+  })
+}
+
+export function useUpdateCompanyProjectMutation() {
+  const queryClient = useQueryClient()
+  const accessToken = useAuthStore((state) =>
+    state.session.status === 'authenticated' ? state.session.accessToken : undefined,
+  )
+  const refreshAccessToken = useAuthStore((state) => state.refreshAccessToken)
+
+  return useMutation({
+    mutationFn: (request: CorporateProjectUpdateRequest) => {
+      if (!accessToken) {
+        return Promise.reject(new Error('로그인이 필요합니다.'))
+      }
+      return updateCorporateProject(request, { accessToken, refreshAccessToken })
+    },
+    onSuccess: (_data, request) => {
+      void queryClient.invalidateQueries({ queryKey: companyProjectsQueryKey })
+      void queryClient.invalidateQueries({
+        queryKey: [...companyProjectsQueryKey, request.corporateId],
+      })
     },
   })
 }

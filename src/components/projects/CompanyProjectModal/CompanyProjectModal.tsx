@@ -23,6 +23,7 @@ interface CompanyProjectModalProps {
   onBannerDelete?: () => void
   onCancel: () => void
   onSave: () => void
+  onEdit?: () => void
   saveDisabled?: boolean
   readOnly?: boolean
   className?: string
@@ -44,6 +45,7 @@ export function CompanyProjectModal({
   onBannerDelete,
   onCancel,
   onSave,
+  onEdit,
   saveDisabled = true,
   readOnly = false,
   className,
@@ -52,10 +54,31 @@ export function CompanyProjectModal({
     <Modal
       open={open}
       onOpenChange={onOpenChange}
-      title={readOnly ? '기업 프로젝트 상세' : '기업 프로젝트 등록'}
+      title={readOnly ? '기업 프로젝트 상세' : onEdit ? '기업 프로젝트 수정' : '기업 프로젝트 등록'}
       className={className ?? 'left-[calc(50%+30px)]'}
       footer={
-        readOnly ? (
+        onEdit ? (
+          <>
+            <Button variant="outlined" size="l" className="w-[140px]" onClick={onCancel}>
+              닫기
+            </Button>
+            {readOnly ? (
+              <Button variant="outlined" size="l" className="w-[140px]" onClick={onEdit}>
+                수정하기
+              </Button>
+            ) : (
+              <Button
+                variant={saveDisabled ? 'disable' : 'strong'}
+                size="l"
+                className="w-[140px]"
+                disabled={saveDisabled}
+                onClick={onSave}
+              >
+                확인
+              </Button>
+            )}
+          </>
+        ) : readOnly ? (
           <Button variant="outlined" size="l" className="w-[140px]" onClick={onCancel}>
             닫기
           </Button>

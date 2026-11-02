@@ -1,5 +1,10 @@
 import { useEffect, useRef, useState } from 'react'
-import type { CorporateProjectCreateRequest, CorporateProjectListItem } from '@api/projects'
+import type {
+  CorporateProjectCreateRequest,
+  CorporateProjectDetail,
+  CorporateProjectListItem,
+  CorporateProjectUpdateRequest,
+} from '@api/projects'
 import { Button } from '@components/common/Button'
 import { Modal } from '@components/common/Modal'
 import { PageHeader } from '@components/common/PageHeader'
@@ -7,12 +12,16 @@ import { SegmentedControl } from '@components/common/SegmentedControl'
 import { CompanyProjectModal } from '@components/projects/CompanyProjectModal'
 import { ProjectThumbnailCard } from '@components/projects/ProjectThumbnailCard'
 import { useToast } from '@hooks/common/useToast'
-import { useCompanyProjectForm } from '@hooks/projects/useCompanyProjectForm'
+import {
+  useCompanyProjectForm,
+  type CompanyProjectFormValues,
+} from '@hooks/projects/useCompanyProjectForm'
 import {
   useCompanyProjectQuery,
   useCompanyProjectsQuery,
   useCreateCompanyProjectMutation,
   useDeleteCompanyProjectMutation,
+  useUpdateCompanyProjectMutation,
 } from '@hooks/projects/useCompanyProjects'
 import { toAbsoluteS3Url } from '@lib/s3'
 import {
@@ -37,15 +46,27 @@ function toProjectCard(item: CorporateProjectListItem) {
   }
 }
 
+function detailToFormValues(detail: CorporateProjectDetail): CompanyProjectFormValues {
+  return {
+    name: detail.name,
+    content: detail.content,
+    logoUrl: toAbsoluteS3Url(detail.logo_url) ?? '',
+    bannerUrl: toAbsoluteS3Url(detail.banner_url) ?? '',
+  }
+}
+
 export function CompanyProjectsPage() {
   const projectsQuery = useCompanyProjectsQuery()
   const [cohort, setCohort] = useState(String(CURRENT_GENERATION))
   const [modalOpen, setModalOpen] = useState(false)
   const [detailId, setDetailId] = useState<number | null>(null)
+  const [isEditing, setIsEditing] = useState(false)
 
   const form = useCompanyProjectForm()
+  const editForm = useCompanyProjectForm()
   const addToast = useToast()
   const createMutation = useCreateCompanyProjectMutation()
+  const updateMutation = useUpdateCompanyProjectMutation()
   const deleteMutation = useDeleteCompanyProjectMutation()
   const detailQuery = useCompanyProjectQuery(detailId ?? undefined)
 
@@ -71,6 +92,38 @@ export function CompanyProjectsPage() {
 
   function closeDetail() {
     setDetailId(null)
+    setIsEditing(false)
+    editForm.reset()
+  }
+
+  function startEdit() {
+    if (!detailQuery.data) return
+    editForm.loadValues(detailToFormValues(detailQuery.data))
+    setIsEditing(true)
+  }
+
+  function handleUpdate() {
+    void editForm.handleSubmit((values) => {
+      if (detailId === null || !detailQuery.data) return
+
+      const request: CorporateProjectUpdateRequest = {
+        corporateId: detailId,
+        cardinal: detailQuery.data.cardinal,
+        name: values.name,
+        content: values.content,
+        logoFile: editForm.logoFile,
+        bannerFile: editForm.bannerFile,
+      }
+
+      updateMutation.mutate(request, {
+        onSuccess: () => {
+          setIsEditing(false)
+        },
+        onError: () => {
+          addToast({ type: 'error', message: '수정하지 못했습니다. 다시 시도해주세요.' })
+        },
+      })
+    })()
   }
 
   function openModal() {
@@ -255,16 +308,22 @@ export function CompanyProjectsPage() {
           onOpenChange={(open) => {
             if (!open) closeDetail()
           }}
-          readOnly
+          readOnly={!isEditing}
+          onEdit={startEdit}
           cardinal={detailQuery.data.cardinal}
-          name={detailQuery.data.name}
-          onNameChange={() => {}}
-          content={detailQuery.data.content}
-          onContentChange={() => {}}
-          logoUrl={toAbsoluteS3Url(detailQuery.data.logo_url)}
-          bannerUrl={toAbsoluteS3Url(detailQuery.data.banner_url)}
+          name={isEditing ? editForm.name : detailQuery.data.name}
+          onNameChange={isEditing ? editForm.setName : () => {}}
+          content={isEditing ? editForm.content : detailQuery.data.content}
+          onContentChange={isEditing ? editForm.setContent : () => {}}
+          logoUrl={isEditing ? editForm.logoUrl : toAbsoluteS3Url(detailQuery.data.logo_url)}
+          onLogoChange={isEditing ? editForm.onLogoChange : undefined}
+          onLogoDelete={isEditing ? editForm.onLogoDelete : undefined}
+          bannerUrl={isEditing ? editForm.bannerUrl : toAbsoluteS3Url(detailQuery.data.banner_url)}
+          onBannerChange={isEditing ? editForm.onBannerChange : undefined}
+          onBannerDelete={isEditing ? editForm.onBannerDelete : undefined}
           onCancel={closeDetail}
-          onSave={closeDetail}
+          onSave={handleUpdate}
+          saveDisabled={!editForm.isValid || updateMutation.isPending}
         />
       )}
     </div>

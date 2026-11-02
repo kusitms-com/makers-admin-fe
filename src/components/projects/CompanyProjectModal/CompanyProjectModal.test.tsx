@@ -89,4 +89,35 @@ describe('CompanyProjectModal', () => {
 
     expect(props.onBannerDelete).toHaveBeenCalledTimes(1)
   })
+
+  it('onEdit과 readOnly가 함께 전달되면 닫기 옆에 수정하기 버튼이 보이고, 클릭 시 onEdit이 호출된다', async () => {
+    const user = userEvent.setup()
+    const onEdit = vi.fn()
+    const props = renderModal({ readOnly: true, onEdit })
+
+    expect(screen.getByRole('button', { name: '닫기' })).toBeTruthy()
+    await user.click(screen.getByRole('button', { name: '수정하기' }))
+
+    expect(onEdit).toHaveBeenCalledTimes(1)
+    expect(props.onCancel).not.toHaveBeenCalled()
+  })
+
+  it('onEdit과 함께 readOnly가 false면 수정하기 대신 확인 버튼이 보이고, saveDisabled가 false면 클릭 시 onSave가 호출된다', async () => {
+    const user = userEvent.setup()
+    const props = renderModal({ readOnly: false, onEdit: vi.fn(), saveDisabled: false })
+
+    expect(screen.queryByRole('button', { name: '수정하기' })).toBeNull()
+    await user.click(screen.getByRole('button', { name: '확인' }))
+
+    expect(props.onSave).toHaveBeenCalledTimes(1)
+  })
+
+  it('onEdit이 있을 때 닫기 클릭 시 onCancel이 호출된다', async () => {
+    const user = userEvent.setup()
+    const props = renderModal({ readOnly: true, onEdit: vi.fn() })
+
+    await user.click(screen.getByRole('button', { name: '닫기' }))
+
+    expect(props.onCancel).toHaveBeenCalledTimes(1)
+  })
 })
