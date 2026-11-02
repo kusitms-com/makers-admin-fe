@@ -74,9 +74,9 @@ export const MentoringMembersPage = () => {
   const [approvalPage, setApprovalPage] = useState(1)
   const currentMembers = isApprovalPage ? approvals : members
   const activeQuery = isApprovalPage ? pendingMembersQuery : membersQuery
-  const page = isApprovalPage ? approvalPage : membersPage
   const setPage = isApprovalPage ? setApprovalPage : setMembersPage
   const totalPages = Math.max(1, Math.ceil(currentMembers.length / PAGE_SIZE))
+  const page = Math.min(isApprovalPage ? approvalPage : membersPage, totalPages)
   const pagedMembers = currentMembers.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE)
   const changedApprovalEntries = Object.entries(approvalEdits).filter(
     (entry): entry is [string, { status: 'APPROVED' | 'REJECTED' }] =>
@@ -110,7 +110,16 @@ export const MentoringMembersPage = () => {
     )
     setIsSavingApprovals(false)
 
-    if (results.some((result) => result.status === 'rejected')) {
+    const failedIds = new Set(
+      changedApprovalEntries
+        .filter((_, index) => results[index].status === 'rejected')
+        .map(([id]) => id),
+    )
+
+    if (failedIds.size > 0) {
+      setApprovalEdits((current) =>
+        Object.fromEntries(Object.entries(current).filter(([id]) => failedIds.has(id))),
+      )
       addToast({ type: 'error', message: '일부 회원 처리에 실패했습니다. 다시 시도해주세요.' })
       return
     }
