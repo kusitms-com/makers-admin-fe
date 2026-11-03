@@ -12,8 +12,9 @@ import {
   useReviewsQuery,
   useUpdateReviewMutation,
 } from '@hooks/reviews/useReviews'
+import { useCurrentCardinalQuery } from '@hooks/auth/useCurrentCardinal'
 import { useToast } from '@hooks/common/useToast'
-import { CURRENT_GENERATION, type ReviewRow } from './ReviewsPage.mock'
+import { type ReviewRow } from './ReviewsPage.mock'
 
 // ReviewRequest.team enum(Swagger) 중 관리자 폼이 다루는 기획/디자인/개발 3파트만 노출한다.
 const TEAM_LABELS: Record<ReviewTeam, string> = {
@@ -59,6 +60,7 @@ function toReviewRow(item: ReviewListItem): ReviewRow {
 
 export function ReviewsPage() {
   const reviewsQuery = useReviewsQuery()
+  const currentCardinalQuery = useCurrentCardinalQuery()
   const createReviewMutation = useCreateReviewMutation()
   const updateReviewMutation = useUpdateReviewMutation()
   const deleteReviewMutation = useDeleteReviewMutation()
@@ -153,8 +155,11 @@ export function ReviewsPage() {
   }
 
   function handleSave() {
+    const currentCardinal = currentCardinalQuery.data
+    if (currentCardinal === undefined) return
+
     createReviewMutation.mutate(
-      { name, cardinal: CURRENT_GENERATION, team, review },
+      { name, cardinal: currentCardinal, team, review },
       {
         onSuccess: () => {
           resetForm()
@@ -213,6 +218,7 @@ export function ReviewsPage() {
           <Button
             variant="outlined"
             size="l"
+            disabled={currentCardinalQuery.data === undefined}
             onClick={() => {
               setModalOpen(true)
             }}
@@ -242,7 +248,7 @@ export function ReviewsPage() {
       <ReviewModal
         open={modalOpen}
         onOpenChange={setModalOpen}
-        cardinal={CURRENT_GENERATION}
+        cardinal={currentCardinalQuery.data ?? 0}
         team={team}
         teamOptions={TEAM_OPTIONS}
         onTeamChange={handleTeamChange}
@@ -252,7 +258,12 @@ export function ReviewsPage() {
         onReviewChange={setReview}
         onCancel={handleCancel}
         onSave={handleSave}
-        saveDisabled={!name || !review || createReviewMutation.isPending}
+        saveDisabled={
+          !name ||
+          !review ||
+          createReviewMutation.isPending ||
+          currentCardinalQuery.data === undefined
+        }
       />
 
       {editingRow && (

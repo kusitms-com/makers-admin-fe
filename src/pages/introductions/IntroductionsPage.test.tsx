@@ -2,8 +2,14 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
+import type * as AuthApi from '@api/auth'
 import { useAuthStore } from '@hooks/auth/useAuth'
 import { IntroductionsPage } from './IntroductionsPage'
+
+vi.mock('@api/auth', async (importOriginal) => {
+  const actual = await importOriginal<typeof AuthApi>()
+  return { ...actual, getCurrentCardinal: vi.fn().mockResolvedValue(33) }
+})
 
 vi.mock('@api/introductions', () => ({
   getIntroduction: vi.fn().mockResolvedValue({

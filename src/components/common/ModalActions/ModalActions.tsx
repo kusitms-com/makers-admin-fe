@@ -4,9 +4,15 @@ interface ModalActionsProps {
   onCancel: () => void
   onSave: () => void
   saveDisabled?: boolean
+  saveLabel?: string
 }
 
-export function ModalActions({ onCancel, onSave, saveDisabled = true }: ModalActionsProps) {
+export function ModalActions({
+  onCancel,
+  onSave,
+  saveDisabled = true,
+  saveLabel = '저장하기',
+}: ModalActionsProps) {
   return (
     <>
       <Button variant="error" size="l" className="w-[140px]" onClick={onCancel}>
@@ -19,7 +25,7 @@ export function ModalActions({ onCancel, onSave, saveDisabled = true }: ModalAct
         disabled={saveDisabled}
         onClick={onSave}
       >
-        저장하기
+        {saveLabel}
       </Button>
     </>
   )

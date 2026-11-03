@@ -1,21 +1,42 @@
 import { useState } from 'react'
+import type { BlogReviewActivity, BlogReviewListItem, BlogReviewPart } from '@api/blogReviews'
 import { BlogReviewModal } from '@components/blog-reviews'
 import { Button } from '@components/common/Button'
 import { PageHeader } from '@components/common/PageHeader'
 import { PART_LABELS, type PartBadgeType } from '@components/common/PartBadge'
 import { ReviewTable } from '@components/common/ReviewTable'
 import type { SelectFieldOption } from '@components/common/SelectField'
+import { useCurrentCardinalQuery } from '@hooks/auth/useCurrentCardinal'
 import {
-  ACTIVITY_OPTIONS,
-  CURRENT_GENERATION,
-  INITIAL_ROWS,
-  type BlogReviewRow,
-} from './BlogReviewsPage.mock'
+  useBlogReviewsQuery,
+  useCreateBlogReviewMutation,
+  useDeleteBlogReviewMutation,
+  useUpdateBlogReviewMutation,
+} from '@hooks/blog-reviews/useBlogReviews'
+import { useToast } from '@hooks/common/useToast'
+import { ACTIVITY_OPTIONS, type BlogReviewRow } from './BlogReviewsPage.mock'
 
 const PART_OPTIONS: SelectFieldOption[] = Object.entries(PART_LABELS).map(([value, label]) => ({
   value,
   label,
 }))
+
+// PartBadgeType -> BlogReviewRequest.part enum(Swagger) 매핑
+const PART_TO_BACKEND: Record<PartBadgeType, BlogReviewPart> = {
+  PLAN: 'PLANNER',
+  DE: 'DESIGNER',
+  FE: 'FRONTEND',
+  BE: 'BACKEND',
+}
+
+// BlogReviewRequest.part enum(Swagger) -> PartBadgeType 역매핑. 관리자 폼이 다루지 않는
+// IOS/ANDROID/DEVELOPER 값은 매핑되지 않아 뱃지 없이 표시된다.
+const BACKEND_TO_PART: Record<string, PartBadgeType> = {
+  PLANNER: 'PLAN',
+  DESIGNER: 'DE',
+  FRONTEND: 'FE',
+  BACKEND: 'BE',
+}
 
 const PAGE_SIZE = 7
 
@@ -23,34 +44,127 @@ function isPartBadgeType(value: string): value is PartBadgeType {
   return Object.prototype.hasOwnProperty.call(PART_LABELS, value)
 }
 
+function isBlogReviewActivity(value: string): value is BlogReviewActivity {
+  return ACTIVITY_OPTIONS.some((option) => option.value === value)
+}
+
+function isKnownBackendPart(value: string): boolean {
+  return Object.prototype.hasOwnProperty.call(BACKEND_TO_PART, value)
+}
+
+// 작성자 이름은 API 응답에 없어 '관리자'로 고정 표시한다.
+function toBlogReviewRow(item: BlogReviewListItem): BlogReviewRow {
+  return {
+    id: String(item.blog_review_id),
+    name: '관리자',
+    generation: item.cardinal,
+    part: BACKEND_TO_PART[item.part],
+    activity:
+      ACTIVITY_OPTIONS.find((option) => option.value === item.activity)?.label ?? item.activity,
+    title: item.title,
+    link: item.blogLink,
+    thumbnailUrl: item.thumbnailUrl,
+  }
+}
+
+interface EditingSnapshot {
+  blogReviewId: number
+  cardinal: number
+  part: PartBadgeType
+  activity: string
+  title: string
+  previewText: string
+  link: string
+  thumbnailUrl?: string
+}
+
 export function BlogReviewsPage() {
-  const [rows, setRows] = useState<BlogReviewRow[]>(INITIAL_ROWS)
+  const blogReviewsQuery = useBlogReviewsQuery()
+  const currentCardinalQuery = useCurrentCardinalQuery()
   const [page, setPage] = useState(1)
   const [modalOpen, setModalOpen] = useState(false)
+  const [editingSnapshot, setEditingSnapshot] = useState<EditingSnapshot>()
   const [part, setPart] = useState<PartBadgeType>('PLAN')
   const [activity, setActivity] = useState('')
   const [title, setTitle] = useState('')
+  const [previewText, setPreviewText] = useState('')
   const [link, setLink] = useState('')
   const [thumbnailUrl, setThumbnailUrl] = useState<string>()
+  const [thumbnailFile, setThumbnailFile] = useState<File>()
+
+  const createBlogReviewMutation = useCreateBlogReviewMutation()
+  const updateBlogReviewMutation = useUpdateBlogReviewMutation()
+  const deleteBlogReviewMutation = useDeleteBlogReviewMutation()
+  const addToast = useToast()
+
+  const rows = (blogReviewsQuery.data?.blog_review_list ?? []).map(toBlogReviewRow)
 
   const totalPages = Math.max(1, Math.ceil(rows.length / PAGE_SIZE))
-  const pagedRows = rows.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE)
+  const currentPage = Math.min(page, totalPages)
+  const pagedRows = rows.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE)
 
   function resetForm() {
+    setEditingSnapshot(undefined)
     setPart('PLAN')
     setActivity('')
     setTitle('')
+    setPreviewText('')
     setLink('')
     setThumbnailUrl(undefined)
+    setThumbnailFile(undefined)
   }
 
-  function handleDeleteRow(id: string) {
-    const nextRows = rows.filter((row) => row.id !== id)
-
-    setRows(nextRows)
-    setPage((currentPage) =>
-      Math.min(currentPage, Math.max(1, Math.ceil(nextRows.length / PAGE_SIZE))),
+  function handleEditRow(id: string) {
+    const item = blogReviewsQuery.data?.blog_review_list.find(
+      (reviewItem) => String(reviewItem.blog_review_id) === id,
     )
+    if (!item) return
+
+    if (!isKnownBackendPart(item.part)) {
+      addToast({ type: 'error', message: '지원하지 않는 파트의 후기는 수정할 수 없습니다.' })
+      return
+    }
+    const mappedPart = BACKEND_TO_PART[item.part]
+
+    setEditingSnapshot({
+      blogReviewId: item.blog_review_id,
+      cardinal: item.cardinal,
+      part: mappedPart,
+      activity: item.activity,
+      title: item.title,
+      previewText: item.previewText,
+      link: item.blogLink,
+      thumbnailUrl: item.thumbnailUrl,
+    })
+    setPart(mappedPart)
+    setActivity(isBlogReviewActivity(item.activity) ? item.activity : '')
+    setTitle(item.title)
+    setPreviewText(item.previewText)
+    setLink(item.blogLink)
+    setThumbnailUrl(item.thumbnailUrl)
+    setThumbnailFile(undefined)
+    setModalOpen(true)
+  }
+
+  const isDirty = editingSnapshot
+    ? part !== editingSnapshot.part ||
+      activity !== editingSnapshot.activity ||
+      title !== editingSnapshot.title ||
+      previewText !== editingSnapshot.previewText ||
+      link !== editingSnapshot.link ||
+      thumbnailUrl !== editingSnapshot.thumbnailUrl
+    : true
+
+  function handleDeleteRow(id: string) {
+    if (!window.confirm('이 후기를 삭제하시겠습니까?')) {
+      return
+    }
+
+    deleteBlogReviewMutation.mutate(Number(id), {
+      onError: () => {
+        addToast({ type: 'error', message: '삭제하지 못했습니다. 다시 시도해주세요.' })
+      },
+    })
   }
 
   function handlePartChange(value: string) {
@@ -59,44 +173,119 @@ export function BlogReviewsPage() {
     }
   }
 
+  function handleActivityChange(value: string) {
+    if (isBlogReviewActivity(value)) {
+      setActivity(value)
+    }
+  }
+
   function handleThumbnailChange(file: File) {
     setThumbnailUrl(URL.createObjectURL(file))
+    setThumbnailFile(file)
   }
 
   function handleThumbnailDelete() {
     setThumbnailUrl(undefined)
+    setThumbnailFile(undefined)
   }
 
   function handleSave() {
+    const activityValue = activity
     const activityLabel = ACTIVITY_OPTIONS.find((option) => option.value === activity)?.label
     const trimmedTitle = title.trim()
     const trimmedLink = link.trim()
 
-    if (!activityLabel || !trimmedTitle || !trimmedLink) {
+    if (!isBlogReviewActivity(activityValue) || !activityLabel || !trimmedTitle || !trimmedLink) {
       return
     }
 
-    setRows((previousRows) => [
+    if (editingSnapshot) {
+      updateBlogReviewMutation.mutate(
+        {
+          blogReviewId: editingSnapshot.blogReviewId,
+          cardinal: editingSnapshot.cardinal,
+          part: PART_TO_BACKEND[part],
+          activity: activityValue,
+          title: trimmedTitle,
+          previewText: previewText.trim(),
+          blogLink: trimmedLink,
+          thumbnailFile,
+        },
+        {
+          onSuccess: () => {
+            resetForm()
+            setModalOpen(false)
+          },
+          onError: () => {
+            addToast({ type: 'error', message: '수정하지 못했습니다. 다시 시도해주세요.' })
+          },
+        },
+      )
+      return
+    }
+
+    const currentCardinal = currentCardinalQuery.data
+    if (currentCardinal === undefined) {
+      return
+    }
+
+    createBlogReviewMutation.mutate(
       {
-        id: crypto.randomUUID(),
-        name: '관리자',
-        generation: CURRENT_GENERATION,
-        part,
-        activity: activityLabel,
+        cardinal: currentCardinal,
+        part: PART_TO_BACKEND[part],
+        activity: activityValue,
         title: trimmedTitle,
-        link: trimmedLink,
-        thumbnailUrl,
+        previewText: previewText.trim(),
+        blogLink: trimmedLink,
+        thumbnailFile,
       },
-      ...previousRows,
-    ])
-    setPage(1)
-    resetForm()
-    setModalOpen(false)
+      {
+        onSuccess: () => {
+          setPage(1)
+          resetForm()
+          setModalOpen(false)
+        },
+        onError: () => {
+          addToast({ type: 'error', message: '등록하지 못했습니다. 다시 시도해주세요.' })
+        },
+      },
+    )
   }
 
   function handleCancel() {
     resetForm()
     setModalOpen(false)
+  }
+
+  if (blogReviewsQuery.isLoading) {
+    return (
+      <div className="flex min-h-screen flex-col">
+        <PageHeader title="블로그 후기 관리" />
+        <div className="text-label-14m text-label-alternative flex flex-1 items-center justify-center">
+          불러오는 중입니다...
+        </div>
+      </div>
+    )
+  }
+
+  if (blogReviewsQuery.isError) {
+    return (
+      <div className="flex min-h-screen flex-col">
+        <PageHeader title="블로그 후기 관리" />
+        <div className="flex flex-1 flex-col items-center justify-center gap-3">
+          <p className="text-label-14m text-label-alternative">후기 목록을 불러오지 못했습니다.</p>
+          <Button
+            variant="primary"
+            size="s"
+            onClick={() => {
+              void blogReviewsQuery.refetch()
+            }}
+          >
+            다시 시도
+          </Button>
+        </div>
+      </div>
+    )
   }
 
   return (
@@ -109,7 +298,9 @@ export function BlogReviewsPage() {
           <Button
             variant="outlined"
             size="l"
+            disabled={currentCardinalQuery.data === undefined}
             onClick={() => {
+              resetForm()
               setModalOpen(true)
             }}
           >
@@ -122,8 +313,9 @@ export function BlogReviewsPage() {
           <ReviewTable
             type="blogReview"
             rows={pagedRows.map((row) => ({ ...row, category: row.activity }))}
+            onEditRow={handleEditRow}
             onDeleteRow={handleDeleteRow}
-            page={page}
+            page={currentPage}
             totalPages={totalPages}
             onPageChange={setPage}
             totalLabel={`총 ${String(rows.length)}개의 후기`}
@@ -134,15 +326,18 @@ export function BlogReviewsPage() {
       <BlogReviewModal
         open={modalOpen}
         onOpenChange={setModalOpen}
-        cardinal={CURRENT_GENERATION}
+        mode={editingSnapshot ? 'edit' : 'create'}
+        cardinal={editingSnapshot?.cardinal ?? currentCardinalQuery.data ?? 0}
         part={part}
         partOptions={PART_OPTIONS}
         onPartChange={handlePartChange}
         activity={activity}
         activityOptions={[...ACTIVITY_OPTIONS]}
-        onActivityChange={setActivity}
+        onActivityChange={handleActivityChange}
         title={title}
         onTitleChange={setTitle}
+        previewText={previewText}
+        onPreviewTextChange={setPreviewText}
         link={link}
         onLinkChange={setLink}
         thumbnailUrl={thumbnailUrl}
@@ -150,7 +345,14 @@ export function BlogReviewsPage() {
         onThumbnailDelete={handleThumbnailDelete}
         onCancel={handleCancel}
         onSave={handleSave}
-        saveDisabled={!activity || !title.trim() || !link.trim()}
+        saveDisabled={
+          !activity ||
+          !title.trim() ||
+          !link.trim() ||
+          createBlogReviewMutation.isPending ||
+          updateBlogReviewMutation.isPending ||
+          (editingSnapshot ? !isDirty : currentCardinalQuery.data === undefined)
+        }
       />
     </div>
   )

@@ -106,7 +106,7 @@ describe('ReviewTable', () => {
       />,
     )
 
-    const deleteButtons = screen.getAllByRole('button', { name: '삭제' })
+    const deleteButtons = screen.getAllByRole('button', { name: /삭제$/ })
     await user.click(deleteButtons[1])
 
     expect(onDeleteRow).toHaveBeenCalledWith('2')

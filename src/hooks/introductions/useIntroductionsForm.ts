@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState, type Dispatch, type SetStateAction } from 'react'
 import type { AdminIntroResponse, BannerStatus, IntroUpdateRequest } from '@api/introductions'
+import { useCurrentCardinalQuery } from '@hooks/auth/useCurrentCardinal'
 import { toAbsoluteS3Url } from '@lib/s3'
 import { useIntroductionQuery, useUpdateIntroductionMutation } from './useIntroductions'
 
@@ -27,9 +28,6 @@ export function revokeIfBlobUrl(url: string | undefined) {
     URL.revokeObjectURL(url)
   }
 }
-
-// 기수 선택 소스가 생기기 전까지 현재 활동 기수를 고정값으로 둔다.
-const CURRENT_GENERATION = 33
 
 function toOptionalCount(value: string): number | undefined {
   if (value === '') return undefined
@@ -170,6 +168,7 @@ function createImageListHandlers(setItems: Dispatch<SetStateAction<PartnerLogo[]
 export function useIntroductionsForm() {
   const introductionQuery = useIntroductionQuery()
   const updateMutation = useUpdateIntroductionMutation()
+  const currentCardinalQuery = useCurrentCardinalQuery()
 
   const [bannerCardinal, setBannerCardinal] = useState<number | undefined>()
   const [bannerStatus, setBannerStatus] = useState<BannerStatus | ''>('')
@@ -306,8 +305,10 @@ export function useIntroductionsForm() {
     }
   }, [])
 
-  function buildPayload(): IntroUpdateRequest {
-    const payload: IntroUpdateRequest = { bannerCardinal: bannerCardinal ?? CURRENT_GENERATION }
+  const cardinal = bannerCardinal ?? currentCardinalQuery.data
+
+  function buildPayload(resolvedCardinal: number): IntroUpdateRequest {
+    const payload: IntroUpdateRequest = { bannerCardinal: resolvedCardinal }
 
     if (bannerStatus) payload.bannerStatus = bannerStatus
     if (slogan) payload.slogan = slogan
@@ -354,7 +355,8 @@ export function useIntroductionsForm() {
   }
 
   async function handleSave() {
-    await updateMutation.mutateAsync(buildPayload())
+    if (cardinal === undefined) return
+    await updateMutation.mutateAsync(buildPayload(cardinal))
     setPristineSnapshot(formSnapshot)
   }
 
@@ -395,7 +397,8 @@ export function useIntroductionsForm() {
   const sponsorHandlers = createImageListHandlers(setSponsors)
 
   return {
-    cardinal: CURRENT_GENERATION,
+    cardinal: cardinal ?? 0,
+    cardinalReady: cardinal !== undefined,
     bannerStatus,
     setBannerStatus,
     slogan,

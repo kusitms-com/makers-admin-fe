@@ -32,3 +32,14 @@ export function signOut(
     z.unknown(),
   )
 }
+
+const currentCardinalResponseSchema = z.object({
+  currentCardinal: z.number(),
+})
+
+export function getCurrentCardinal(): Promise<number> {
+  return apiRequest(
+    { method: 'GET', path: '/api/auth/current-cardinal' },
+    currentCardinalResponseSchema,
+  ).then((data) => data.currentCardinal)
+}

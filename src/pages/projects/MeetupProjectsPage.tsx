@@ -13,6 +13,7 @@ import { PageHeader } from '@components/common/PageHeader'
 import { SegmentedControl } from '@components/common/SegmentedControl'
 import { MeetupProjectModal } from '@components/projects/MeetupProjectModal'
 import { ProjectThumbnailCard } from '@components/projects/ProjectThumbnailCard'
+import { useCurrentCardinalQuery } from '@hooks/auth/useCurrentCardinal'
 import { useToast } from '@hooks/common/useToast'
 import {
   useMeetupProjectForm,
@@ -83,6 +84,7 @@ function detailToFormValues(detail: MeetupProjectDetail): MeetupProjectFormValue
 
 export function MeetupProjectsPage() {
   const projectsQuery = useMeetupProjectsQuery()
+  const currentCardinalQuery = useCurrentCardinalQuery()
   const [cohort, setCohort] = useState(String(CURRENT_GENERATION))
   const [modalOpen, setModalOpen] = useState(false)
   const [detailId, setDetailId] = useState<number | null>(null)
@@ -178,8 +180,11 @@ export function MeetupProjectsPage() {
       // 항상 같이 설정되므로 posterFile/logoFile도 존재한다.
       if (!form.posterFile || !form.logoFile) return
 
+      const currentCardinal = currentCardinalQuery.data
+      if (currentCardinal === undefined) return
+
       const request: MeetupProjectCreateRequest = {
-        cardinal: CURRENT_GENERATION,
+        cardinal: currentCardinal,
         name: values.name,
         intro: values.intro,
         type: values.type as MeetupProjectType,
@@ -264,7 +269,12 @@ export function MeetupProjectsPage() {
       <div className="flex flex-col gap-7 pt-6 pr-8 pb-15 pl-6">
         <section className="flex flex-col items-start gap-3">
           <h2 className="text-body-18sb text-label-normal">프로젝트 추가하기</h2>
-          <Button variant="outlined" size="l" onClick={openModal}>
+          <Button
+            variant="outlined"
+            size="l"
+            disabled={currentCardinalQuery.data === undefined}
+            onClick={openModal}
+          >
             추가하기
           </Button>
         </section>
@@ -299,7 +309,7 @@ export function MeetupProjectsPage() {
       <MeetupProjectModal
         open={modalOpen}
         onOpenChange={setModalOpen}
-        cardinal={CURRENT_GENERATION}
+        cardinal={currentCardinalQuery.data ?? 0}
         type={form.type}
         typeOptions={TYPE_OPTIONS}
         onTypeChange={form.setType}
@@ -338,7 +348,9 @@ export function MeetupProjectsPage() {
           setModalOpen(false)
         }}
         onSave={handleSave}
-        saveDisabled={!form.isValid || createMutation.isPending}
+        saveDisabled={
+          !form.isValid || createMutation.isPending || currentCardinalQuery.data === undefined
+        }
       />
 
       {detailId !== null && detailQuery.isPending && (

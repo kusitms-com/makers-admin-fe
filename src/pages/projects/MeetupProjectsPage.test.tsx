@@ -2,6 +2,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { render, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
+import type * as AuthApi from '@api/auth'
 import { useAuthStore } from '@hooks/auth/useAuth'
 import { MeetupProjectsPage } from './MeetupProjectsPage'
 
@@ -58,6 +59,11 @@ const MEETUP_DETAIL = {
   end_date: '2026-02-01',
   tags: [],
 }
+
+vi.mock('@api/auth', async (importOriginal) => {
+  const actual = await importOriginal<typeof AuthApi>()
+  return { ...actual, getCurrentCardinal: vi.fn().mockResolvedValue(33) }
+})
 
 vi.mock('@api/projects', () => ({
   getMeetupProjects: vi

@@ -176,7 +176,7 @@ export function IntroductionsPage() {
       <PageHeader
         title="학회 소개"
         actionLabel="저장하기"
-        actionDisabled={!form.isDirty || form.isSaving}
+        actionDisabled={!form.isDirty || form.isSaving || !form.cardinalReady}
         onAction={handleSave}
       />
 

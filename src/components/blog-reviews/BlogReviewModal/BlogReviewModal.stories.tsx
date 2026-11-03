@@ -18,6 +18,8 @@ const meta = {
     onActivityChange: () => {},
     title: '',
     onTitleChange: () => {},
+    previewText: '',
+    onPreviewTextChange: () => {},
     link: '',
     onLinkChange: () => {},
     onCancel: () => {},
@@ -45,6 +47,7 @@ function Demo() {
   const [part, setPart] = useState('PLAN')
   const [activity, setActivity] = useState('')
   const [title, setTitle] = useState('')
+  const [previewText, setPreviewText] = useState('')
   const [link, setLink] = useState('')
 
   return (
@@ -60,6 +63,8 @@ function Demo() {
       onActivityChange={setActivity}
       title={title}
       onTitleChange={setTitle}
+      previewText={previewText}
+      onPreviewTextChange={setPreviewText}
       link={link}
       onLinkChange={setLink}
       onCancel={() => {
