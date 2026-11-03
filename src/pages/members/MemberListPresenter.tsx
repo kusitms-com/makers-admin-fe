@@ -1,19 +1,14 @@
 import { useNavigate } from 'react-router'
 import { Button } from '@/components/common'
-import {
-  MentoringMemberTable,
-  type MentoringMemberRow,
-  type MentoringMemberStatus,
-} from '@/components/members'
+import { MentoringMemberTable, type MentoringMemberRow } from '@/components/members'
 
 interface MemberListPresenterProps {
   members: MentoringMemberRow[]
   page: number
   totalPages: number
   totalLabel: string
+  pendingApprovalCount: number
   onPageChange: (page: number) => void
-  onStatusChange: (id: string, status: MentoringMemberStatus) => void
-  onDelete: (id: string) => void
 }
 
 export const MemberListPresenter = ({
@@ -21,9 +16,8 @@ export const MemberListPresenter = ({
   page,
   totalPages,
   totalLabel,
+  pendingApprovalCount,
   onPageChange,
-  onStatusChange,
-  onDelete,
 }: MemberListPresenterProps) => {
   const navigate = useNavigate()
 
@@ -34,13 +28,13 @@ export const MemberListPresenter = ({
           <span className="text-label-normal">회원 관리</span>
         </nav>
         <Button
-          variant="strong"
+          variant={pendingApprovalCount === 0 ? 'disable' : 'strong'}
           size="m"
           onClick={() => {
             void navigate('/members/approval')
           }}
         >
-          승인 요청 3
+          승인 요청 {pendingApprovalCount}
         </Button>
       </div>
       <MentoringMemberTable
@@ -49,8 +43,6 @@ export const MemberListPresenter = ({
         totalPages={totalPages}
         totalLabel={totalLabel}
         onPageChange={onPageChange}
-        onStatusChange={onStatusChange}
-        onDelete={onDelete}
       />
     </>
   )
