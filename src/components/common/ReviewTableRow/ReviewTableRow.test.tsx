@@ -71,7 +71,7 @@ describe('ReviewTableRow', () => {
       />,
     )
 
-    await user.click(screen.getByRole('button', { name: '삭제' }))
+    await user.click(screen.getByRole('button', { name: '큐시즘 34기 서류 합격 후기 삭제' }))
 
     expect(onDelete).toHaveBeenCalledTimes(1)
   })

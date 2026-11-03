@@ -28,8 +28,33 @@ Swagger 출처: `.env`의 `VITE_API_BASE_URL` + `/api-docs/json`
 | --- | --- |
 | `blogReviewId` | `number` |
 | `cardinal` | `number` |
-| `part` | `string` |
-| `activity` | `string` |
+| `part` | `string` (enum: `BACKEND`, `FRONTEND`, `IOS`, `ANDROID`, `DESIGNER`, `PLANNER`, `DEVELOPER`) |
+| `activity` | `string` (enum: `DOCUMENT_REVIEW`, `INTERVIEW_REVIEW`, `COMPANY_PROJECT`, `ACTIVITY_REVIEW`, `MEETUP_PROJECT`) |
 | `thumbnailFile` | `File` |
+| `blogLink` | `string` (블로그 원문 링크) |
 | `title` | `string` |
 | `previewText` | `string` |
+
+## Response Fields
+
+### `getBlogReviews` data
+
+| Field | Type |
+| --- | --- |
+| `blog_review_count` | `number` |
+| `blog_review_list` | `BlogReviewListItem[]` |
+
+### `BlogReviewListItem`
+
+| Field | Type |
+| --- | --- |
+| `blog_review_id` | `number` |
+| `cardinal` | `number` |
+| `part` | `string` (enum: `BACKEND`, `FRONTEND`, `IOS`, `ANDROID`, `DESIGNER`, `PLANNER`, `DEVELOPER`) |
+| `activity` | `string` (enum: `DOCUMENT_REVIEW`, `INTERVIEW_REVIEW`, `COMPANY_PROJECT`, `ACTIVITY_REVIEW`, `MEETUP_PROJECT`) |
+| `title` | `string` |
+| `previewText` | `string` |
+| `blogLink` | `string` |
+| `thumbnailUrl` | `string` |
+
+작성자 이름 필드는 내려오지 않는다 (관리자 페이지 리스트에는 '관리자'로 고정 표시).

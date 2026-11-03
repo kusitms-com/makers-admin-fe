@@ -6,10 +6,12 @@ import { Inputfield } from '@components/common/Inputfield'
 import { Modal } from '@components/common/Modal'
 import { ModalActions } from '@components/common/ModalActions'
 import { SelectField, type SelectFieldOption } from '@components/common/SelectField'
+import { TextareaField } from '@components/common/TextareaField'
 
 interface BlogReviewModalProps {
   open: boolean
   onOpenChange: (open: boolean) => void
+  mode?: 'create' | 'edit'
   cardinal: number
   part: string
   partOptions: SelectFieldOption[]
@@ -19,6 +21,8 @@ interface BlogReviewModalProps {
   onActivityChange: (value: string) => void
   title: string
   onTitleChange: (value: string) => void
+  previewText: string
+  onPreviewTextChange: (value: string) => void
   link: string
   onLinkChange: (value: string) => void
   thumbnailUrl?: string
@@ -33,6 +37,7 @@ interface BlogReviewModalProps {
 export function BlogReviewModal({
   open,
   onOpenChange,
+  mode = 'create',
   cardinal,
   part,
   partOptions,
@@ -42,6 +47,8 @@ export function BlogReviewModal({
   onActivityChange,
   title,
   onTitleChange,
+  previewText,
+  onPreviewTextChange,
   link,
   onLinkChange,
   thumbnailUrl,
@@ -52,13 +59,22 @@ export function BlogReviewModal({
   saveDisabled = true,
   className,
 }: BlogReviewModalProps) {
+  const isEdit = mode === 'edit'
+
   return (
     <Modal
       open={open}
       onOpenChange={onOpenChange}
-      title="블로그 후기 등록"
+      title={isEdit ? '블로그 후기 수정' : '블로그 후기 등록'}
       className={className}
-      footer={<ModalActions onCancel={onCancel} onSave={onSave} saveDisabled={saveDisabled} />}
+      footer={
+        <ModalActions
+          onCancel={onCancel}
+          onSave={onSave}
+          saveDisabled={saveDisabled}
+          saveLabel={isEdit ? '수정하기' : '저장하기'}
+        />
+      }
     >
       <div className="flex items-stretch gap-3">
         <CardinalField cardinal={cardinal} className="flex-1" />
@@ -90,6 +106,15 @@ export function BlogReviewModal({
             onLinkChange(event.target.value)
           }}
           placeholder="링크를 입력해주세요"
+        />
+      </FormField>
+      <FormField label="미리보기 텍스트">
+        <TextareaField
+          value={previewText}
+          onChange={(event) => {
+            onPreviewTextChange(event.target.value)
+          }}
+          placeholder="미리보기 텍스트를 입력해주세요"
         />
       </FormField>
       <FormField label="미리보기 이미지">
