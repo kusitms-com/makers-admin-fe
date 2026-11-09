@@ -49,9 +49,13 @@ export function IntroductionCard({
   className,
 }: IntroductionCardProps) {
   const isActive = variant === 'active'
-  const { inputProps, openFilePicker } = useImageFileInput({ onFileChange: onThumbnailChange })
+  const { inputProps, openFilePicker } = useImageFileInput({
+    onFileChange: onThumbnailChange,
+    accept: 'image/png,image/jpeg',
+  })
   const { inputProps: inputProps2, openFilePicker: openFilePicker2 } = useImageFileInput({
     onFileChange: onThumbnailChange2,
+    accept: 'image/png,image/jpeg',
   })
 
   return (
