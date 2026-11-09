@@ -21,10 +21,7 @@ export function PartnerImageBox({
   onDelete,
   className,
 }: PartnerImageBoxProps) {
-  const { inputId, inputProps, openFilePicker } = useImageFileInput({
-    onFileChange,
-    accept: 'image/png,image/jpeg',
-  })
+  const { inputId, inputProps, openFilePicker } = useImageFileInput({ onFileChange })
 
   return (
     <div

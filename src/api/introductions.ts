@@ -2,14 +2,12 @@ import { z } from 'zod'
 import { apiRequest } from './client'
 
 const managementTeamResponseSchema = z.object({
-  id: z.number(),
   name: z.string(),
   image_link: z.string().nullable(),
   description: z.string(),
 })
 
 const activityResponseSchema = z.object({
-  id: z.number(),
   name: z.string(),
   image_url1: z.string().nullable(),
   image_url2: z.string().nullable(),
@@ -17,7 +15,6 @@ const activityResponseSchema = z.object({
 })
 
 const expertLectureResponseSchema = z.object({
-  id: z.number(),
   name: z.string(),
   image_link: z.string().nullable(),
   corporation: z.string(),
@@ -25,20 +22,16 @@ const expertLectureResponseSchema = z.object({
 })
 
 const obLectureResponseSchema = z.object({
-  id: z.number(),
   name: z.string(),
   image_link: z.string().nullable(),
   topic: z.string(),
 })
 
-const introImageResponseSchema = z.object({
-  id: z.number(),
-  image_url: z.string().nullable(),
-})
-
 const adminIntroResponseSchema = z.object({
   banner_cardinal: z.number().nullable(),
   banner_status: z.string().nullable(),
+  slogan: z.string().nullable(),
+  banner_image_url: z.string().nullable(),
   member_count: z.number().nullable(),
   project_count: z.number().nullable(),
   university_count: z.number().nullable(),
@@ -47,13 +40,13 @@ const adminIntroResponseSchema = z.object({
   design_image_url: z.string().nullable(),
   frontend_image_url: z.string().nullable(),
   backend_image_url: z.string().nullable(),
-  partner_logos: z.array(introImageResponseSchema),
-  meetup_images: z.array(introImageResponseSchema),
+  partner_logo_urls: z.array(z.string()),
+  meetup_image_urls: z.array(z.string()),
   activities: z.array(activityResponseSchema),
   teams: z.array(managementTeamResponseSchema),
   expert_lecture: z.array(expertLectureResponseSchema),
   ob_lecture: z.array(obLectureResponseSchema),
-  sponsors: z.array(introImageResponseSchema),
+  sponsor_image_urls: z.array(z.string()),
 })
 
 export type AdminIntroResponse = z.infer<typeof adminIntroResponseSchema>
@@ -76,51 +69,39 @@ export function getIntroduction({
 export type BannerStatus = 'CLOSE' | 'MANAGE_RECRUIT' | 'MEMBER_RECRUIT'
 
 interface TeamItem {
-  id?: number
   name: string
   description: string
   imageFile?: File
-  removeImage?: boolean
 }
 
 interface ActivityItem {
-  id?: number
   name: string
   description: string
   imageFile1?: File
   imageFile2?: File
-  removeImage1?: boolean
-  removeImage2?: boolean
 }
 
 interface ExpertLectureItem {
-  id?: number
   name: string
   corporation: string
   description: string
   imageFile?: File
-  removeImage?: boolean
 }
 
 interface OBLectureItem {
-  id?: number
   name: string
   topic: string
   imageFile?: File
-  removeImage?: boolean
 }
 
-interface IntroImageItem {
-  id?: number
-  imageFile?: File
-}
-
-// 목록 필드(teams/expertLecture/obLecture/activities/partnerLogos/meetupImages/sponsors)는
-// 생략하면 기존 목록이 유지된다. 전달하면 id 기준으로 수정/추가하고, 빠진 기존 항목은 삭제되며
-// 보낸 순서대로 정렬된다. 자세한 내용은 .claude/references/api/admin-introductions.md 참고.
+// PUT은 teams/activities/expertLecture/obLecture/partnerLogoFiles/meetupImages/sponsors를
+// 매번 전체 교체한다(백엔드가 삭제 후 재생성). 생략한 필드는 서버 쪽 기존 데이터가 지워진다.
+// 자세한 내용은 .claude/references/api/admin-introductions.md 참고.
 export interface IntroUpdateRequest {
   bannerCardinal?: number
   bannerStatus?: BannerStatus
+  slogan?: string
+  bannerImageFile?: File
   memberCount?: number
   projectCount?: number
   universityCount?: number
@@ -132,22 +113,25 @@ export interface IntroUpdateRequest {
   teams?: TeamItem[]
   expertLecture?: ExpertLectureItem[]
   obLecture?: OBLectureItem[]
-  partnerLogos?: IntroImageItem[]
-  meetupImages?: IntroImageItem[]
+  partnerLogoFiles?: File[]
+  meetupImages?: File[]
   activities?: ActivityItem[]
-  sponsors?: IntroImageItem[]
+  sponsors?: File[]
 }
 
 // 백엔드가 @ModelAttribute로 바인딩하므로 배열 항목은 `key[index].field` 형태로 보내야 한다.
 function appendIndexedItems(formData: FormData, key: string, items: object[] | undefined) {
   items?.forEach((item, index) => {
     Object.entries(item).forEach(([field, value]) => {
-      if (value === undefined) return
-      formData.append(
-        `${key}[${String(index)}].${field}`,
-        value instanceof File ? value : String(value),
-      )
+      if (typeof value !== 'string' && !(value instanceof File)) return
+      formData.append(`${key}[${String(index)}].${field}`, value)
     })
+  })
+}
+
+function appendFiles(formData: FormData, key: string, files: File[] | undefined) {
+  files?.forEach((file) => {
+    formData.append(key, file)
   })
 }
 
@@ -159,6 +143,12 @@ function buildIntroFormData(request: IntroUpdateRequest): FormData {
   }
   if (request.bannerStatus !== undefined) {
     formData.append('bannerStatus', request.bannerStatus)
+  }
+  if (request.slogan !== undefined) {
+    formData.append('slogan', request.slogan)
+  }
+  if (request.bannerImageFile) {
+    formData.append('bannerImageFile', request.bannerImageFile)
   }
   if (request.memberCount !== undefined) {
     formData.append('memberCount', String(request.memberCount))
@@ -189,9 +179,9 @@ function buildIntroFormData(request: IntroUpdateRequest): FormData {
   appendIndexedItems(formData, 'expertLecture', request.expertLecture)
   appendIndexedItems(formData, 'obLecture', request.obLecture)
   appendIndexedItems(formData, 'activities', request.activities)
-  appendIndexedItems(formData, 'partnerLogos', request.partnerLogos)
-  appendIndexedItems(formData, 'meetupImages', request.meetupImages)
-  appendIndexedItems(formData, 'sponsors', request.sponsors)
+  appendFiles(formData, 'partnerLogoFiles', request.partnerLogoFiles)
+  appendFiles(formData, 'meetupImages', request.meetupImages)
+  appendFiles(formData, 'sponsors', request.sponsors)
 
   return formData
 }

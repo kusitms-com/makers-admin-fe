@@ -2,15 +2,10 @@ import { useId, useRef, type ChangeEvent } from 'react'
 
 interface UseImageFileInputOptions {
   id?: string
-  accept?: string
   onFileChange?: (file: File) => void
 }
 
-export function useImageFileInput({
-  id,
-  accept = 'image/*',
-  onFileChange,
-}: UseImageFileInputOptions) {
+export function useImageFileInput({ id, onFileChange }: UseImageFileInputOptions) {
   const generatedId = useId()
   const inputId = id ?? generatedId
   const inputRef = useRef<HTMLInputElement>(null)
@@ -34,7 +29,7 @@ export function useImageFileInput({
       ref: inputRef,
       id: inputId,
       type: 'file' as const,
-      accept,
+      accept: 'image/*',
       onChange: handleChange,
       className: 'sr-only',
       tabIndex: -1,
