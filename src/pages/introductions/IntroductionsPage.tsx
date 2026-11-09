@@ -33,7 +33,10 @@ interface PartImageFieldProps {
 }
 
 function PartImageField({ label, imageUrl, onFileChange, onDelete }: PartImageFieldProps) {
-  const { inputProps, openFilePicker } = useImageFileInput({ onFileChange })
+  const { inputProps, openFilePicker } = useImageFileInput({
+    onFileChange,
+    accept: 'image/png,image/jpeg',
+  })
 
   return (
     <>
@@ -185,11 +188,6 @@ export function IntroductionsPage() {
           cardinal={form.cardinal}
           bannerStatus={form.bannerStatus}
           onBannerStatusChange={form.setBannerStatus}
-          slogan={form.slogan}
-          onSloganChange={form.setSlogan}
-          bannerImageUrl={form.bannerImageUrl}
-          onImageChange={form.onBannerImageChange}
-          onImageDelete={form.onBannerImageDelete}
         />
 
         <IntroductionSection title="학회 정보">

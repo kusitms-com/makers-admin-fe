@@ -8,6 +8,7 @@ export type PartKey = 'plan' | 'design' | 'frontend' | 'backend'
 
 export interface IntroductionItem {
   id: string
+  remoteId?: number
   title: string
   description: string
   extra?: string
@@ -19,6 +20,7 @@ export interface IntroductionItem {
 
 export interface PartnerLogo {
   id: string
+  remoteId?: number
   imageUrl?: string
   imageFile?: File
 }
@@ -35,12 +37,12 @@ function toOptionalCount(value: string): number | undefined {
   return Number.isNaN(parsed) ? undefined : parsed
 }
 
-function toFileList(items: PartnerLogo[]): File[] {
-  return items.map((item) => item.imageFile).filter((file): file is File => file !== undefined)
-}
-
-function toPartnerLogoList(urls: string[]): PartnerLogo[] {
-  return urls.map((url) => ({ id: crypto.randomUUID(), imageUrl: toAbsoluteS3Url(url) }))
+function toPartnerLogoList(items: { id: number; image_url: string | null }[]): PartnerLogo[] {
+  return items.map((item) => ({
+    id: crypto.randomUUID(),
+    remoteId: item.id,
+    imageUrl: toAbsoluteS3Url(item.image_url),
+  }))
 }
 
 function toSnapshotItem({
@@ -60,8 +62,6 @@ function toLogoSnapshot(items: PartnerLogo[]) {
 
 function buildFormSnapshot(fields: {
   bannerStatus: BannerStatus | ''
-  slogan: string
-  bannerImageUrl: string | undefined
   memberCount: string
   projectCount: string
   universityCount: string
@@ -77,8 +77,6 @@ function buildFormSnapshot(fields: {
 }) {
   return JSON.stringify({
     bannerStatus: fields.bannerStatus,
-    slogan: fields.slogan,
-    bannerImageUrl: fields.bannerImageUrl,
     memberCount: fields.memberCount,
     projectCount: fields.projectCount,
     universityCount: fields.universityCount,
@@ -98,8 +96,6 @@ function hydrateFromResponse(data: AdminIntroResponse) {
   return {
     bannerCardinal: data.banner_cardinal ?? undefined,
     bannerStatus: (data.banner_status ?? '') as BannerStatus | '',
-    slogan: data.slogan ?? '',
-    bannerImageUrl: toAbsoluteS3Url(data.banner_image_url),
     memberCount: data.member_count !== null ? String(data.member_count) : '',
     projectCount: data.project_count !== null ? String(data.project_count) : '',
     universityCount: data.university_count !== null ? String(data.university_count) : '',
@@ -112,12 +108,14 @@ function hydrateFromResponse(data: AdminIntroResponse) {
     },
     teams: data.teams.map((team) => ({
       id: crypto.randomUUID(),
+      remoteId: team.id,
       title: team.name,
       description: team.description,
       thumbnailUrl: toAbsoluteS3Url(team.image_link),
     })),
     activities: data.activities.map((activity) => ({
       id: crypto.randomUUID(),
+      remoteId: activity.id,
       title: activity.name,
       description: activity.description,
       thumbnailUrl: toAbsoluteS3Url(activity.image_url1),
@@ -125,6 +123,7 @@ function hydrateFromResponse(data: AdminIntroResponse) {
     })),
     expertLecture: data.expert_lecture.map((lecture) => ({
       id: crypto.randomUUID(),
+      remoteId: lecture.id,
       title: lecture.name,
       description: lecture.description,
       extra: lecture.corporation,
@@ -132,13 +131,14 @@ function hydrateFromResponse(data: AdminIntroResponse) {
     })),
     obLecture: data.ob_lecture.map((lecture) => ({
       id: crypto.randomUUID(),
+      remoteId: lecture.id,
       title: lecture.name,
       description: lecture.topic,
       thumbnailUrl: toAbsoluteS3Url(lecture.image_link),
     })),
-    partnerLogos: toPartnerLogoList(data.partner_logo_urls),
-    meetupImages: toPartnerLogoList(data.meetup_image_urls),
-    sponsors: toPartnerLogoList(data.sponsor_image_urls),
+    partnerLogos: toPartnerLogoList(data.partner_logos),
+    meetupImages: toPartnerLogoList(data.meetup_images),
+    sponsors: toPartnerLogoList(data.sponsors),
   }
 }
 
@@ -172,9 +172,6 @@ export function useIntroductionsForm() {
 
   const [bannerCardinal, setBannerCardinal] = useState<number | undefined>()
   const [bannerStatus, setBannerStatus] = useState<BannerStatus | ''>('')
-  const [slogan, setSlogan] = useState('')
-  const [bannerImageUrl, setBannerImageUrl] = useState<string | undefined>()
-  const [bannerImageFile, setBannerImageFile] = useState<File | undefined>()
   const [memberCount, setMemberCount] = useState('')
   const [projectCount, setProjectCount] = useState('')
   const [universityCount, setUniversityCount] = useState('')
@@ -203,8 +200,6 @@ export function useIntroductionsForm() {
 
   const formSnapshot = buildFormSnapshot({
     bannerStatus,
-    slogan,
-    bannerImageUrl,
     memberCount,
     projectCount,
     universityCount,
@@ -231,8 +226,6 @@ export function useIntroductionsForm() {
 
     setBannerCardinal(hydrated.bannerCardinal)
     setBannerStatus(hydrated.bannerStatus)
-    setSlogan(hydrated.slogan)
-    setBannerImageUrl(hydrated.bannerImageUrl)
     setMemberCount(hydrated.memberCount)
     setProjectCount(hydrated.projectCount)
     setUniversityCount(hydrated.universityCount)
@@ -250,7 +243,6 @@ export function useIntroductionsForm() {
   }, [introductionQuery.data])
 
   const latestImagesRef = useRef({
-    bannerImageUrl,
     partImages,
     activities,
     teams,
@@ -262,7 +254,6 @@ export function useIntroductionsForm() {
   })
   useEffect(() => {
     latestImagesRef.current = {
-      bannerImageUrl,
       partImages,
       activities,
       teams,
@@ -273,7 +264,6 @@ export function useIntroductionsForm() {
       sponsors,
     }
   }, [
-    bannerImageUrl,
     partImages,
     activities,
     teams,
@@ -287,7 +277,6 @@ export function useIntroductionsForm() {
   useEffect(() => {
     return () => {
       const current = latestImagesRef.current
-      revokeIfBlobUrl(current.bannerImageUrl)
       Object.values(current.partImages).forEach(revokeIfBlobUrl)
       ;[current.activities, current.teams, current.expertLecture, current.obLecture].forEach(
         (items) => {
@@ -307,12 +296,14 @@ export function useIntroductionsForm() {
 
   const cardinal = bannerCardinal ?? currentCardinalQuery.data
 
+  function toImageItems(items: PartnerLogo[]) {
+    return items.map((item) => ({ id: item.remoteId, imageFile: item.imageFile }))
+  }
+
   function buildPayload(resolvedCardinal: number): IntroUpdateRequest {
     const payload: IntroUpdateRequest = { bannerCardinal: resolvedCardinal }
 
     if (bannerStatus) payload.bannerStatus = bannerStatus
-    if (slogan) payload.slogan = slogan
-    if (bannerImageFile) payload.bannerImageFile = bannerImageFile
     const memberCountValue = toOptionalCount(memberCount)
     if (memberCountValue !== undefined) payload.memberCount = memberCountValue
     const projectCountValue = toOptionalCount(projectCount)
@@ -326,30 +317,34 @@ export function useIntroductionsForm() {
     if (partImageFiles.backend) payload.backendImage = partImageFiles.backend
 
     payload.teams = teams.map((item) => ({
+      id: item.remoteId,
       name: item.title,
       description: item.description,
       imageFile: item.thumbnailFile,
     }))
     payload.activities = activities.map((item) => ({
+      id: item.remoteId,
       name: item.title,
       description: item.description,
       imageFile1: item.thumbnailFile,
       imageFile2: item.thumbnailFile2,
     }))
     payload.expertLecture = expertLecture.map((item) => ({
+      id: item.remoteId,
       name: item.title,
       corporation: item.extra ?? '',
       description: item.description,
       imageFile: item.thumbnailFile,
     }))
     payload.obLecture = obLecture.map((item) => ({
+      id: item.remoteId,
       name: item.title,
       topic: item.description,
       imageFile: item.thumbnailFile,
     }))
-    payload.partnerLogoFiles = toFileList(partnerLogos)
-    payload.meetupImages = toFileList(meetupImages)
-    payload.sponsors = toFileList(sponsors)
+    payload.partnerLogos = toImageItems(partnerLogos)
+    payload.meetupImages = toImageItems(meetupImages)
+    payload.sponsors = toImageItems(sponsors)
 
     return payload
   }
@@ -358,22 +353,6 @@ export function useIntroductionsForm() {
     if (cardinal === undefined) return
     await updateMutation.mutateAsync(buildPayload(cardinal))
     setPristineSnapshot(formSnapshot)
-  }
-
-  function onBannerImageChange(file: File) {
-    setBannerImageUrl((prev) => {
-      revokeIfBlobUrl(prev)
-      return URL.createObjectURL(file)
-    })
-    setBannerImageFile(file)
-  }
-
-  function onBannerImageDelete() {
-    setBannerImageUrl((prev) => {
-      revokeIfBlobUrl(prev)
-      return undefined
-    })
-    setBannerImageFile(undefined)
   }
 
   function onPartImageChange(key: PartKey, file: File) {
@@ -401,11 +380,6 @@ export function useIntroductionsForm() {
     cardinalReady: cardinal !== undefined,
     bannerStatus,
     setBannerStatus,
-    slogan,
-    setSlogan,
-    bannerImageUrl,
-    onBannerImageChange,
-    onBannerImageDelete,
     memberCount,
     setMemberCount,
     projectCount,
