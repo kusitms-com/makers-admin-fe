@@ -120,7 +120,11 @@ jobs:
               return `| ${label} | 🔴 실패 |`;
             };
 
+            // 이 표식이 달린 댓글 하나만 매 실행마다 갱신한다
+            const marker = '<!-- admin-ci-result -->';
+
             const body = [
+              marker,
               '## CI 결과',
               '',
               '| 항목 | 결과 |',
@@ -133,9 +137,35 @@ jobs:
               row(results.build, 'Build'),
             ].join('\n');
 
-            await github.rest.issues.createComment({
+            const target = {
               owner: context.repo.owner,
               repo: context.repo.repo,
               issue_number: context.issue.number,
-              body,
+            };
+
+            // 이전 커밋 실행을 재실행하면 원래 커밋 기준으로 돌기 때문에, 최신 커밋 결과를 덮어쓰지 않게 막는다
+            const { data: pr } = await github.rest.pulls.get({
+              owner: target.owner,
+              repo: target.repo,
+              pull_number: target.issue_number,
             });
+            if (pr.head.sha !== context.payload.pull_request.head.sha) {
+              core.info('PR의 최신 커밋 실행이 아니라 댓글을 갱신하지 않습니다.');
+              return;
+            }
+
+            const comments = await github.paginate(github.rest.issues.listComments, target);
+            const existing = comments.find(
+              (item) => item.user?.login === 'github-actions[bot]' && item.body?.includes(marker),
+            );
+
+            if (existing) {
+              await github.rest.issues.updateComment({
+                owner: target.owner,
+                repo: target.repo,
+                comment_id: existing.id,
+                body,
+              });
+            } else {
+              await github.rest.issues.createComment({ ...target, body });
+            }
