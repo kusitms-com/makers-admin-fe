@@ -114,8 +114,12 @@ export function MeetupProjectsPage() {
     }
   }, [])
 
+  // 선택한 기수의 마지막 프로젝트를 지워도 그 탭이 남아 있어야 어느 기수의 빈 목록인지 알 수 있다.
   const cohortOptions = toCohortOptions(
-    projects.map((project) => project.cardinal),
+    [
+      ...projects.map((project) => project.cardinal),
+      ...(selectedCohort ? [Number(selectedCohort)] : []),
+    ],
     currentCardinalQuery.data,
   )
   const cohort = selectedCohort ?? cohortOptions.at(0)?.value ?? ''

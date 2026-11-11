@@ -228,6 +228,7 @@ describe('MeetupProjectsPage', () => {
       expect(screen.queryByText('모먼트')).toBeFalsy()
     })
     expect(screen.getByText('등록된 프로젝트가 없습니다')).toBeTruthy()
+    expect(screen.getByRole('tab', { name: '31기', selected: true })).toBeTruthy()
   })
 
   it('상세보기를 클릭하면 상세 정보를 읽기 전용으로 보여준다', async () => {

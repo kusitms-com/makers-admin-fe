@@ -176,6 +176,7 @@ describe('CompanyProjectsPage', () => {
       expect(screen.queryByText('브릿지웍스')).toBeFalsy()
     })
     expect(screen.getByText('등록된 프로젝트가 없습니다')).toBeTruthy()
+    expect(screen.getByRole('tab', { name: '31기', selected: true })).toBeTruthy()
     expect(useToastStore.getState().toasts.map((toast) => toast.message)).toContain('삭제했습니다.')
   })
 })
