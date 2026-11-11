@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import dayjs from 'dayjs'
-import { useForm, type Resolver } from 'react-hook-form'
+import { useForm, useWatch, type Resolver } from 'react-hook-form'
 import { z } from 'zod'
 import type { MeetupTeamMember } from '@components/projects/MeetupProjectModal'
 
@@ -92,13 +92,14 @@ function revokeIfBlobUrl(url: string | undefined) {
 type StringFieldKey = Exclude<keyof MeetupProjectFormValues, 'members'>
 
 export function useMeetupProjectForm() {
-  const { watch, setValue, reset, handleSubmit, formState } = useForm<MeetupProjectFormValues>({
+  const { control, setValue, reset, handleSubmit, formState } = useForm<MeetupProjectFormValues>({
     mode: 'onChange',
     resolver: meetupProjectFormResolver,
     defaultValues: createDefaultValues(),
   })
 
-  const values = watch()
+  // watch()는 React Compiler 메모이제이션과 맞지 않는다. compute를 쓰면 DeepPartial이 아닌 전체 값 타입으로 받는다.
+  const values = useWatch({ control, compute: (formValues) => formValues })
 
   // posterUrl/logoUrl은 미리보기용 blob URL일 뿐이라 업로드에 쓸 원본 File은 별도로 보관한다.
   const [posterFile, setPosterFile] = useState<File | undefined>()
