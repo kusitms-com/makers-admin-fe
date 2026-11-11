@@ -13,8 +13,19 @@ import {
   useUpdateReviewMutation,
 } from '@hooks/reviews/useReviews'
 import { useCurrentCardinalQuery } from '@hooks/auth/useCurrentCardinal'
+import { useConfirm } from '@hooks/common/useConfirm'
+import { useCardinalSelection } from '@hooks/common/useCardinalSelection'
 import { useToast } from '@hooks/common/useToast'
-import { type ReviewRow } from './ReviewsPage.mock'
+import { TOAST_MESSAGES } from '@/constants/toastMessages'
+
+interface ReviewRow {
+  id: string
+  name: string
+  generation: number
+  team: string
+  part?: PartBadgeType
+  title: string
+}
 
 // ReviewRequest.team enum(Swagger) 중 관리자 폼이 다루는 기획/디자인/개발 3파트만 노출한다.
 const TEAM_LABELS: Record<ReviewTeam, string> = {
@@ -65,6 +76,7 @@ export function ReviewsPage() {
   const updateReviewMutation = useUpdateReviewMutation()
   const deleteReviewMutation = useDeleteReviewMutation()
   const addToast = useToast()
+  const confirm = useConfirm()
 
   const [page, setPage] = useState(1)
 
@@ -80,6 +92,7 @@ export function ReviewsPage() {
   const [editReview, setEditReview] = useState('')
 
   const rows = reviewsQuery.data?.review_list.map(toReviewRow) ?? []
+  const cardinalSelection = useCardinalSelection(rows.map((row) => row.generation))
 
   const totalPages = Math.max(1, Math.ceil(rows.length / PAGE_SIZE))
   const pagedRows = rows.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE)
@@ -90,19 +103,20 @@ export function ReviewsPage() {
     setReview('')
   }
 
-  function handleDeleteRow(id: string) {
-    if (!window.confirm('이 후기를 삭제하시겠습니까?')) {
+  async function handleDeleteRow(id: string) {
+    if (!(await confirm({ title: '이 후기를 삭제하시겠습니까?', confirmLabel: '삭제하기' }))) {
       return
     }
 
     deleteReviewMutation.mutate(Number(id), {
       onSuccess: () => {
+        addToast({ type: 'complete', message: TOAST_MESSAGES.deleted })
         setPage((currentPage) =>
           Math.min(currentPage, Math.max(1, Math.ceil((rows.length - 1) / PAGE_SIZE))),
         )
       },
       onError: () => {
-        addToast({ type: 'error', message: '삭제하지 못했습니다. 다시 시도해주세요.' })
+        addToast({ type: 'error', message: TOAST_MESSAGES.deleteFailed })
       },
     })
   }
@@ -145,28 +159,30 @@ export function ReviewsPage() {
       },
       {
         onSuccess: () => {
+          addToast({ type: 'complete', message: TOAST_MESSAGES.updated })
           closeDetail()
         },
         onError: () => {
-          addToast({ type: 'error', message: '수정하지 못했습니다. 다시 시도해주세요.' })
+          addToast({ type: 'error', message: TOAST_MESSAGES.updateFailed })
         },
       },
     )
   }
 
   function handleSave() {
-    const currentCardinal = currentCardinalQuery.data
+    const currentCardinal = cardinalSelection.cardinal
     if (currentCardinal === undefined) return
 
     createReviewMutation.mutate(
       { name, cardinal: currentCardinal, team, review },
       {
         onSuccess: () => {
+          addToast({ type: 'complete', message: TOAST_MESSAGES.created })
           resetForm()
           setModalOpen(false)
         },
         onError: () => {
-          addToast({ type: 'error', message: '등록하지 못했습니다. 다시 시도해주세요.' })
+          addToast({ type: 'error', message: TOAST_MESSAGES.createFailed })
         },
       },
     )
@@ -220,6 +236,7 @@ export function ReviewsPage() {
             size="l"
             disabled={currentCardinalQuery.data === undefined}
             onClick={() => {
+              cardinalSelection.reset()
               setModalOpen(true)
             }}
           >
@@ -232,7 +249,9 @@ export function ReviewsPage() {
           <ReviewTable
             type="review"
             rows={pagedRows}
-            onDeleteRow={handleDeleteRow}
+            onDeleteRow={(id) => {
+              void handleDeleteRow(id)
+            }}
             onTitleClick={(id) => {
               const row = rows.find((item) => item.id === id)
               if (row) openDetail(row)
@@ -248,7 +267,9 @@ export function ReviewsPage() {
       <ReviewModal
         open={modalOpen}
         onOpenChange={setModalOpen}
-        cardinal={currentCardinalQuery.data ?? 0}
+        cardinal={cardinalSelection.cardinal ?? 0}
+        cardinalOptions={cardinalSelection.options}
+        onCardinalChange={cardinalSelection.setCardinal}
         team={team}
         teamOptions={TEAM_OPTIONS}
         onTeamChange={handleTeamChange}

@@ -17,9 +17,8 @@
 ```text
 src/pages/projects/
   MeetupProjectsPage.tsx      # 밋업 프로젝트 관리 페이지 (목록 조회/등록/삭제 API 연동 완료)
-  MeetupProjectsPage.mock.ts
   CompanyProjectsPage.tsx     # 기업 프로젝트 관리 페이지 (목록 조회/등록/삭제 API 연동 완료)
-  CompanyProjectsPage.mock.ts
+  projects.constants.ts      # 두 페이지 공용 상수(타입·파트 옵션, 빈 썸네일)와 카드 타입
 
 src/hooks/projects/
   useMeetupProjectForm.ts     # 밋업 프로젝트 등록 폼 상태 (RHF + Zod)

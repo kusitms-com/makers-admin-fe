@@ -14,6 +14,7 @@ import { SegmentedControl } from '@components/common/SegmentedControl'
 import { MeetupProjectModal } from '@components/projects/MeetupProjectModal'
 import { ProjectThumbnailCard } from '@components/projects/ProjectThumbnailCard'
 import { useCurrentCardinalQuery } from '@hooks/auth/useCurrentCardinal'
+import { useCardinalSelection } from '@hooks/common/useCardinalSelection'
 import { useToast } from '@hooks/common/useToast'
 import {
   useMeetupProjectForm,
@@ -26,15 +27,15 @@ import {
   useMeetupProjectsQuery,
   useUpdateMeetupProjectMutation,
 } from '@hooks/projects/useMeetupProjects'
+import { toCohortOptions } from '@lib/cohort'
 import { toAbsoluteS3Url } from '@lib/s3'
 import {
-  COHORT_OPTIONS,
-  CURRENT_GENERATION,
   PART_OPTIONS,
   PLACEHOLDER_THUMBNAIL_URL,
   TYPE_OPTIONS,
   type MeetupProjectCard,
-} from './MeetupProjectsPage.mock'
+} from './projects.constants'
+import { TOAST_MESSAGES } from '@/constants/toastMessages'
 
 function revokeIfBlobUrl(url: string | undefined) {
   if (url?.startsWith('blob:')) {
@@ -85,7 +86,7 @@ function detailToFormValues(detail: MeetupProjectDetail): MeetupProjectFormValue
 export function MeetupProjectsPage() {
   const projectsQuery = useMeetupProjectsQuery()
   const currentCardinalQuery = useCurrentCardinalQuery()
-  const [cohort, setCohort] = useState(String(CURRENT_GENERATION))
+  const [selectedCohort, setSelectedCohort] = useState<string | null>(null)
   const [modalOpen, setModalOpen] = useState(false)
   const [detailId, setDetailId] = useState<number | null>(null)
   const [isEditing, setIsEditing] = useState(false)
@@ -99,6 +100,7 @@ export function MeetupProjectsPage() {
   const detailQuery = useMeetupProjectQuery(detailId ?? undefined)
 
   const projects = (projectsQuery.data?.meetup_list ?? []).map(toProjectCard)
+  const cardinalSelection = useCardinalSelection(projects.map((project) => project.cardinal))
 
   const latestProjectsRef = useRef(projects)
   useEffect(() => {
@@ -112,6 +114,15 @@ export function MeetupProjectsPage() {
     }
   }, [])
 
+  // 선택한 기수의 마지막 프로젝트를 지워도 그 탭이 남아 있어야 어느 기수의 빈 목록인지 알 수 있다.
+  const cohortOptions = toCohortOptions(
+    [
+      ...projects.map((project) => project.cardinal),
+      ...(selectedCohort ? [Number(selectedCohort)] : []),
+    ],
+    currentCardinalQuery.data,
+  )
+  const cohort = selectedCohort ?? cohortOptions.at(0)?.value ?? ''
   const visibleProjects = projects.filter((project) => project.cardinal === Number(cohort))
 
   function openDetail(id: string) {
@@ -160,10 +171,11 @@ export function MeetupProjectsPage() {
 
       updateMutation.mutate(request, {
         onSuccess: () => {
+          addToast({ type: 'complete', message: TOAST_MESSAGES.updated })
           setIsEditing(false)
         },
         onError: () => {
-          addToast({ type: 'error', message: '수정하지 못했습니다. 다시 시도해주세요.' })
+          addToast({ type: 'error', message: TOAST_MESSAGES.updateFailed })
         },
       })
     })()
@@ -171,6 +183,7 @@ export function MeetupProjectsPage() {
 
   function openModal() {
     form.reset()
+    cardinalSelection.reset()
     setModalOpen(true)
   }
 
@@ -180,7 +193,7 @@ export function MeetupProjectsPage() {
       // 항상 같이 설정되므로 posterFile/logoFile도 존재한다.
       if (!form.posterFile || !form.logoFile) return
 
-      const currentCardinal = currentCardinalQuery.data
+      const currentCardinal = cardinalSelection.cardinal
       if (currentCardinal === undefined) return
 
       const request: MeetupProjectCreateRequest = {
@@ -208,11 +221,12 @@ export function MeetupProjectsPage() {
 
       createMutation.mutate(request, {
         onSuccess: () => {
+          addToast({ type: 'complete', message: TOAST_MESSAGES.saved })
           form.resetAfterSave()
           setModalOpen(false)
         },
         onError: () => {
-          addToast({ type: 'error', message: '저장하지 못했습니다. 다시 시도해주세요.' })
+          addToast({ type: 'error', message: TOAST_MESSAGES.saveFailed })
         },
       })
     })()
@@ -221,10 +235,11 @@ export function MeetupProjectsPage() {
   function handleDelete(id: string) {
     deleteMutation.mutate(Number(id), {
       onSuccess: () => {
+        addToast({ type: 'complete', message: TOAST_MESSAGES.deleted })
         revokeIfBlobUrl(projects.find((project) => project.id === id)?.imageUrl)
       },
       onError: () => {
-        addToast({ type: 'error', message: '삭제하지 못했습니다. 다시 시도해주세요.' })
+        addToast({ type: 'error', message: TOAST_MESSAGES.deleteFailed })
       },
     })
   }
@@ -280,7 +295,11 @@ export function MeetupProjectsPage() {
         </section>
 
         <section className="flex flex-col gap-6">
-          <SegmentedControl items={COHORT_OPTIONS} value={cohort} onValueChange={setCohort} />
+          <SegmentedControl
+            items={cohortOptions}
+            value={cohort}
+            onValueChange={setSelectedCohort}
+          />
 
           {visibleProjects.length === 0 ? (
             <p className="text-body-16sb text-label-alternative py-10 text-center">
@@ -309,7 +328,9 @@ export function MeetupProjectsPage() {
       <MeetupProjectModal
         open={modalOpen}
         onOpenChange={setModalOpen}
-        cardinal={currentCardinalQuery.data ?? 0}
+        cardinal={cardinalSelection.cardinal ?? 0}
+        cardinalOptions={cardinalSelection.options}
+        onCardinalChange={cardinalSelection.setCardinal}
         type={form.type}
         typeOptions={TYPE_OPTIONS}
         onTypeChange={form.setType}

@@ -6,11 +6,15 @@ import { ImageUploadBox } from '@components/common/ImageUploadBox'
 import { Inputfield } from '@components/common/Inputfield'
 import { Modal } from '@components/common/Modal'
 import { ModalActions } from '@components/common/ModalActions'
+import type { SelectFieldOption } from '@components/common/SelectField'
 
 interface CompanyProjectModalProps {
   open: boolean
   onOpenChange: (open: boolean) => void
   cardinal: number
+  // 등록 모달에서만 넘긴다. 없으면 기수는 고정 표시
+  cardinalOptions?: SelectFieldOption[]
+  onCardinalChange?: (cardinal: number) => void
   name: string
   onNameChange: (value: string) => void
   content: string
@@ -33,6 +37,8 @@ export function CompanyProjectModal({
   open,
   onOpenChange,
   cardinal,
+  cardinalOptions,
+  onCardinalChange,
   name,
   onNameChange,
   content,
@@ -88,7 +94,12 @@ export function CompanyProjectModal({
       }
     >
       <div className="flex items-stretch gap-3">
-        <CardinalField cardinal={cardinal} className="w-[130px] shrink-0" />
+        <CardinalField
+          cardinal={cardinal}
+          options={cardinalOptions}
+          onCardinalChange={onCardinalChange}
+          className="w-[130px] shrink-0"
+        />
         <FormField label="기업 이름" className="flex-1">
           <Inputfield
             value={name}

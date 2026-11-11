@@ -1,3 +1,4 @@
+import { getPageItems } from '@lib/pagination'
 import { cn } from '@lib/utils'
 
 interface TableFooterProps {
@@ -15,7 +16,7 @@ export function TableFooter({
   totalLabel,
   className,
 }: TableFooterProps) {
-  const pages = Array.from({ length: totalPages }, (_, index) => index + 1)
+  const pages = getPageItems(page, totalPages)
 
   return (
     <div
@@ -32,11 +33,23 @@ export function TableFooter({
           }}
           disabled={page <= 1}
           aria-label="이전 페이지"
-          className="text-label-14sb text-label-alternative flex size-[30px] items-center justify-center rounded-md disabled:opacity-50"
+          className="text-label-14sb text-label-alternative enabled:hover:text-label-normal flex size-[30px] items-center justify-center rounded-md enabled:cursor-pointer disabled:opacity-50"
         >
           ‹
         </button>
         {pages.map((pageNumber) => {
+          if (typeof pageNumber !== 'number') {
+            return (
+              <span
+                key={pageNumber}
+                aria-hidden="true"
+                className="text-label-13sb text-label-alternative flex size-[30px] items-center justify-center"
+              >
+                …
+              </span>
+            )
+          }
+
           const isActive = pageNumber === page
 
           return (
@@ -48,10 +61,10 @@ export function TableFooter({
               }}
               aria-current={isActive ? 'page' : undefined}
               className={cn(
-                'text-label-13sb flex size-[30px] items-center justify-center rounded-md',
+                'text-label-13sb flex size-[30px] cursor-pointer items-center justify-center rounded-md',
                 isActive
                   ? 'bg-fill-alternative text-label-normal'
-                  : 'bg-fill-normal text-label-alternative',
+                  : 'bg-fill-normal text-label-alternative hover:text-label-normal',
               )}
             >
               {pageNumber}
@@ -65,7 +78,7 @@ export function TableFooter({
           }}
           disabled={page >= totalPages}
           aria-label="다음 페이지"
-          className="text-label-14sb text-label-alternative flex size-[30px] items-center justify-center rounded-md disabled:opacity-50"
+          className="text-label-14sb text-label-alternative enabled:hover:text-label-normal flex size-[30px] items-center justify-center rounded-md enabled:cursor-pointer disabled:opacity-50"
         >
           ›
         </button>

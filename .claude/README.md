@@ -59,7 +59,6 @@ Claude Code와 Codex 모두 아래 역할을 프로젝트 전용 읽기 전용 �
 | API 계약 리뷰어 | `.claude/agents/api-contract-reviewer.md`, `.codex/agents/api-contract-reviewer.toml` | Swagger·TanStack Query 계약 검토 |
 | 라우트 리뷰어 | `.claude/agents/route-reviewer.md`, `.codex/agents/route-reviewer.toml` | 라우팅·접근 경계 검토 |
 | UI 접근성 리뷰어 | `.claude/agents/ui-accessibility-reviewer.md`, `.codex/agents/ui-accessibility-reviewer.toml` | UI 시스템·접근성 검토 |
-| E2E 플래너 | `.claude/agents/e2e-planner.md`, `.codex/agents/e2e-planner.toml` | 브라우저 흐름·E2E 범위 제안 |
 
 ## Hooks
 

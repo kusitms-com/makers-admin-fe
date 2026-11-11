@@ -16,9 +16,6 @@ export default defineConfig([
     'storybook-static',
     'node_modules',
     'coverage',
-    'playwright-report',
-    'test-results',
-    'blob-report',
     'dev-dist',
     '.omc',
     '.omx',
@@ -34,12 +31,7 @@ export default defineConfig([
     files: ['**/*.{jsx,tsx}'],
   },
   {
-    files: [
-      '*.config.{ts,js}',
-      'e2e/**/*.ts',
-      '.claude/hooks/**/*.mjs',
-      '.storybook/**/*.{ts,tsx}',
-    ],
+    files: ['*.config.{ts,js}', '.claude/hooks/**/*.mjs', '.storybook/**/*.{ts,tsx}'],
     languageOptions: {
       globals: {
         ...globals.node,

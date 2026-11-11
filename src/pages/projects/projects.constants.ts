@@ -1,15 +1,4 @@
-import type { SegmentedControlItem } from '@components/common/SegmentedControl'
 import type { SelectFieldOption } from '@components/common/SelectField'
-
-// 기수 선택 소스가 생기기 전까지 현재 활동 기수를 고정값으로 둔다.
-export const CURRENT_GENERATION = 33
-
-export const COHORT_OPTIONS: SegmentedControlItem[] = [
-  { value: '33', label: '33기' },
-  { value: '32', label: '32기' },
-  { value: '31', label: '31기' },
-  { value: '30', label: '30기' },
-]
 
 // 백엔드 ProjectType enum 상수명(WEB/APP)과 정확히 일치해야 한다(Spring 기본 enum 바인딩은 대소문자를 구분한다).
 export const TYPE_OPTIONS: SelectFieldOption[] = [

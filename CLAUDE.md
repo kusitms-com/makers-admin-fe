@@ -24,7 +24,7 @@ KUSITMS 관리자 패널입니다. React 19 + Vite 8 기반 SPA이며, KUSITMS S
 - **Server State**: TanStack Query v5
 - **Client State**: Zustand v5
 - **Form**: React Hook Form v7 + Zod v4
-- **Testing**: Vitest + Testing Library + happy-dom, Playwright
+- **Testing**: Vitest + Testing Library + jsdom
 - **Package Manager**: pnpm
 
 ## 주요 명령어
@@ -33,7 +33,6 @@ KUSITMS 관리자 패널입니다. React 19 + Vite 8 기반 SPA이며, KUSITMS S
 - `pnpm build`: TypeScript 프로젝트 빌드 후 Vite 프로덕션 빌드
 - `pnpm lint`: ESLint 검사
 - `pnpm test`: Vitest watch 모드
-- `pnpm test:e2e`: Playwright E2E 테스트
 - `pnpm test:coverage`: Vitest 커버리지 리포트
 
 ## 검증
@@ -42,7 +41,6 @@ KUSITMS 관리자 패널입니다. React 19 + Vite 8 기반 SPA이며, KUSITMS S
 - 좁은 컴포넌트/훅 변경: 관련 테스트 우선
 - 공통 유틸리티/API 변경: 관련 테스트와 `pnpm lint`
 - 앱 전반 변경: `pnpm lint`, `pnpm build`
-- E2E 영향이 있는 flow: 관련 Playwright 테스트 또는 `pnpm test:e2e`
 
 ## 참조 파일
 

@@ -13,6 +13,9 @@ interface BlogReviewModalProps {
   onOpenChange: (open: boolean) => void
   mode?: 'create' | 'edit'
   cardinal: number
+  // 등록 모달에서만 넘긴다. 없으면 기수는 고정 표시
+  cardinalOptions?: SelectFieldOption[]
+  onCardinalChange?: (cardinal: number) => void
   part: string
   partOptions: SelectFieldOption[]
   onPartChange: (value: string) => void
@@ -39,6 +42,8 @@ export function BlogReviewModal({
   onOpenChange,
   mode = 'create',
   cardinal,
+  cardinalOptions,
+  onCardinalChange,
   part,
   partOptions,
   onPartChange,
@@ -77,7 +82,12 @@ export function BlogReviewModal({
       }
     >
       <div className="flex items-stretch gap-3">
-        <CardinalField cardinal={cardinal} className="flex-1" />
+        <CardinalField
+          cardinal={cardinal}
+          options={cardinalOptions}
+          onCardinalChange={onCardinalChange}
+          className="flex-1"
+        />
         <FormField label="파트" className="flex-1">
           <SelectField value={part} options={partOptions} onValueChange={onPartChange} />
         </FormField>

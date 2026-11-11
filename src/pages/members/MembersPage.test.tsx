@@ -1,10 +1,11 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import { render, screen } from '@testing-library/react'
+import { render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter } from 'react-router'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { useAuthStore } from '@hooks/auth/useAuth'
 import { useToastStore } from '@hooks/common/useToast'
+import { ConfirmProvider } from '@/providers/ConfirmProvider'
 import { MentoringMembersPage } from './MembersPage'
 
 const MEMBER_ITEMS = [
@@ -188,7 +189,9 @@ function renderPage() {
   return render(
     <QueryClientProvider client={queryClient}>
       <MemoryRouter>
-        <MentoringMembersPage />
+        <ConfirmProvider>
+          <MentoringMembersPage />
+        </ConfirmProvider>
       </MemoryRouter>
     </QueryClientProvider>,
   )
@@ -252,7 +255,6 @@ describe('MentoringMembersPage', () => {
 
   it('승인/반려를 선택해도 저장 전에는 API가 호출되지 않고, 저장하기를 누르면 일괄 호출된다', async () => {
     const user = userEvent.setup()
-    window.confirm = vi.fn().mockReturnValue(true)
     renderPage()
 
     await screen.findByText('김서연')
@@ -270,9 +272,10 @@ describe('MentoringMembersPage', () => {
 
     await user.click(saveButton)
 
-    expect(window.confirm).toHaveBeenCalledWith(
-      '반려로 선택한 회원은 계정이 삭제됩니다. 저장하시겠습니까?',
-    )
+    const dialog = await screen.findByRole('dialog', { name: '저장하시겠습니까?' })
+    expect(within(dialog).getByText('반려로 선택한 회원은 계정이 삭제됩니다.')).toBeTruthy()
+    await user.click(within(dialog).getByRole('button', { name: '저장하기' }))
+
     expect(approveMember).toHaveBeenCalledWith(101)
     expect(rejectMember).toHaveBeenCalledWith(102)
     expect(await screen.findByRole('button', { name: '승인 요청 2' })).toBeTruthy()
@@ -283,7 +286,6 @@ describe('MentoringMembersPage', () => {
 
   it('반려 확인을 취소하면 API를 호출하지 않고 승인 화면에 머문다', async () => {
     const user = userEvent.setup()
-    window.confirm = vi.fn().mockReturnValue(false)
     renderPage()
 
     await screen.findByText('김서연')
@@ -293,7 +295,9 @@ describe('MentoringMembersPage', () => {
     await user.click(await screen.findByRole('option', { name: '거절' }))
     await user.click(screen.getByRole('button', { name: '저장하기' }))
 
-    expect(window.confirm).toHaveBeenCalled()
+    const dialog = await screen.findByRole('dialog', { name: '저장하시겠습니까?' })
+    await user.click(within(dialog).getByRole('button', { name: '취소' }))
+
     expect(rejectMember).not.toHaveBeenCalled()
     expect(screen.getByText('회원가입 승인')).toBeTruthy()
   })

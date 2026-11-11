@@ -19,6 +19,9 @@ interface MeetupProjectModalProps {
   open: boolean
   onOpenChange: (open: boolean) => void
   cardinal: number
+  // 등록 모달에서만 넘긴다. 없으면 기수는 고정 표시
+  cardinalOptions?: SelectFieldOption[]
+  onCardinalChange?: (cardinal: number) => void
   type: string
   typeOptions: SelectFieldOption[]
   onTypeChange: (value: string) => void
@@ -65,6 +68,8 @@ export function MeetupProjectModal({
   open,
   onOpenChange,
   cardinal,
+  cardinalOptions,
+  onCardinalChange,
   type,
   typeOptions,
   onTypeChange,
@@ -156,7 +161,12 @@ export function MeetupProjectModal({
       }
     >
       <div className="flex items-stretch gap-3">
-        <CardinalField cardinal={cardinal} className="w-[130px] shrink-0" />
+        <CardinalField
+          cardinal={cardinal}
+          options={cardinalOptions}
+          onCardinalChange={onCardinalChange}
+          className="w-[130px] shrink-0"
+        />
         <FormField label="유형" className="shrink-0">
           <SelectField
             value={type}

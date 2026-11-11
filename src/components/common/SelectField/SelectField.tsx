@@ -67,7 +67,7 @@ export function SelectField({
         className={cn(
           fieldClassName,
           valueClassName,
-          'focus-visible:border-brand-primary focus-visible:bg-fill-normal justify-between outline-none',
+          'focus-visible:border-brand-primary focus-visible:bg-fill-normal cursor-pointer justify-between outline-none data-disabled:cursor-not-allowed',
           className,
         )}
       >

@@ -33,10 +33,10 @@ export function SegmentedControl({
               onValueChange(item.value)
             }}
             className={cn(
-              'text-body-16sb -mb-px flex flex-col items-center justify-center border-b-[1.5px] px-5 pt-2 pb-[11px] transition-colors',
+              'text-body-16sb -mb-px flex cursor-pointer flex-col items-center justify-center border-b-[1.5px] px-5 pt-2 pb-[11px] transition-colors',
               isActive
                 ? 'border-brand-primary text-brand-primary'
-                : 'border-line-normal text-label-assitive',
+                : 'border-line-normal text-label-assitive hover:text-label-normal',
             )}
           >
             {item.label}

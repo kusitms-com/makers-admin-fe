@@ -12,6 +12,9 @@ interface ReviewModalProps {
   open: boolean
   onOpenChange: (open: boolean) => void
   cardinal: number
+  // 등록 모달에서만 넘긴다. 없으면 기수는 고정 표시
+  cardinalOptions?: SelectFieldOption[]
+  onCardinalChange?: (cardinal: number) => void
   team: string
   teamOptions: SelectFieldOption[]
   onTeamChange: (value: string) => void
@@ -31,6 +34,8 @@ export function ReviewModal({
   open,
   onOpenChange,
   cardinal,
+  cardinalOptions,
+  onCardinalChange,
   team,
   teamOptions,
   onTeamChange,
@@ -79,7 +84,12 @@ export function ReviewModal({
       }
     >
       <div className="flex items-stretch gap-3">
-        <CardinalField cardinal={cardinal} className="flex-1" />
+        <CardinalField
+          cardinal={cardinal}
+          options={cardinalOptions}
+          onCardinalChange={onCardinalChange}
+          className="flex-1"
+        />
         <FormField label="파트" className="flex-1">
           <SelectField
             value={team}

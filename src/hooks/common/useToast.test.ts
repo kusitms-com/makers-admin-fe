@@ -41,6 +41,22 @@ describe('useToast', () => {
     expect(useToastStore.getState().toasts).toHaveLength(0)
   })
 
+  it('제거되기 직전에는 사라지는 애니메이션 상태가 된다', () => {
+    const { result } = renderHook(() => useToast())
+
+    act(() => {
+      result.current({ type: 'info', message: '안내' })
+    })
+    expect(useToastStore.getState().toasts[0].leaving).toBeFalsy()
+
+    act(() => {
+      vi.advanceTimersByTime(3800)
+    })
+
+    expect(useToastStore.getState().toasts).toHaveLength(1)
+    expect(useToastStore.getState().toasts[0].leaving).toBe(true)
+  })
+
   it('여러 개를 추가하면 순서대로 쌓인다', () => {
     const { result } = renderHook(() => useToast())
 
