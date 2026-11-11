@@ -4,6 +4,7 @@ import userEvent from '@testing-library/user-event'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import type * as AuthApi from '@api/auth'
 import { useAuthStore } from '@hooks/auth/useAuth'
+import { useToastStore } from '@hooks/common/useToast'
 import { CompanyProjectsPage } from './CompanyProjectsPage'
 
 const INITIAL_CORPORATE_ITEMS = [
@@ -175,5 +176,6 @@ describe('CompanyProjectsPage', () => {
       expect(screen.queryByText('브릿지웍스')).toBeFalsy()
     })
     expect(screen.getByText('등록된 프로젝트가 없습니다')).toBeTruthy()
+    expect(useToastStore.getState().toasts.map((toast) => toast.message)).toContain('삭제했습니다.')
   })
 })

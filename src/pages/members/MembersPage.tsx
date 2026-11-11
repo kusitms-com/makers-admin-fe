@@ -5,6 +5,7 @@ import type { AdminMemberResponse, PendingMemberResponse } from '@api/members'
 import { Button, PageHeader } from '@/components/common'
 import type { PartBadgeType } from '@/components/common/PartBadge'
 import { type MentoringMemberRow, type MentoringMemberStatus } from '@/components/members'
+import { useConfirm } from '@hooks/common/useConfirm'
 import { useToast } from '@hooks/common/useToast'
 import {
   useApproveMemberMutation,
@@ -14,6 +15,7 @@ import {
 } from '@hooks/members/useMembers'
 import { MemberApprovalPresenter } from './MemberApprovalPresenter'
 import { MemberListPresenter } from './MemberListPresenter'
+import { TOAST_MESSAGES } from '@/constants/toastMessages'
 
 const PAGE_SIZE = 8
 
@@ -56,6 +58,7 @@ export const MentoringMembersPage = () => {
   const { pathname } = useLocation()
   const navigate = useNavigate()
   const addToast = useToast()
+  const confirm = useConfirm()
   const isApprovalPage = pathname === '/members/approval'
   const membersQuery = useMembersQuery()
   const pendingMembersQuery = usePendingMembersQuery()
@@ -95,7 +98,11 @@ export const MentoringMembersPage = () => {
     const hasRejected = changedApprovalEntries.some(([, edit]) => edit.status === 'REJECTED')
     if (
       hasRejected &&
-      !window.confirm('반려로 선택한 회원은 계정이 삭제됩니다. 저장하시겠습니까?')
+      !(await confirm({
+        title: '저장하시겠습니까?',
+        description: '반려로 선택한 회원은 계정이 삭제됩니다.',
+        confirmLabel: '저장하기',
+      }))
     ) {
       return
     }
@@ -120,12 +127,12 @@ export const MentoringMembersPage = () => {
       setApprovalEdits((current) =>
         Object.fromEntries(Object.entries(current).filter(([id]) => failedIds.has(id))),
       )
-      addToast({ type: 'error', message: '일부 회원 처리에 실패했습니다. 다시 시도해주세요.' })
+      addToast({ type: 'error', message: TOAST_MESSAGES.approvalPartiallyFailed })
       return
     }
 
     setApprovalEdits({})
-    addToast({ type: 'complete', message: '승인 처리가 완료됐습니다.' })
+    addToast({ type: 'complete', message: TOAST_MESSAGES.approvalCompleted })
     void navigate('/members')
   }
 

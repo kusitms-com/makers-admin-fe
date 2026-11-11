@@ -349,10 +349,12 @@ export function useIntroductionsForm() {
     return payload
   }
 
+  // 실제로 저장했으면 true. 현재 기수를 아직 모르면 저장하지 않고 false.
   async function handleSave() {
-    if (cardinal === undefined) return
+    if (cardinal === undefined) return false
     await updateMutation.mutateAsync(buildPayload(cardinal))
     setPristineSnapshot(formSnapshot)
+    return true
   }
 
   function onPartImageChange(key: PartKey, file: File) {

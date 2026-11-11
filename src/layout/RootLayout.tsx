@@ -2,6 +2,7 @@ import { Outlet } from 'react-router'
 import { Sidebar } from '@/components/common'
 import { useToast } from '@hooks/common/useToast'
 import { useAuthStore } from '@hooks/auth/useAuth'
+import { TOAST_MESSAGES } from '@/constants/toastMessages'
 
 export function RootLayout() {
   const logout = useAuthStore((state) => state.logout)
@@ -10,7 +11,7 @@ export function RootLayout() {
   function handleLogout() {
     void logout().catch((error: unknown) => {
       if (error instanceof Error) {
-        addToast({ type: 'error', message: '서버 로그아웃을 완료하지 못했습니다.' })
+        addToast({ type: 'error', message: TOAST_MESSAGES.logoutFailed })
         return
       }
       throw error

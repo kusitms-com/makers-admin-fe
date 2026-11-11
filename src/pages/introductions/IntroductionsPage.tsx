@@ -17,6 +17,7 @@ import {
 } from '@hooks/introductions/useIntroductionsForm'
 import { ImageSection } from './ImageSection'
 import { IntroductionBannerSection } from './IntroductionBannerSection'
+import { TOAST_MESSAGES } from '@/constants/toastMessages'
 
 const PART_FIELDS: { key: PartKey; label: string }[] = [
   { key: 'plan', label: '기획' },
@@ -138,13 +139,18 @@ export function IntroductionsPage() {
   const addToast = useToast()
 
   function handleSave() {
-    void form.handleSave().catch((error: unknown) => {
-      if (error instanceof Error) {
-        addToast({ type: 'error', message: '저장하지 못했습니다. 다시 시도해주세요.' })
-        return
-      }
-      throw error
-    })
+    void form
+      .handleSave()
+      .then((saved) => {
+        if (saved) addToast({ type: 'complete', message: TOAST_MESSAGES.saved })
+      })
+      .catch((error: unknown) => {
+        if (error instanceof Error) {
+          addToast({ type: 'error', message: TOAST_MESSAGES.saveFailed })
+          return
+        }
+        throw error
+      })
   }
 
   if (form.isLoadingIntroduction) {

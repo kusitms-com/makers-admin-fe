@@ -13,8 +13,31 @@ import {
   useDeleteBlogReviewMutation,
   useUpdateBlogReviewMutation,
 } from '@hooks/blog-reviews/useBlogReviews'
+import { useConfirm } from '@hooks/common/useConfirm'
+import { useCardinalSelection } from '@hooks/common/useCardinalSelection'
 import { useToast } from '@hooks/common/useToast'
-import { ACTIVITY_OPTIONS, type BlogReviewRow } from './BlogReviewsPage.mock'
+import { TOAST_MESSAGES } from '@/constants/toastMessages'
+
+interface BlogReviewRow {
+  id: string
+  name: string
+  generation: number
+  part: PartBadgeType
+  activity: string
+  title: string
+  link: string
+  thumbnailUrl?: string
+}
+
+// BlogReviewRequest.activity enum(Swagger): DOCUMENT_REVIEW, INTERVIEW_REVIEW, COMPANY_PROJECT,
+// ACTIVITY_REVIEW, MEETUP_PROJECT
+const ACTIVITY_OPTIONS = [
+  { value: 'DOCUMENT_REVIEW', label: '서류 후기' },
+  { value: 'INTERVIEW_REVIEW', label: '면접 후기' },
+  { value: 'ACTIVITY_REVIEW', label: '활동 후기' },
+  { value: 'COMPANY_PROJECT', label: '기업 프로젝트' },
+  { value: 'MEETUP_PROJECT', label: '밋업 프로젝트' },
+] as const
 
 const PART_OPTIONS: SelectFieldOption[] = Object.entries(PART_LABELS).map(([value, label]) => ({
   value,
@@ -96,8 +119,10 @@ export function BlogReviewsPage() {
   const updateBlogReviewMutation = useUpdateBlogReviewMutation()
   const deleteBlogReviewMutation = useDeleteBlogReviewMutation()
   const addToast = useToast()
+  const confirm = useConfirm()
 
   const rows = (blogReviewsQuery.data?.blog_review_list ?? []).map(toBlogReviewRow)
+  const cardinalSelection = useCardinalSelection(rows.map((row) => row.generation))
 
   const totalPages = Math.max(1, Math.ceil(rows.length / PAGE_SIZE))
   const currentPage = Math.min(page, totalPages)
@@ -121,7 +146,7 @@ export function BlogReviewsPage() {
     if (!item) return
 
     if (!isKnownBackendPart(item.part)) {
-      addToast({ type: 'error', message: '지원하지 않는 파트의 후기는 수정할 수 없습니다.' })
+      addToast({ type: 'error', message: TOAST_MESSAGES.unsupportedBlogReviewPart })
       return
     }
     const mappedPart = BACKEND_TO_PART[item.part]
@@ -155,14 +180,17 @@ export function BlogReviewsPage() {
       thumbnailUrl !== editingSnapshot.thumbnailUrl
     : true
 
-  function handleDeleteRow(id: string) {
-    if (!window.confirm('이 후기를 삭제하시겠습니까?')) {
+  async function handleDeleteRow(id: string) {
+    if (!(await confirm({ title: '이 후기를 삭제하시겠습니까?', confirmLabel: '삭제하기' }))) {
       return
     }
 
     deleteBlogReviewMutation.mutate(Number(id), {
+      onSuccess: () => {
+        addToast({ type: 'complete', message: TOAST_MESSAGES.deleted })
+      },
       onError: () => {
-        addToast({ type: 'error', message: '삭제하지 못했습니다. 다시 시도해주세요.' })
+        addToast({ type: 'error', message: TOAST_MESSAGES.deleteFailed })
       },
     })
   }
@@ -213,18 +241,19 @@ export function BlogReviewsPage() {
         },
         {
           onSuccess: () => {
+            addToast({ type: 'complete', message: TOAST_MESSAGES.updated })
             resetForm()
             setModalOpen(false)
           },
           onError: () => {
-            addToast({ type: 'error', message: '수정하지 못했습니다. 다시 시도해주세요.' })
+            addToast({ type: 'error', message: TOAST_MESSAGES.updateFailed })
           },
         },
       )
       return
     }
 
-    const currentCardinal = currentCardinalQuery.data
+    const currentCardinal = cardinalSelection.cardinal
     if (currentCardinal === undefined) {
       return
     }
@@ -241,12 +270,13 @@ export function BlogReviewsPage() {
       },
       {
         onSuccess: () => {
+          addToast({ type: 'complete', message: TOAST_MESSAGES.created })
           setPage(1)
           resetForm()
           setModalOpen(false)
         },
         onError: () => {
-          addToast({ type: 'error', message: '등록하지 못했습니다. 다시 시도해주세요.' })
+          addToast({ type: 'error', message: TOAST_MESSAGES.createFailed })
         },
       },
     )
@@ -301,6 +331,7 @@ export function BlogReviewsPage() {
             disabled={currentCardinalQuery.data === undefined}
             onClick={() => {
               resetForm()
+              cardinalSelection.reset()
               setModalOpen(true)
             }}
           >
@@ -314,7 +345,9 @@ export function BlogReviewsPage() {
             type="blogReview"
             rows={pagedRows.map((row) => ({ ...row, category: row.activity }))}
             onEditRow={handleEditRow}
-            onDeleteRow={handleDeleteRow}
+            onDeleteRow={(id) => {
+              void handleDeleteRow(id)
+            }}
             page={currentPage}
             totalPages={totalPages}
             onPageChange={setPage}
@@ -327,7 +360,9 @@ export function BlogReviewsPage() {
         open={modalOpen}
         onOpenChange={setModalOpen}
         mode={editingSnapshot ? 'edit' : 'create'}
-        cardinal={editingSnapshot?.cardinal ?? currentCardinalQuery.data ?? 0}
+        cardinal={editingSnapshot?.cardinal ?? cardinalSelection.cardinal ?? 0}
+        cardinalOptions={editingSnapshot ? undefined : cardinalSelection.options}
+        onCardinalChange={editingSnapshot ? undefined : cardinalSelection.setCardinal}
         part={part}
         partOptions={PART_OPTIONS}
         onPartChange={handlePartChange}
