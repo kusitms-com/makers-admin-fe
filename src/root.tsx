@@ -14,6 +14,8 @@ export function Layout({ children }: { children: ReactNode }) {
         <meta charSet="utf-8" />
         <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        {/* robots.txt만으로는 외부 링크된 주소가 검색 결과에 남을 수 있어 색인 자체를 막는다. */}
+        <meta name="robots" content="noindex, nofollow" />
         <title>kusitms_admin</title>
         <Meta />
         <Links />
