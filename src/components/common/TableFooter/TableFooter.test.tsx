@@ -20,6 +20,24 @@ describe('TableFooter', () => {
     expect(screen.getByRole('button', { name: '3' })).toBeTruthy()
   })
 
+  it('페이지가 많으면 현재 페이지 주변 번호만 보여준다', () => {
+    render(<TableFooter page={1} totalPages={20} onPageChange={vi.fn()} totalLabel="총 134개" />)
+
+    const pageButtons = screen
+      .getAllByRole('button')
+      .filter((button) => /^\d+$/.test(button.textContent))
+    expect(pageButtons.map((button) => button.textContent)).toEqual([
+      '1',
+      '2',
+      '3',
+      '4',
+      '5',
+      '6',
+      '7',
+      '20',
+    ])
+  })
+
   it('현재 페이지 버튼에 aria-current가 설정된다', () => {
     render(<TableFooter page={2} totalPages={3} onPageChange={vi.fn()} totalLabel="총 6개" />)
 
