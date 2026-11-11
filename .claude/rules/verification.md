@@ -8,7 +8,6 @@
 - 좁은 컴포넌트/훅 변경: 관련 테스트가 있으면 실행합니다.
 - 공통 유틸리티/API 변경: 관련 테스트와 `pnpm lint`를 실행합니다.
 - 앱 전반 변경: `pnpm lint`와 `pnpm build`를 실행합니다.
-- E2E 영향이 있는 flow: 필요한 경우 특정 Playwright 테스트 또는 `pnpm test:e2e`를 실행합니다.
 
 ## 보고
 

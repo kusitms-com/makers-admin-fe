@@ -8,7 +8,6 @@
 - **Form**: React Hook Form + Zod
 - **UI**: Tailwind CSS v4 + [@kusitms.com/ui](https://github.com/kusitms-com/makers-design-system)
 - **Test**: Vitest + React Testing Library
-- **E2E**: Playwright
 
 ## Getting Started
 
@@ -34,7 +33,6 @@ pnpm dev
 | `pnpm icons:check`     | 아이콘 동기화 검사       |
 | `pnpm test`            | 단위 테스트              |
 | `pnpm test:coverage`   | 커버리지 리포트          |
-| `pnpm test:e2e`        | E2E 테스트               |
 
 ## Project Structure
 

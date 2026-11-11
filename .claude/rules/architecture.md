@@ -18,8 +18,8 @@
 | `src/providers` | 앱 전체를 감싸는 wrapper 컴포넌트 (`QueryProvider`, `ToastProvider` 등) |
 | `src/layout` | Sidebar/PageHeader를 조합한 공통 레이아웃 셸 |
 | `src/lib` | 공통 유틸리티 |
+| `src/constants` | 여러 화면이 함께 쓰는 문구·상수 (예: `toastMessages.ts`). 한 도메인 전용 상수는 기능 근처에 둠 — `006-constants-folder.md` |
 | `src/types.ts` | 공통 타입 (도메인 전용이면 해당 도메인 파일 근처) |
-| `e2e` | E2E 테스트 |
 
 `src/pages/**`의 페이지 컴포넌트와 `src/layout/RootLayout.tsx`는 named export와 함께 **`export default`가 필수**입니다. `src/routes.ts`가 파일 경로로 참조하는 파일 기반 라우팅 관례라, 빠뜨리면 타입체크/테스트는 통과해도 실제 화면에는 아무것도 렌더링되지 않습니다.
 

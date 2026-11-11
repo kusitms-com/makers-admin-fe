@@ -15,6 +15,6 @@ tools: Read, Glob, Grep
 - `src/routes/(group)`의 얇은 재수출 규칙과 `src/pages` 구현 분리
 - `default export`, route path, 레이아웃 적용, 인증 그룹 경계
 - 404와 ErrorBoundary의 역할 분리, 오류 화면의 사용자 복구 경로
-- 라우팅 변경에 필요한 E2E 또는 build 검증
+- 라우팅 변경에 필요한 테스트 또는 build 검증
 
 파일을 수정하지 않고, 발견 사항마다 `파일:줄`, 영향, 최소 수정 방향을 보고합니다.
