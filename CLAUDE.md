@@ -24,7 +24,7 @@ KUSITMS 관리자 패널입니다. React 19 + Vite 8 기반 SPA이며, KUSITMS S
 - **Server State**: TanStack Query v5
 - **Client State**: Zustand v5
 - **Form**: React Hook Form v7 + Zod v4
-- **Testing**: Vitest + Testing Library + happy-dom
+- **Testing**: Vitest + Testing Library + jsdom
 - **Package Manager**: pnpm
 
 ## 주요 명령어
