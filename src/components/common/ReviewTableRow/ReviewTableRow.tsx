@@ -114,7 +114,7 @@ export function ReviewTableRow({
             <button
               type="button"
               onClick={onTitleClick}
-              className="text-label-14m text-label-normal w-full truncate text-left hover:underline"
+              className="text-label-14m text-label-normal w-full cursor-pointer truncate text-left hover:underline"
             >
               {title}
             </button>
