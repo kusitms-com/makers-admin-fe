@@ -26,10 +26,9 @@ import {
   useMeetupProjectsQuery,
   useUpdateMeetupProjectMutation,
 } from '@hooks/projects/useMeetupProjects'
+import { toCohortOptions } from '@lib/cohort'
 import { toAbsoluteS3Url } from '@lib/s3'
 import {
-  COHORT_OPTIONS,
-  CURRENT_GENERATION,
   PART_OPTIONS,
   PLACEHOLDER_THUMBNAIL_URL,
   TYPE_OPTIONS,
@@ -85,7 +84,7 @@ function detailToFormValues(detail: MeetupProjectDetail): MeetupProjectFormValue
 export function MeetupProjectsPage() {
   const projectsQuery = useMeetupProjectsQuery()
   const currentCardinalQuery = useCurrentCardinalQuery()
-  const [cohort, setCohort] = useState(String(CURRENT_GENERATION))
+  const [selectedCohort, setSelectedCohort] = useState<string | null>(null)
   const [modalOpen, setModalOpen] = useState(false)
   const [detailId, setDetailId] = useState<number | null>(null)
   const [isEditing, setIsEditing] = useState(false)
@@ -112,6 +111,11 @@ export function MeetupProjectsPage() {
     }
   }, [])
 
+  const cohortOptions = toCohortOptions(
+    projects.map((project) => project.cardinal),
+    currentCardinalQuery.data,
+  )
+  const cohort = selectedCohort ?? cohortOptions.at(0)?.value ?? ''
   const visibleProjects = projects.filter((project) => project.cardinal === Number(cohort))
 
   function openDetail(id: string) {
@@ -280,7 +284,11 @@ export function MeetupProjectsPage() {
         </section>
 
         <section className="flex flex-col gap-6">
-          <SegmentedControl items={COHORT_OPTIONS} value={cohort} onValueChange={setCohort} />
+          <SegmentedControl
+            items={cohortOptions}
+            value={cohort}
+            onValueChange={setSelectedCohort}
+          />
 
           {visibleProjects.length === 0 ? (
             <p className="text-body-16sb text-label-alternative py-10 text-center">

@@ -2,6 +2,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { render, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { getCurrentCardinal } from '@api/auth'
 import type * as AuthApi from '@api/auth'
 import { useAuthStore } from '@hooks/auth/useAuth'
 import { MeetupProjectsPage } from './MeetupProjectsPage'
@@ -111,6 +112,16 @@ describe('MeetupProjectsPage', () => {
 
     expect(screen.queryByText('큐첵')).toBeFalsy()
     expect(screen.getByText('모먼트')).toBeTruthy()
+  })
+
+  it('현재 기수로 등록된 프로젝트가 기본 탭에 보인다', async () => {
+    vi.mocked(getCurrentCardinal).mockResolvedValueOnce(34)
+    meetupList.push({ ...INITIAL_MEETUP_ITEMS[0], meetup_id: 9, cardinal: 34, name: 'QA테스트' })
+    renderPage()
+
+    expect(await screen.findByText('QA테스트')).toBeTruthy()
+    expect(screen.getByRole('tab', { name: '34기', selected: true })).toBeTruthy()
+    expect(screen.queryByText('큐첵')).toBeFalsy()
   })
 
   it('필수 필드를 모두 채우기 전에는 저장 버튼이 비활성화된다', async () => {
