@@ -6,10 +6,14 @@ interface TextareaFieldProps extends TextareaHTMLAttributes<HTMLTextAreaElement>
 }
 
 export function TextareaField({ className, ...props }: TextareaFieldProps) {
+  // Inputfield와 같은 규칙: 포커스되면 파란 테두리와 흰 배경, 값이 있으면 흰 배경 유지
+  const hasValue = props.value != null && String(props.value).length > 0
+
   return (
     <div
       className={cn(
-        'bg-fill-netural border-line-normal flex h-[90px] w-full rounded-lg border px-3 py-2.5',
+        'border-line-normal focus-within:border-brand-primary focus-within:bg-fill-normal flex h-[90px] w-full rounded-lg border px-3 py-2.5',
+        hasValue ? 'bg-fill-normal' : 'bg-fill-netural',
         className,
       )}
     >
