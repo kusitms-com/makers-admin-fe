@@ -23,7 +23,6 @@
     "vite.config.ts",
     "vitest.config.ts",
     "react-router.config.ts",
-    "playwright.config.ts",
     "scripts/**/*.ts",
     ".storybook/**/*"
   ]
