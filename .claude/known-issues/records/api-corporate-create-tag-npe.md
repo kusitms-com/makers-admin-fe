@@ -25,10 +25,17 @@ Swagger UI가 매번 성공했던 이유도 이걸로 설명된다 — Swagger�
 
 ## 왜 지금 우리 코드에서 고치면 안 되는지
 
-백엔드의 null 체크 누락이라 프론트엔드에서 원인 자체를 고칠 수 없다. 다만 Swagger와 동일하게 `tag` 필드에 빈 문자열 하나를 보내면 NPE를 피할 수 있다는 게 확인됐으므로, `src/api/projects.ts`의 `buildCorporateFormData()`에서 `formData.append('tag', '')`로 우회한다(`tag` 입력 UI가 아직 없어서 실제 태그 값은 항상 비어 있다).
+백엔드의 null 체크 누락이라 프론트엔드에서 원인 자체를 고칠 수 없다. 다만 Swagger와 동일하게 `tag` 필드에 빈 문자열 하나를 보내면 NPE를 피할 수 있다는 게 확인됐으므로, `src/api/projects/api.ts`의 `buildCorporateFormData()`에서 `formData.append('tag', '')`로 우회한다(`tag` 입력 UI가 아직 없어서 실제 태그 값은 항상 비어 있다).
 
 ## 언제/누가 해결해야 하는지
 
-**우회 방법(적용 완료)**: `src/api/projects.ts`의 `buildCorporateFormData()`에서 `tag` 필드에 빈 문자열을 보낸다.
+**우회 방법(적용 완료)**: `src/api/projects/api.ts`의 `buildCorporateFormData()`에서 `tag` 필드에 빈 문자열을 보낸다.
 
 **근본 해결(백엔드 담당)**: `AdminService#saveCorporate`/`updateCorporate`에서 `request.getTag()`가 null일 수 있음을 null 체크하거나(`request.getTag() != null ? request.getTag() : List.of()`), `CorporateRequest.tag`에 기본값(`= new ArrayList<>()`)을 둬야 한다. 같은 레포의 밋업 `logoFile`/`posterFile` null 체크 누락(`.claude/known-issues/records/api-meetup-image-url-missing-slash.md` 참고 커밋 당시 발견)과 같은 패턴이라, 백엔드 팀에 함께 전달하면 좋다. 백엔드가 고치면 이 workaround(`tag` 빈 문자열 전송)는 제거해도 된다 — 단, `tag` 입력 UI를 나중에 만들 때는 실제 값을 보내도록 바꿔야 한다.
+
+
+## 상태 갱신 (2026-11-11) — 해소
+
+백엔드 main(`289ee1d`)에서 `resolveTags`가 `tag == null`을 빈 목록으로 처리해 NPE가 사라졌다(`AdminService.java:292-294`). `updateCorporate`는 `tag`가 있을 때만 태그를 교체한다(`:230-236`).
+
+빈 문자열 workaround(`tag=''`)는 오히려 수정 시 기존 태그를 지우므로 제거했다. 이제 프론트는 `tag`를 보내지 않는다(`src/api/projects/api.ts`의 `buildCorporateFormData`).

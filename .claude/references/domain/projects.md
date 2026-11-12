@@ -22,12 +22,12 @@ src/pages/projects/
 
 src/hooks/projects/
   useMeetupProjectForm.ts     # 밋업 프로젝트 등록 폼 상태 (RHF + Zod)
-  useMeetupProjects.ts        # 밋업 프로젝트 목록 조회/등록/삭제 TanStack Query 훅
   useCompanyProjectForm.ts    # 기업 프로젝트 등록 폼 상태 (RHF + Zod)
-  useCompanyProjects.ts       # 기업 프로젝트 목록 조회/등록/삭제 TanStack Query 훅
 
-src/api/projects.ts            # 밋업/기업 프로젝트 모두 목록 조회(GET)/등록(POST)/삭제(DELETE) 구현
-                                # 기업 프로젝트 수정(PUT)은 미구현
+src/api/projects/
+  api.ts                      # 밋업/기업 프로젝트 조회·등록·수정·삭제 요청 함수
+  queries.ts                  # key 팩토리·queryOptions·조회/mutation 훅 (밋업·기업 공통 파일)
+  types.ts                    # 요청·응답 타입
 ```
 
 ## 주요 액션

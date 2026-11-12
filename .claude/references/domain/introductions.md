@@ -17,8 +17,9 @@
 src/pages/introductions/
   # 학회 소개 관리 화면 구현 시 생성
 
-src/api/introductions.ts
-src/hooks/useIntroductions.ts
+src/api/introductions/api.ts
+src/api/introductions/queries.ts  # key 팩토리·queryOptions·조회/mutation 훅
+src/api/introductions/types.ts
 ```
 
 ## 주요 액션

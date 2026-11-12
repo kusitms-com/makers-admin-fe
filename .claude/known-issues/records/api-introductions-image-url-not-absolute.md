@@ -39,3 +39,8 @@ S3 버킷명/리전(`cloud.aws.s3.bucket`)은 백엔드 환경 변수로만 주�
 ## 언제/누가 해결해야 하는지
 
 **백엔드 담당**: `S3Service.uploadFile()`이 `fileName`(key) 대신 완전한 URL(또는 CloudFront 등 CDN 도메인)을 반환하도록 수정 요청이 필요하다. 백엔드가 고치면 프론트의 `toAbsoluteImageUrl()` 우회 코드(하드코딩된 버킷 도메인)는 제거한다 — 버킷/리전이 바뀌면 이 하드코딩은 조용히 깨진다.
+
+
+## 상태 갱신 (2026-11-11)
+
+백엔드 main(`289ee1d`)에서는 모든 응답 DTO가 `S3Util.toUrl()`로 `prefix + "/" + key` 형태의 절대 URL을 만든다(`S3Util.java:20-29`). 코드상으로는 해소됐다. **운영 배포 반영 여부는 확인하지 못했다.** `src/lib/s3.ts`의 `toAbsoluteS3Url()`은 절대 URL이 와도 그대로 정규화하므로, 운영 응답이 절대 URL로 바뀐 것을 확인한 뒤 제거한다.

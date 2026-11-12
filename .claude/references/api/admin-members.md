@@ -31,9 +31,11 @@ Swagger 출처: `.env`의 `VITE_API_BASE_URL` + `/api-docs/json`
 | `cardinal` | `number \| null` | 활동 기수 |
 | `part` | `string \| null` | 파트 (`PLANNER`/`DESIGNER`/`FRONTEND`/`BACKEND`) |
 | `status` | `string \| null` | 가입 상태 (`PENDING`/`APPROVED`/`WITHDRAWN`) |
-| `role` | `string` | 학회원 구분 (`YB`/`OB`/`ADMIN`) |
+| `role` | `string \| null` | 학회원 구분 (`YB`/`OB`/`ADMIN`). 탈퇴 회원은 `Member.withdraw()`가 `null`로 바꿈 |
 | `authority` | `string` | 어드민 권한 (`MEMBER`/`MANAGER`/`OWNER`) |
 | `createdAt` | `string \| null` | 가입 일시 |
+
+**두 목록 API 모두 0건이면 `data` 키가 생략됩니다.** 공통 envelope의 `data`에 `@JsonInclude(NON_DEFAULT)`가 붙어 빈 배열도 빠지므로, API 함수에서 `data ?? []`로 받습니다 (백엔드 소스 `kusitms-com/api.kusitms.com` main `289ee1d`로 확인, 2026-11-11).
 
 가입 절차를 거치지 않은 계정(최초 admin 계정 등)은 `name`/`phone`/`email`/`cardinal`/`part`/`status`/`createdAt`이 전부 `null`로 내려온다.
 
@@ -51,7 +53,7 @@ Swagger 출처: `.env`의 `VITE_API_BASE_URL` + `/api-docs/json`
 | `cardinal` | `number` | 활동 기수 |
 | `part` | `string` | 파트 |
 | `profileImageUrl` | `string` | 프로필 이미지 URL |
-| `certificateImageUrl` | `string` | 수료증 이미지 URL |
+| `certificateImageUrl` | `string \| null` | 수료증 이미지 URL. 수료증은 33기 이하만 필수라 없으면 `null` |
 
 ### Mutation 공통
 
@@ -60,7 +62,7 @@ Swagger 출처: `.env`의 `VITE_API_BASE_URL` + `/api-docs/json`
 
 ## 구현 메모
 
-- API 함수는 `src/api/members.ts`에 둡니다.
+- API 함수는 `src/api/members/api.ts`에 둡니다.
 - 전체 목록 query key는 `['admin', 'members']`, 승인 대기 목록 query key는 `['admin', 'members', 'pending']`을 우선합니다.
 - 승인/반려 mutation 이후 `['admin', 'members']`와 `['admin', 'members', 'pending']`을 모두 invalidate합니다.
 - destructive action인 반려는 UI에서 확인 절차를 둡니다.

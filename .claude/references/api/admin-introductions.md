@@ -39,7 +39,7 @@ Swagger 출처: `.env`의 `VITE_API_BASE_URL` + `/api-docs/json`
 - `ManagementTeamRequest`/`ExpertLectureRequest`/`OBLectureRequest`: `id?`, 내용 필드(`name`, `description`/`corporation`+`description`/`topic`), `imageFile?`, `removeImage?`
 - `ActivityRequest`: `id?`, `name`, `description`, `imageFile1?`, `imageFile2?`, `removeImage1?`, `removeImage2?`
 - `IntroImageRequest`(`partnerLogos`/`meetupImages`/`sponsors` 공용): `id?`, `imageFile?` — flat `File[]`가 아니라 다른 목록과 동일하게 **인덱스가 붙은 객체 배열**입니다.
-- 모든 목록 항목은 `name` 필수(없으면 400), `id`가 잘못됐거나 중복되면 400.
+- 이름이 있는 목록 항목(teams/activities/expertLecture/obLecture)은 내용이 있는데 `name`이 없으면 400이고, 완전히 빈 항목은 조용히 건너뜁니다. 이미지 목록(partnerLogos/meetupImages/sponsors)에는 `name`이 없고 id나 파일이 있는 항목만 저장합니다. `id`가 잘못됐거나 중복되면 400. (백엔드 소스 `kusitms-com/api.kusitms.com` main `289ee1d`로 확인, 2026-11-11)
 
 ## 멀티파트 직렬화 방식
 
@@ -87,13 +87,15 @@ partnerLogos[1].imageFile=@newlogo.png
   "backend_image_url": string | null,
   "partner_logos": { "id": number, "image_url": string | null }[],
   "meetup_images": { "id": number, "image_url": string | null }[],
-  "activities": { "id": number, "name": string, "image_url1": string | null, "image_url2": string | null, "description": string }[],
-  "teams": { "id": number, "name": string, "image_link": string | null, "description": string }[],
-  "expert_lecture": { "id": number, "name": string, "image_link": string | null, "corporation": string, "description": string }[],
-  "ob_lecture": { "id": number, "name": string, "image_link": string | null, "topic": string }[],
+  "activities": { "id": number, "name": string, "image_url1": string | null, "image_url2": string | null, "description": string | null }[],
+  "teams": { "id": number, "name": string, "image_link": string | null, "description": string | null }[],
+  "expert_lecture": { "id": number, "name": string, "image_link": string | null, "corporation": string | null, "description": string | null }[],
+  "ob_lecture": { "id": number, "name": string, "image_link": string | null, "topic": string | null }[],
   "sponsors": { "id": number, "image_url": string | null }[]
 }
 ```
+
+- 목록 항목의 `description`/`corporation`/`topic`은 서버가 `name`만 필수로 검사해서, 기존 데이터나 다른 클라이언트가 넣은 데이터는 `null`일 수 있습니다(엔티티 컬럼 nullable). `banner_status`는 `'CLOSE' | 'MANAGE_RECRUIT' | 'MEMBER_RECRUIT' | null`입니다. (백엔드 소스 `kusitms-com/api.kusitms.com` main `289ee1d`로 확인, 2026-11-11)
 
 이전 버전과의 차이:
 
@@ -111,7 +113,7 @@ PNG/JPG만 허용됩니다(SVG는 깨짐). 프론트 업로드 input에 `accept=
 
 ## 구현 메모
 
-- API 함수는 `src/api/introductions.ts`에 둔다.
+- API 함수는 `src/api/introductions/api.ts`에 둔다.
 - query key는 `['admin', 'introductions']`를 우선한다. 수정은 `multipart/form-data`이고, 수정 이후 조회 query를 invalidate한다.
 - `IntroductionsPage` UI는 슬로건/배너 이미지 입력란 없이, `IntroRequest`의 나머지 필드를 다룬다: 배너 상태(`bannerStatus`)·기수, 회원·프로젝트·대학 수, 학회 소개 영상(`introYoutubeLink`), 파트별 이미지 4종, 운영진(`teams`), 큐시즘 활동(`activities`, 이미지 2개), 밋업 이미지, 파트너사 로고, 전문가/OB 강연자, 후원사 이미지.
 - GET 응답은 `useIntroductionsForm.ts`의 `hydrateFromResponse`가 최초 로드 시 폼에 하이드레이션하며, 각 항목의 `id`를 `remoteId`로 보관해 저장 시 PUT 요청에 그대로 실어 보낸다(이게 빠지면 저장마다 기존 항목이 전부 "새 항목"으로 처리돼 중복/이미지 소실이 난다).
