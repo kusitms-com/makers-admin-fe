@@ -32,3 +32,12 @@ export function prefetchWhenAuthenticated<TQueryFnData, TError, TData, TQueryKey
   }
   return null
 }
+
+// 로그인 상태가 풀리면(로그아웃, 리프레시 토큰 거부) 진행 중인 요청을 취소하고 캐시를 비운다.
+// 모듈 단위 캐시라 그대로 두면 다음에 로그인한 계정에 이전 계정의 데이터가 보일 수 있다.
+useAuthStore.subscribe((state, previous) => {
+  if (previous.session.status === 'authenticated' && state.session.status !== 'authenticated') {
+    void queryClient.cancelQueries()
+    queryClient.clear()
+  }
+})

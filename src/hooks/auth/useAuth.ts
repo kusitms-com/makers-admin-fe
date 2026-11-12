@@ -5,6 +5,14 @@ import { ApiError, isNetworkError, setAuthTokenSource } from '@api/client'
 
 const REFRESH_TOKEN_KEY = 'kusitms-admin-refresh-token'
 
+// 서버가 리프레시 토큰 자체를 거부한 경우(4xx, 응답 형식 오류). 네트워크·5xx 같은 일시 오류와 구분한다.
+function isRejectedSessionError(error: unknown) {
+  return (
+    (error instanceof ApiError && error.status >= 400 && error.status < 500) ||
+    error instanceof z.ZodError
+  )
+}
+
 type AuthSession =
   | { readonly status: 'loading' | 'guest' }
   | {
@@ -24,12 +32,34 @@ interface AuthStore {
 export const useAuthStore = create<AuthStore>((set, get) => ({
   session: { status: 'loading' },
   refreshAccessToken: async () => {
+    // 갱신을 기다리는 사이 로그아웃·재로그인하면 세션 객체가 바뀐다. 그때는 이 갱신 결과를 버린다.
+    const startedSession = get().session
+    const endSessionIfUnchanged = () => {
+      if (get().session !== startedSession) return
+      sessionStorage.removeItem(REFRESH_TOKEN_KEY)
+      set({ session: { status: 'guest' } })
+    }
+
     const refreshToken = sessionStorage.getItem(REFRESH_TOKEN_KEY)
     if (!refreshToken) {
+      endSessionIfUnchanged()
       throw new ApiError(401, undefined, '다시 로그인해주세요.')
     }
-    const result = await refreshSession(refreshToken)
+
+    let result: Awaited<ReturnType<typeof refreshSession>>
+    try {
+      result = await refreshSession(refreshToken)
+    } catch (error) {
+      // 리프레시 토큰이 거부되면 로그인 화면으로 보낸다. 네트워크·5xx 같은 일시 오류는 세션을 유지한다.
+      if (isRejectedSessionError(error)) endSessionIfUnchanged()
+      throw error
+    }
+
+    if (get().session !== startedSession) {
+      throw new ApiError(401, undefined, '다시 로그인해주세요.')
+    }
     if (result.authority === 'MEMBER') {
+      endSessionIfUnchanged()
       throw new ApiError(403, undefined, '관리자 권한이 없는 계정입니다.')
     }
     sessionStorage.setItem(REFRESH_TOKEN_KEY, result.refreshToken)
@@ -67,10 +97,7 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
     } catch (error) {
       set({ session: { status: 'guest' } })
       // 토큰이 거부된 경우(4xx, 응답 형식 오류)만 지우고, 네트워크·5xx 같은 일시 오류는 다음 복원을 위해 남긴다.
-      if (
-        (error instanceof ApiError && error.status >= 400 && error.status < 500) ||
-        error instanceof z.ZodError
-      ) {
+      if (isRejectedSessionError(error)) {
         sessionStorage.removeItem(REFRESH_TOKEN_KEY)
       } else if (!(error instanceof ApiError || isNetworkError(error))) {
         throw error

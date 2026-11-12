@@ -46,3 +46,16 @@ describe('shouldRetryQuery', () => {
     expect(shouldRetryQuery(0, new ApiError(404, 404, '없음'))).toBe(false)
   })
 })
+
+describe('로그아웃 시 캐시 정리', () => {
+  it('로그인 상태가 풀리면 이전 계정의 캐시를 비운다', () => {
+    useAuthStore.setState({
+      session: { status: 'authenticated', accessToken: 'access', authority: 'MANAGER' },
+    })
+    queryClient.setQueryData(['admin', 'members', 'approved'], [{ id: 'a' }])
+
+    useAuthStore.setState({ session: { status: 'guest' } })
+
+    expect(queryClient.getQueryData(['admin', 'members', 'approved'])).toBeUndefined()
+  })
+})

@@ -165,4 +165,67 @@ describe('관리자 세션', () => {
     expect(useAuthStore.getState().session.status).toBe('guest')
     expect(sessionStorage.getItem(refreshTokenKey)).toBeNull()
   })
+
+  it('토큰 갱신 중 리프레시 토큰이 거부되면 로그아웃 상태로 바꾼다', async () => {
+    sessionStorage.setItem(refreshTokenKey, 'expired-refresh')
+    useAuthStore.setState({
+      session: { status: 'authenticated', accessToken: 'old', authority: 'MANAGER' },
+    })
+    respondWith(null, 401)
+
+    await expect(useAuthStore.getState().refreshAccessToken()).rejects.toMatchObject({
+      status: 401,
+    })
+
+    expect(useAuthStore.getState().session.status).toBe('guest')
+    expect(sessionStorage.getItem(refreshTokenKey)).toBeNull()
+  })
+
+  it('토큰 갱신이 서버 오류(5xx)로 실패하면 세션을 유지한다', async () => {
+    sessionStorage.setItem(refreshTokenKey, 'refresh')
+    useAuthStore.setState({
+      session: { status: 'authenticated', accessToken: 'old', authority: 'MANAGER' },
+    })
+    respondWith(null, 503)
+
+    await expect(useAuthStore.getState().refreshAccessToken()).rejects.toMatchObject({
+      status: 503,
+    })
+
+    expect(useAuthStore.getState().session.status).toBe('authenticated')
+    expect(sessionStorage.getItem(refreshTokenKey)).toBe('refresh')
+  })
+
+  it('토큰 갱신을 기다리는 동안 로그아웃하면 갱신 결과로 세션을 되살리지 않는다', async () => {
+    sessionStorage.setItem(refreshTokenKey, 'refresh')
+    useAuthStore.setState({
+      session: { status: 'authenticated', accessToken: 'old', authority: 'MANAGER' },
+    })
+    let resolveRefresh: (response: Response) => void = () => undefined
+    const fetchMock = vi.fn<typeof fetch>().mockImplementation(
+      () =>
+        new Promise<Response>((resolve) => {
+          resolveRefresh = resolve
+        }),
+    )
+    vi.stubGlobal('fetch', fetchMock)
+
+    const refreshing = useAuthStore.getState().refreshAccessToken()
+    // 인터셉터가 비동기라 갱신 요청이 실제로 나갈 때까지 기다린다.
+    await vi.waitFor(() => {
+      expect(fetchMock).toHaveBeenCalledOnce()
+    })
+    // 서버 로그아웃 요청은 기다리지 않고 로컬 세션만 먼저 비운다(logout은 세션을 먼저 guest로 바꾼다).
+    sessionStorage.removeItem(refreshTokenKey)
+    useAuthStore.setState({ session: { status: 'guest' } })
+    resolveRefresh(
+      new Response(JSON.stringify({ code: 200, message: '성공', data: responseData }), {
+        status: 200,
+      }),
+    )
+
+    await expect(refreshing).rejects.toMatchObject({ status: 401 })
+    expect(useAuthStore.getState().session.status).toBe('guest')
+    expect(sessionStorage.getItem(refreshTokenKey)).toBeNull()
+  })
 })
