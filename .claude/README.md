@@ -51,6 +51,8 @@ Tier 1은 코드 변경, 리뷰, 리팩터링처럼 실제 작업이 시작될 �
 
 Claude Code와 Codex 모두 아래 역할을 프로젝트 전용 읽기 전용 에이전트로 제공합니다. 일반 구현은 메인 세션이 담당하고, 에이전트는 조사·검토·검증 결과를 보고합니다.
 
+호출 위치(리뷰 게이트, `/code-review`), 선택표, 판정 기준은 `.claude/agents/README.md`를 따릅니다.
+
 | 역할 | 파일 | 용도 |
 | --- | --- | --- |
 | 디버거 | `.claude/agents/debugger.md`, `.codex/agents/debugger.toml` | 버그 원인 조사 |
