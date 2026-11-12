@@ -36,6 +36,8 @@ Swagger UI가 매번 성공했던 이유도 이걸로 설명된다 — Swagger�
 
 ## 상태 갱신 (2026-11-11) — 해소
 
+**운영 배포 확인**: 백엔드는 `main` push 시 `.github/workflows/CD.yaml`로 Heroku에 자동 배포된다. 이 수정이 포함된 `289ee1d`의 CD 실행이 2026-11-09 `success`로 끝났다(GitHub Actions 기록, 2026-11-12 확인). 그래서 프론트에서 `tag` 생략으로 바꿔도 운영에서 NPE가 나지 않는다.
+
 백엔드 main(`289ee1d`)에서 `resolveTags`가 `tag == null`을 빈 목록으로 처리해 NPE가 사라졌다(`AdminService.java:292-294`). `updateCorporate`는 `tag`가 있을 때만 태그를 교체한다(`:230-236`).
 
 빈 문자열 workaround(`tag=''`)는 오히려 수정 시 기존 태그를 지우므로 제거했다. 이제 프론트는 `tag`를 보내지 않는다(`src/api/projects/api.ts`의 `buildCorporateFormData`).
