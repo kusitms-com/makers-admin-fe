@@ -26,7 +26,7 @@
 - `src/components/<domain>`은 해당 도메인 UI 컴포넌트만 export합니다.
 - `src/hooks/common`은 전역 재사용 hook만 export합니다.
 - `src/hooks/<domain>`은 해당 도메인 hook만 export합니다.
-- 특정 페이지/도메인에서만 쓰는 hook도 FSD식 page-local 폴더가 아니라 `src/hooks/<domain>`에 둡니다.
+- 특정 페이지/도메인에서만 쓰는 hook도 FSD식 page-local 폴더가 아니라 `src/hooks/<domain>`에 둡니다. 단, 서버 조회·mutation 훅은 `src/api/<domain>/queries.ts`에 둡니다(`src/api`는 barrel 생성 대상이 아니므로 파일 경로로 import).
 - index 생성물을 직접 고치지 말고 `pnpm gen:index`를 실행합니다.
 - 동기화 확인은 `pnpm gen:index:check`로 합니다.
 

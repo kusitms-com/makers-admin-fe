@@ -11,8 +11,10 @@ const refreshTokenKey = 'kusitms-admin-refresh-token'
 function respondWith(data: unknown, status = 200) {
   const fetchMock = vi
     .fn<typeof fetch>()
-    .mockResolvedValue(
-      new Response(JSON.stringify({ code: status, message: '요청 결과', data }), { status }),
+    .mockImplementation(() =>
+      Promise.resolve(
+        new Response(JSON.stringify({ code: status, message: '요청 결과', data }), { status }),
+      ),
     )
   vi.stubGlobal('fetch', fetchMock)
   return fetchMock
@@ -62,10 +64,11 @@ describe('관리자 세션', () => {
 
     await useAuthStore.getState().restore()
 
-    expect(fetchMock).toHaveBeenCalledWith(
-      new URL('https://api.example.test/api/auth/refresh'),
-      expect.objectContaining({ body: JSON.stringify({ refreshToken: 'old-refresh' }) }),
-    )
+    // axios fetch 어댑터는 fetch(Request)로 호출한다.
+    const request = fetchMock.mock.calls[0]?.[0]
+    if (!(request instanceof Request)) throw new Error('fetch가 Request로 호출되지 않았습니다.')
+    expect(request.url).toBe('https://api.example.test/api/auth/refresh')
+    expect(await request.text()).toBe(JSON.stringify({ refreshToken: 'old-refresh' }))
     expect(useAuthStore.getState().session).toEqual({
       status: 'authenticated',
       accessToken: 'new-access',
@@ -155,7 +158,8 @@ describe('관리자 세션', () => {
     expect(
       fetchMock.mock.calls.map(([url]) => new URL(url instanceof Request ? url.url : url).pathname),
     ).toEqual(['/api/auth/logout', '/api/auth/refresh', '/api/auth/logout'])
-    expect(new Headers(fetchMock.mock.calls[2]?.[1]?.headers).get('Authorization')).toBe(
+    const retried = fetchMock.mock.calls[2]?.[0]
+    expect(retried instanceof Request ? retried.headers.get('Authorization') : null).toBe(
       'Bearer new-access',
     )
     expect(useAuthStore.getState().session.status).toBe('guest')

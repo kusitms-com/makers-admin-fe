@@ -2,10 +2,11 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { render, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
-import type * as AuthApi from '@api/auth'
+import type * as AuthApi from '@api/auth/api'
 import { useAuthStore } from '@hooks/auth/useAuth'
 import { useToastStore } from '@hooks/common/useToast'
 import { CompanyProjectsPage } from './CompanyProjectsPage'
+import { waitForDialogFocus } from '@/test/dialog'
 
 const INITIAL_CORPORATE_ITEMS = [
   { corporate_id: 1, cardinal: 33, name: '큐시즘 파트너스' },
@@ -29,18 +30,19 @@ const INITIAL_CORPORATE_ITEMS = [
 
 const corporateList = [...INITIAL_CORPORATE_ITEMS]
 
-vi.mock('@api/auth', async (importOriginal) => {
+vi.mock('@api/auth/api', async (importOriginal) => {
   const actual = await importOriginal<typeof AuthApi>()
   return { ...actual, getCurrentCardinal: vi.fn().mockResolvedValue(33) }
 })
 
-vi.mock('@api/projects', () => ({
+vi.mock('@api/projects/api', () => ({
   getCorporateProjects: vi
     .fn()
     .mockImplementation(() =>
       Promise.resolve({ corporateCount: corporateList.length, corporateList }),
     ),
   createCorporateProject: vi.fn().mockResolvedValue(undefined),
+  updateCorporateProject: vi.fn().mockResolvedValue(undefined),
   deleteCorporateProject: vi.fn().mockImplementation((id: number) => {
     const index = corporateList.findIndex((item) => item.corporate_id === id)
     if (index !== -1) corporateList.splice(index, 1)
@@ -97,6 +99,7 @@ describe('CompanyProjectsPage', () => {
     await user.click(await screen.findByRole('button', { name: '추가하기' }))
     const dialog = screen.getByRole('dialog')
 
+    await waitForDialogFocus()
     await user.type(within(dialog).getByPlaceholderText('기업 이름을 입력해주세요'), '테스트 기업')
     await user.type(
       within(dialog).getByPlaceholderText('프로젝트 소개를 입력해주세요'),
@@ -133,6 +136,7 @@ describe('CompanyProjectsPage', () => {
     await user.click(await screen.findByRole('button', { name: '추가하기' }))
     const dialog = screen.getByRole('dialog')
 
+    await waitForDialogFocus()
     await user.type(within(dialog).getByPlaceholderText('기업 이름을 입력해주세요'), '취소될 기업')
     await user.click(within(dialog).getByRole('button', { name: '취소하기' }))
 

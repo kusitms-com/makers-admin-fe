@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react'
 import { Links, Meta, Outlet, Scripts, ScrollRestoration } from 'react-router'
+import { LoadingState } from '@components/common/LoadingState'
 import { GlobalErrorPage } from '@pages/errors/GlobalErrorPage'
 import { AuthProvider } from '@/providers/AuthProvider'
 import { ConfirmProvider } from '@/providers/ConfirmProvider'
@@ -41,6 +42,11 @@ export default function Root() {
       </AuthProvider>
     </QueryProvider>
   )
+}
+
+// 목록 라우트에 clientLoader가 있어 SPA 첫 진입 때 loader가 끝날 때까지 보여 준다.
+export function HydrateFallback() {
+  return <LoadingState className="min-h-screen" />
 }
 
 export function ErrorBoundary() {

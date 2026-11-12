@@ -1,8 +1,8 @@
 import { useEffect, useRef, useState, type Dispatch, type SetStateAction } from 'react'
-import type { AdminIntroResponse, BannerStatus, IntroUpdateRequest } from '@api/introductions'
-import { useCurrentCardinalQuery } from '@hooks/auth/useCurrentCardinal'
+import type { AdminIntroResponse, BannerStatus, IntroUpdateRequest } from '@api/introductions/types'
+import { useCurrentCardinalQuery } from '@api/auth/queries'
 import { toAbsoluteS3Url } from '@lib/s3'
-import { useIntroductionQuery, useUpdateIntroductionMutation } from './useIntroductions'
+import { useIntroductionQuery, useUpdateIntroductionMutation } from '@api/introductions/queries'
 
 export type PartKey = 'plan' | 'design' | 'frontend' | 'backend'
 
@@ -95,7 +95,7 @@ function buildFormSnapshot(fields: {
 function hydrateFromResponse(data: AdminIntroResponse) {
   return {
     bannerCardinal: data.banner_cardinal ?? undefined,
-    bannerStatus: (data.banner_status ?? '') as BannerStatus | '',
+    bannerStatus: data.banner_status ?? ('' as const),
     memberCount: data.member_count !== null ? String(data.member_count) : '',
     projectCount: data.project_count !== null ? String(data.project_count) : '',
     universityCount: data.university_count !== null ? String(data.university_count) : '',
@@ -110,14 +110,14 @@ function hydrateFromResponse(data: AdminIntroResponse) {
       id: crypto.randomUUID(),
       remoteId: team.id,
       title: team.name,
-      description: team.description,
+      description: team.description ?? '',
       thumbnailUrl: toAbsoluteS3Url(team.image_link),
     })),
     activities: data.activities.map((activity) => ({
       id: crypto.randomUUID(),
       remoteId: activity.id,
       title: activity.name,
-      description: activity.description,
+      description: activity.description ?? '',
       thumbnailUrl: toAbsoluteS3Url(activity.image_url1),
       thumbnailUrl2: toAbsoluteS3Url(activity.image_url2),
     })),
@@ -125,15 +125,15 @@ function hydrateFromResponse(data: AdminIntroResponse) {
       id: crypto.randomUUID(),
       remoteId: lecture.id,
       title: lecture.name,
-      description: lecture.description,
-      extra: lecture.corporation,
+      description: lecture.description ?? '',
+      extra: lecture.corporation ?? '',
       thumbnailUrl: toAbsoluteS3Url(lecture.image_link),
     })),
     obLecture: data.ob_lecture.map((lecture) => ({
       id: crypto.randomUUID(),
       remoteId: lecture.id,
       title: lecture.name,
-      description: lecture.topic,
+      description: lecture.topic ?? '',
       thumbnailUrl: toAbsoluteS3Url(lecture.image_link),
     })),
     partnerLogos: toPartnerLogoList(data.partner_logos),

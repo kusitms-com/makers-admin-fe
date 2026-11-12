@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useLocation, useNavigate } from 'react-router'
 import dayjs from 'dayjs'
-import type { AdminMemberResponse, PendingMemberResponse } from '@api/members'
+import type { AdminMemberResponse, PendingMemberResponse } from '@api/members/types'
 import { Button, PageHeader } from '@/components/common'
 import type { PartBadgeType } from '@/components/common/PartBadge'
 import { type MentoringMemberRow, type MentoringMemberStatus } from '@/components/members'
@@ -12,10 +12,11 @@ import {
   useMembersQuery,
   usePendingMembersQuery,
   useRejectMemberMutation,
-} from '@hooks/members/useMembers'
+} from '@api/members/queries'
 import { MemberApprovalPresenter } from './MemberApprovalPresenter'
 import { MemberListPresenter } from './MemberListPresenter'
 import { TOAST_MESSAGES } from '@/constants/toastMessages'
+import { LoadingState } from '@components/common/LoadingState'
 
 const PAGE_SIZE = 8
 
@@ -50,7 +51,8 @@ function toPendingMemberRow(member: PendingMemberResponse): MentoringMemberRow {
     email: '-',
     registeredAt: '-',
     status: 'PENDING',
-    remark: member.certificateImageUrl.split('/').pop(),
+    // 수료증이 필수가 아닌 기수는 이미지가 없다(null).
+    remark: member.certificateImageUrl?.split('/').pop(),
   }
 }
 
@@ -140,9 +142,7 @@ export const MentoringMembersPage = () => {
     return (
       <div className="flex min-h-screen min-w-0 flex-col">
         <PageHeader title="회원 관리" />
-        <div className="text-label-14m text-label-alternative flex min-w-0 flex-1 items-center justify-center">
-          불러오는 중입니다...
-        </div>
+        <LoadingState className="min-w-0 flex-1" />
       </div>
     )
   }

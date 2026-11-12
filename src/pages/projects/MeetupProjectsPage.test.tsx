@@ -2,10 +2,11 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { render, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
-import { getCurrentCardinal } from '@api/auth'
-import type * as AuthApi from '@api/auth'
+import { getCurrentCardinal } from '@api/auth/api'
+import type * as AuthApi from '@api/auth/api'
 import { useAuthStore } from '@hooks/auth/useAuth'
 import { MeetupProjectsPage } from './MeetupProjectsPage'
+import { waitForDialogFocus } from '@/test/dialog'
 
 const INITIAL_MEETUP_ITEMS = [
   { meetup_id: 1, cardinal: 33, name: '큐첵' },
@@ -61,12 +62,12 @@ const MEETUP_DETAIL = {
   tags: [],
 }
 
-vi.mock('@api/auth', async (importOriginal) => {
+vi.mock('@api/auth/api', async (importOriginal) => {
   const actual = await importOriginal<typeof AuthApi>()
   return { ...actual, getCurrentCardinal: vi.fn().mockResolvedValue(33) }
 })
 
-vi.mock('@api/projects', () => ({
+vi.mock('@api/projects/api', () => ({
   getMeetupProjects: vi
     .fn()
     .mockImplementation(() =>
@@ -77,6 +78,7 @@ vi.mock('@api/projects', () => ({
     return Promise.resolve(MEETUP_DETAIL)
   }),
   createMeetupProject: vi.fn().mockResolvedValue(undefined),
+  updateMeetupProject: vi.fn().mockResolvedValue(undefined),
   deleteMeetupProject: vi.fn().mockImplementation((id: number) => {
     const index = meetupList.findIndex((item) => item.meetup_id === id)
     if (index !== -1) meetupList.splice(index, 1)
@@ -143,6 +145,7 @@ describe('MeetupProjectsPage', () => {
     await user.click(await screen.findByRole('button', { name: '추가하기' }))
     const dialog = screen.getByRole('dialog')
 
+    await waitForDialogFocus()
     await user.type(
       within(dialog).getByPlaceholderText('서비스 이름을 입력해주세요'),
       '테스트 프로젝트',
@@ -187,6 +190,7 @@ describe('MeetupProjectsPage', () => {
     await user.click(await screen.findByRole('button', { name: '추가하기' }))
     const dialog = screen.getByRole('dialog')
 
+    await waitForDialogFocus()
     await user.type(
       within(dialog).getByPlaceholderText('서비스 이름을 입력해주세요'),
       '취소될 프로젝트',
@@ -205,6 +209,7 @@ describe('MeetupProjectsPage', () => {
     await user.click(await screen.findByRole('button', { name: '추가하기' }))
     const dialog = screen.getByRole('dialog')
 
+    await waitForDialogFocus()
     await user.type(within(dialog).getByLabelText('추가할 팀원 이름'), '홍길동')
     await user.click(within(dialog).getByRole('button', { name: '추가하기' }))
     expect(within(dialog).getByLabelText('홍길동 이름')).toBeTruthy()

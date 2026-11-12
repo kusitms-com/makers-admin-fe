@@ -72,7 +72,14 @@ export default defineConfig([
       ],
       'react-hooks/rules-of-hooks': 'error',
       'react-hooks/exhaustive-deps': 'error',
-      'react-refresh/only-export-components': ['warn', { allowConstantExport: true }],
+      'react-refresh/only-export-components': [
+        'warn',
+        {
+          allowConstantExport: true,
+          // React Router 라우트 모듈 관례 export(src/routes, root.tsx)는 Vite 플러그인이 HMR을 처리한다.
+          allowExportNames: ['clientLoader', 'HydrateFallback', 'ErrorBoundary', 'Layout'],
+        },
+      ],
     },
   },
   prettierConfig,

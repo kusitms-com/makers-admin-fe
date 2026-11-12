@@ -6,14 +6,14 @@ import type {
   MeetupProjectListItem,
   MeetupProjectType,
   MeetupProjectUpdateRequest,
-} from '@api/projects'
+} from '@api/projects/types'
 import { Button } from '@components/common/Button'
 import { Modal } from '@components/common/Modal'
 import { PageHeader } from '@components/common/PageHeader'
 import { SegmentedControl } from '@components/common/SegmentedControl'
 import { MeetupProjectModal } from '@components/projects/MeetupProjectModal'
 import { ProjectThumbnailCard } from '@components/projects/ProjectThumbnailCard'
-import { useCurrentCardinalQuery } from '@hooks/auth/useCurrentCardinal'
+import { useCurrentCardinalQuery } from '@api/auth/queries'
 import { useCardinalSelection } from '@hooks/common/useCardinalSelection'
 import { useToast } from '@hooks/common/useToast'
 import {
@@ -26,7 +26,7 @@ import {
   useMeetupProjectQuery,
   useMeetupProjectsQuery,
   useUpdateMeetupProjectMutation,
-} from '@hooks/projects/useMeetupProjects'
+} from '@api/projects/queries'
 import { toCohortOptions } from '@lib/cohort'
 import { toAbsoluteS3Url } from '@lib/s3'
 import {
@@ -36,6 +36,7 @@ import {
   type MeetupProjectCard,
 } from './projects.constants'
 import { TOAST_MESSAGES } from '@/constants/toastMessages'
+import { LoadingState } from '@components/common/LoadingState'
 
 function revokeIfBlobUrl(url: string | undefined) {
   if (url?.startsWith('blob:')) {
@@ -64,12 +65,17 @@ function teamToMembers(team: MeetupProjectDetail['team']): MeetupProjectFormValu
   )
 }
 
+// 응답 type은 표시용 이름('chrome extension')이라 요청 enum('CHROME_EXTENSION')으로 바꿔야 수정 요청이 400이 나지 않는다.
+function toTypeOptionValue(type: MeetupProjectDetail['type']) {
+  return (type ?? '').toUpperCase().replace(' ', '_')
+}
+
 function detailToFormValues(detail: MeetupProjectDetail): MeetupProjectFormValues {
   return {
-    type: detail.type.toUpperCase(),
+    type: toTypeOptionValue(detail.type),
     name: detail.name,
     oneLineIntro: detail.one_line_intro,
-    intro: detail.intro,
+    intro: detail.intro ?? '',
     teamName: detail.team.name,
     members: teamToMembers(detail.team),
     logoUrl: toAbsoluteS3Url(detail.logo_url) ?? '',
@@ -248,9 +254,7 @@ export function MeetupProjectsPage() {
     return (
       <div className="flex min-h-screen flex-col">
         <PageHeader title="밋업 프로젝트" />
-        <div className="text-label-14m text-label-alternative flex flex-1 items-center justify-center">
-          불러오는 중입니다...
-        </div>
+        <LoadingState className="flex-1" />
       </div>
     )
   }
@@ -385,9 +389,7 @@ export function MeetupProjectsPage() {
             </Button>
           }
         >
-          <p className="text-label-14m text-label-alternative py-10 text-center">
-            불러오는 중입니다...
-          </p>
+          <LoadingState className="py-10" />
         </Modal>
       )}
 
@@ -417,14 +419,14 @@ export function MeetupProjectsPage() {
           readOnly={!isEditing}
           onEdit={startEdit}
           cardinal={detailQuery.data.cardinal}
-          type={isEditing ? editForm.type : detailQuery.data.type.toUpperCase()}
+          type={isEditing ? editForm.type : toTypeOptionValue(detailQuery.data.type)}
           typeOptions={TYPE_OPTIONS}
           onTypeChange={isEditing ? editForm.setType : () => {}}
           name={isEditing ? editForm.name : detailQuery.data.name}
           onNameChange={isEditing ? editForm.setName : () => {}}
           oneLineIntro={isEditing ? editForm.oneLineIntro : detailQuery.data.one_line_intro}
           onOneLineIntroChange={isEditing ? editForm.setOneLineIntro : () => {}}
-          intro={isEditing ? editForm.intro : detailQuery.data.intro}
+          intro={isEditing ? editForm.intro : (detailQuery.data.intro ?? '')}
           onIntroChange={isEditing ? editForm.setIntro : () => {}}
           teamName={isEditing ? editForm.teamName : detailQuery.data.team.name}
           onTeamNameChange={isEditing ? editForm.setTeamName : () => {}}

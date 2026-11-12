@@ -18,6 +18,7 @@ import {
 import { ImageSection } from './ImageSection'
 import { IntroductionBannerSection } from './IntroductionBannerSection'
 import { TOAST_MESSAGES } from '@/constants/toastMessages'
+import { LoadingState } from '@components/common/LoadingState'
 
 const PART_FIELDS: { key: PartKey; label: string }[] = [
   { key: 'plan', label: '기획' },
@@ -157,9 +158,7 @@ export function IntroductionsPage() {
     return (
       <div className="flex min-h-screen flex-col">
         <PageHeader title="학회 소개" />
-        <div className="text-label-14m text-label-alternative flex flex-1 items-center justify-center">
-          불러오는 중입니다...
-        </div>
+        <LoadingState className="flex-1" />
       </div>
     )
   }

@@ -1,7 +1,7 @@
 import { create } from 'zustand'
 import { z } from 'zod'
-import { refreshSession, signIn, signOut } from '@api/auth'
-import { ApiError } from '@api/client'
+import { refreshSession, signIn, signOut } from '@api/auth/api'
+import { ApiError, isNetworkError, setAuthTokenSource } from '@api/client'
 
 const REFRESH_TOKEN_KEY = 'kusitms-admin-refresh-token'
 
@@ -72,7 +72,7 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
         error instanceof z.ZodError
       ) {
         sessionStorage.removeItem(REFRESH_TOKEN_KEY)
-      } else if (!(error instanceof ApiError || error instanceof TypeError)) {
+      } else if (!(error instanceof ApiError || isNetworkError(error))) {
         throw error
       }
     }
@@ -112,3 +112,17 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
     }
   },
 }))
+
+// 로그인 화면 배경처럼 비로그인 상태에서도 관리자 화면이 렌더링되므로, 서버 조회는 로그인 상태일 때만 한다.
+export function useIsAuthenticated() {
+  return useAuthStore((state) => state.session.status === 'authenticated')
+}
+
+// API 클라이언트가 요청마다 현재 토큰을 읽고, 401이면 이 store로 토큰을 갱신한다.
+setAuthTokenSource({
+  getAccessToken: () => {
+    const { session } = useAuthStore.getState()
+    return session.status === 'authenticated' ? session.accessToken : undefined
+  },
+  refreshAccessToken: () => useAuthStore.getState().refreshAccessToken(),
+})

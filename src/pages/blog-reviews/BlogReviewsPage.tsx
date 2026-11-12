@@ -1,22 +1,27 @@
 import { useState } from 'react'
-import type { BlogReviewActivity, BlogReviewListItem, BlogReviewPart } from '@api/blogReviews'
+import type {
+  BlogReviewActivity,
+  BlogReviewListItem,
+  BlogReviewPart,
+} from '@api/blog-reviews/types'
 import { BlogReviewModal } from '@components/blog-reviews'
 import { Button } from '@components/common/Button'
 import { PageHeader } from '@components/common/PageHeader'
 import { PART_LABELS, type PartBadgeType } from '@components/common/PartBadge'
 import { ReviewTable } from '@components/common/ReviewTable'
 import type { SelectFieldOption } from '@components/common/SelectField'
-import { useCurrentCardinalQuery } from '@hooks/auth/useCurrentCardinal'
+import { useCurrentCardinalQuery } from '@api/auth/queries'
 import {
   useBlogReviewsQuery,
   useCreateBlogReviewMutation,
   useDeleteBlogReviewMutation,
   useUpdateBlogReviewMutation,
-} from '@hooks/blog-reviews/useBlogReviews'
+} from '@api/blog-reviews/queries'
 import { useConfirm } from '@hooks/common/useConfirm'
 import { useCardinalSelection } from '@hooks/common/useCardinalSelection'
 import { useToast } from '@hooks/common/useToast'
 import { TOAST_MESSAGES } from '@/constants/toastMessages'
+import { LoadingState } from '@components/common/LoadingState'
 
 interface BlogReviewRow {
   id: string
@@ -86,7 +91,7 @@ function toBlogReviewRow(item: BlogReviewListItem): BlogReviewRow {
       ACTIVITY_OPTIONS.find((option) => option.value === item.activity)?.label ?? item.activity,
     title: item.title,
     link: item.blogLink,
-    thumbnailUrl: item.thumbnailUrl,
+    thumbnailUrl: item.thumbnailUrl ?? undefined,
   }
 }
 
@@ -159,14 +164,14 @@ export function BlogReviewsPage() {
       title: item.title,
       previewText: item.previewText,
       link: item.blogLink,
-      thumbnailUrl: item.thumbnailUrl,
+      thumbnailUrl: item.thumbnailUrl ?? undefined,
     })
     setPart(mappedPart)
     setActivity(isBlogReviewActivity(item.activity) ? item.activity : '')
     setTitle(item.title)
     setPreviewText(item.previewText)
     setLink(item.blogLink)
-    setThumbnailUrl(item.thumbnailUrl)
+    setThumbnailUrl(item.thumbnailUrl ?? undefined)
     setThumbnailFile(undefined)
     setModalOpen(true)
   }
@@ -291,9 +296,7 @@ export function BlogReviewsPage() {
     return (
       <div className="flex min-h-screen flex-col">
         <PageHeader title="블로그 후기 관리" />
-        <div className="text-label-14m text-label-alternative flex flex-1 items-center justify-center">
-          불러오는 중입니다...
-        </div>
+        <LoadingState className="flex-1" />
       </div>
     )
   }
