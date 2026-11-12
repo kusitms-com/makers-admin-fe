@@ -2,6 +2,7 @@ import { render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { describe, expect, it, vi } from 'vitest'
 import { MeetupProjectModal } from './MeetupProjectModal'
+import { waitForDialogFocus } from '@/test/dialog'
 
 const TYPE_OPTIONS = [
   { value: 'WEB', label: 'Web' },
@@ -89,6 +90,7 @@ describe('MeetupProjectModal', () => {
     const user = userEvent.setup()
     const props = renderModal()
 
+    await waitForDialogFocus()
     await user.type(screen.getByPlaceholderText('이름'), '홍길동')
     const addButton = screen.getByRole<HTMLButtonElement>('button', { name: '추가하기' })
     expect(addButton.disabled).toBe(false)
@@ -103,6 +105,7 @@ describe('MeetupProjectModal', () => {
     renderModal()
 
     const nameInput = screen.getByPlaceholderText<HTMLInputElement>('이름')
+    await waitForDialogFocus()
     await user.type(nameInput, '홍길동')
     await user.click(screen.getByRole('button', { name: '추가하기' }))
 

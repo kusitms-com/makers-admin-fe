@@ -56,7 +56,8 @@ pnpm test <테스트-파일-경로>
 
 ```text
 src/components/UserTable.tsx -> src/components/UserTable.test.tsx
-src/hooks/useMembers.ts -> src/hooks/useMembers.test.ts
+src/api/members/queries.ts -> src/api/members/queries.test.ts
+src/hooks/common/useToast.ts -> src/hooks/common/useToast.test.ts
 src/lib/formatDate.ts -> src/lib/formatDate.test.ts
 ```
 

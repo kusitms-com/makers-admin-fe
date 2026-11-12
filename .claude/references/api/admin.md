@@ -2,6 +2,8 @@
 
 Swagger 출처: `.env`의 `VITE_API_BASE_URL` + `/swagger-ui/index.html#`
 
+> 2026-11-11부터 OpenAPI 문서(`/v3/api-docs`)가 인증 없이 열리지 않습니다(401). 계약 확인은 관리자 토큰으로 Swagger를 열거나, 공개 백엔드 저장소 `kusitms-com/api.kusitms.com`의 Controller·Response DTO로 합니다. 응답 필드의 null 가능 여부는 DTO와 엔티티 컬럼 기준으로 적습니다.
+
 이 파일은 어드민 API 작업의 인덱스입니다. 엔드포인트별 상세 내용은 `.claude/references/api` 아래의 `admin-*` 파일에 기록합니다.
 
 ## 규칙

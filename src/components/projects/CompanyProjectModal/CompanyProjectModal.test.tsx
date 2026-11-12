@@ -2,6 +2,7 @@ import { render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { describe, expect, it, vi } from 'vitest'
 import { CompanyProjectModal } from './CompanyProjectModal'
+import { waitForDialogFocus } from '@/test/dialog'
 
 function renderModal(overrides: Partial<Parameters<typeof CompanyProjectModal>[0]> = {}) {
   const props = {
@@ -36,6 +37,7 @@ describe('CompanyProjectModal', () => {
     const user = userEvent.setup()
     const props = renderModal()
 
+    await waitForDialogFocus()
     await user.type(screen.getByPlaceholderText('기업 이름을 입력해주세요'), 'A')
 
     expect(props.onNameChange).toHaveBeenCalledWith('A')

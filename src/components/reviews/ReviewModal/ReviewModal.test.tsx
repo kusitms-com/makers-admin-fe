@@ -2,6 +2,7 @@ import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { describe, expect, it, vi } from 'vitest'
 import { ReviewModal } from './ReviewModal'
+import { waitForDialogFocus } from '@/test/dialog'
 
 const TEAM_OPTIONS = [
   { value: 'PLAN', label: '기획' },
@@ -42,6 +43,7 @@ describe('ReviewModal', () => {
     const user = userEvent.setup()
     const props = renderModal()
 
+    await waitForDialogFocus()
     await user.type(screen.getByPlaceholderText('이름을 입력해주세요'), 'A')
 
     expect(props.onNameChange).toHaveBeenCalledWith('A')
@@ -51,6 +53,7 @@ describe('ReviewModal', () => {
     const user = userEvent.setup()
     const props = renderModal()
 
+    await waitForDialogFocus()
     await user.type(screen.getByPlaceholderText('내용을 입력해주세요'), 'A')
 
     expect(props.onReviewChange).toHaveBeenCalledWith('A')

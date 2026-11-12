@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
-import { getCurrentCardinal } from '@api/auth'
-import { useAuthStore } from './useAuth'
+import { getCurrentCardinal } from './api'
+import { useAuthStore } from '@hooks/auth/useAuth'
 
 export const currentCardinalQueryKey = ['auth', 'current-cardinal'] as const
 

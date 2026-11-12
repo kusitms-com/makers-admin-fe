@@ -2,7 +2,7 @@
 name: commit-kr
 description: 변경 내용을 분석해 한국어 커밋 메시지와 실행할 git 명령을 제안합니다. 직접 커밋하지 않습니다.
 user-invocable: true
-allowed-tools: Bash, Read, Grep
+allowed-tools: Bash, Read, Grep, Agent
 ---
 
 # commit-kr
@@ -14,9 +14,10 @@ allowed-tools: Bash, Read, Grep
 1. `git status --short`로 변경 파일을 확인합니다.
 2. `git diff`와 `git diff --staged`를 확인합니다.
 3. `.claude/rules/commit-convention.md`를 읽습니다.
-4. 변경 목적을 기능/수정/문서/테스트/설정/리팩터링으로 분류합니다.
-5. 변경 목적이 여러 개면 커밋 분리를 제안합니다.
-6. 아래 형식으로 명령을 출력합니다.
+4. **리뷰 게이트**: `.claude/rules/workflow.md`의 "리뷰 게이트"를 따릅니다. `src/` 코드가 바뀌었을 때만 `reviewer` 에이전트로 Critical·Major를 확인합니다.
+5. 변경 목적을 기능/수정/문서/테스트/설정/리팩터링으로 분류합니다.
+6. 변경 목적이 여러 개면 커밋 분리를 제안합니다.
+7. 아래 형식으로 명령을 출력하고, 마지막에 리뷰 결과를 한 줄로 적습니다.
 
 ## Format
 

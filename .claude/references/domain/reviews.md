@@ -17,8 +17,9 @@
 src/pages/reviews/
   # 학회원 후기 관리 화면 구현 시 생성
 
-src/api/reviews.ts
-src/hooks/useReviews.ts
+src/api/reviews/api.ts
+src/api/reviews/queries.ts  # key 팩토리·queryOptions·조회/mutation 훅
+src/api/reviews/types.ts
 ```
 
 ## 주요 액션

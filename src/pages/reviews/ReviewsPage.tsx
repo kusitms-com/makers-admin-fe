@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import type { ReviewListItem, ReviewTeam } from '@api/reviews'
+import type { ReviewListItem, ReviewTeam } from '@api/reviews/types'
 import { Button } from '@components/common/Button'
 import { PageHeader } from '@components/common/PageHeader'
 import { ReviewTable } from '@components/common/ReviewTable'
@@ -11,12 +11,13 @@ import {
   useDeleteReviewMutation,
   useReviewsQuery,
   useUpdateReviewMutation,
-} from '@hooks/reviews/useReviews'
-import { useCurrentCardinalQuery } from '@hooks/auth/useCurrentCardinal'
+} from '@api/reviews/queries'
+import { useCurrentCardinalQuery } from '@api/auth/queries'
 import { useConfirm } from '@hooks/common/useConfirm'
 import { useCardinalSelection } from '@hooks/common/useCardinalSelection'
 import { useToast } from '@hooks/common/useToast'
 import { TOAST_MESSAGES } from '@/constants/toastMessages'
+import { LoadingState } from '@components/common/LoadingState'
 
 interface ReviewRow {
   id: string
@@ -63,8 +64,9 @@ function toReviewRow(item: ReviewListItem): ReviewRow {
     id: String(item.review_id),
     name: item.name,
     generation: item.cardinal,
-    team: item.team,
-    part: TEAM_BADGE_PART[item.team],
+    // 기획/디자인/개발 외 팀으로 저장된 데이터는 서버가 team을 null로 내려준다.
+    team: item.team ?? '-',
+    part: item.team ? TEAM_BADGE_PART[item.team] : undefined,
     title: item.review,
   }
 }
@@ -197,9 +199,7 @@ export function ReviewsPage() {
     return (
       <div className="flex min-h-screen flex-col">
         <PageHeader title="활동 후기 관리" />
-        <div className="text-label-14m text-label-alternative flex flex-1 items-center justify-center">
-          불러오는 중입니다...
-        </div>
+        <LoadingState className="flex-1" />
       </div>
     )
   }

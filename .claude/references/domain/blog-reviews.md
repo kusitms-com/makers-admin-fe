@@ -17,8 +17,9 @@
 src/pages/blog-reviews/
   # 블로그 후기 관리 화면 구현 시 생성
 
-src/api/blogReviews.ts
-src/hooks/useBlogReviews.ts
+src/api/blog-reviews/api.ts
+src/api/blog-reviews/queries.ts  # key 팩토리·queryOptions·조회/mutation 훅
+src/api/blog-reviews/types.ts
 ```
 
 ## 주요 액션

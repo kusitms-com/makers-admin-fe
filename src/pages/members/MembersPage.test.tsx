@@ -170,15 +170,13 @@ const rejectMember = vi.fn((userId: number) => {
   return Promise.resolve({})
 })
 // 회원 관리 화면은 status=APPROVED로 필터링해서 조회한다.
-const getMembers = vi.fn((params: { status?: string }) =>
-  Promise.resolve(
-    params.status ? memberItems.filter((member) => member.status === params.status) : memberItems,
-  ),
+const getMembers = vi.fn((status?: string) =>
+  Promise.resolve(status ? memberItems.filter((member) => member.status === status) : memberItems),
 )
 const getPendingMembers = vi.fn(() => Promise.resolve(pendingItems))
 
-vi.mock('@api/members', () => ({
-  getMembers: (params: { status?: string }) => getMembers(params),
+vi.mock('@api/members/api', () => ({
+  getMembers: (status?: string) => getMembers(status),
   getPendingMembers: () => getPendingMembers(),
   approveMember: (userId: number) => approveMember(userId),
   rejectMember: (userId: number) => rejectMember(userId),
@@ -212,7 +210,7 @@ describe('MentoringMembersPage', () => {
 
     expect(screen.getByRole('heading', { name: '회원 관리' })).toBeTruthy()
     expect(await screen.findByText('김서연')).toBeTruthy()
-    expect(getMembers).toHaveBeenCalledWith(expect.objectContaining({ status: 'APPROVED' }))
+    expect(getMembers).toHaveBeenCalledWith('APPROVED')
     expect(screen.getByLabelText('현재 위치')).toBeTruthy()
     expect(screen.getByRole('button', { name: '승인 요청 4' })).toBeTruthy()
     expect(screen.getByText('총 3명')).toBeTruthy()

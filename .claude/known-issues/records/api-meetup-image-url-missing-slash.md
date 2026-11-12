@@ -30,3 +30,10 @@ introductions의 `banner_image_url` 등이 key만 반환하는 것과는 다른 
 ## 언제/누가 해결해야 하는지
 
 **백엔드 담당**: `MeetupDetailResponse`(그리고 같은 패턴을 쓰는 다른 응답이 있다면 함께)에서 `s3Url + key`가 아니라 `s3Url`에 슬래시를 포함하거나 `String.join("/", ...)`처럼 구분자를 보장하는 방식으로 고쳐야 한다. `.claude/known-issues/records/api-introductions-image-url-not-absolute.md`에 적어둔 "완전한 URL을 반환하도록 응답 구성 로직 자체를 정리해야 한다"는 요청과 같이 전달하는 게 좋다. 백엔드가 고치면 `toAbsoluteS3Url()`의 하드코딩된 버킷 도메인을 제거한다.
+
+
+## 상태 갱신 (2026-11-11)
+
+백엔드 main(`289ee1d`)에서는 모든 응답 DTO가 `S3Util.toUrl()`로 `prefix + "/" + key` 형태의 절대 URL을 만든다(`S3Util.java:20-29`). 코드상으로는 해소됐다. **운영 배포 반영 여부는 확인하지 못했다.** `src/lib/s3.ts`의 `toAbsoluteS3Url()`은 절대 URL이 와도 그대로 정규화하므로, 운영 응답이 절대 URL로 바뀐 것을 확인한 뒤 제거한다.
+
+**운영 배포**: 이 수정이 포함된 백엔드 `289ee1d`의 자동 배포(CD)가 2026-11-09 성공했다(2026-11-12 확인). 운영 응답을 직접 받아 확인하지는 못해 `toAbsoluteS3Url()`은 그대로 둔다.

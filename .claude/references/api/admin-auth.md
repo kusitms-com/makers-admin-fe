@@ -32,7 +32,7 @@ Swagger 출처: `.env`의 `VITE_API_BASE_URL` + `/api-docs/json`
 | --- | --- | --- |
 | `accessToken` | `string` | response body로 내려옴 (헤더/쿠키 아님) |
 | `refreshToken` | `string` | response body로 내려옴 |
-| `role` | `'YB' \| 'OB' \| 'ADMIN'` | 학회원 구분. 레거시 `ADMIN`은 권한 판정에 사용하지 않음 |
+| `role` | `'YB' \| 'OB'` | 학회원 구분. signin은 `resolveRole`로 YB/OB만 반환하고, 레거시 `ADMIN`은 기동 시 YB/OB로 이전됨 (백엔드 소스 `kusitms-com/api.kusitms.com` main `289ee1d`로 확인, 2026-11-11) |
 | `authority` | `'MEMBER' \| 'MANAGER' \| 'OWNER'` | 관리자 화면에는 `MANAGER`와 `OWNER`만 접근 |
 | `redirectPath` | `string` | 일반 사이트 이동 경로. 관리자 앱에서는 `/introduction` 사용 |
 
@@ -42,5 +42,5 @@ Swagger 출처: `.env`의 `VITE_API_BASE_URL` + `/api-docs/json`
 - 토큰은 응답 본문으로 내려온다. 세션 구현 시 액세스 토큰은 메모리에, 새로고침 후 복원용 리프레시 토큰은 `sessionStorage`에 보관한다.
 - 세션 구현 시 로그인과 갱신 응답의 `authority`가 `MANAGER` 또는 `OWNER`인 경우에만 관리자 세션을 유지한다. `MEMBER`이거나 값이 누락되면 토큰을 보관하지 않는다.
 - 보호된 요청은 `apiRequest`에 `refreshAccessToken`을 전달하면 401에서 새 액세스 토큰으로 한 번만 재시도한다. 권한 부족(403)은 갱신하지 않는다. 현재 보호된 요청인 로그아웃은 로컬 세션을 먼저 지우고, 401이면 저장된 리프레시 토큰으로 갱신해 다시 요청한다.
-- 인증 API 함수는 `src/api/auth.ts`에 둔다.
+- 인증 API 함수는 `src/api/auth/api.ts`에 둔다.
 - 인증 API의 요청·응답과 권한 규칙은 백엔드 `docs/admin-authorization.md`와 배포된 `/api-docs/json`에서 확인했다.

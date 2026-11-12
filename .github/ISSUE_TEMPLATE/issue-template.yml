@@ -30,7 +30,7 @@ body:
     id: description
     attributes:
       label: Description
-      value: |
+      placeholder: |
         - 구현할 내용 1
         - 구현할 내용 2
     validations:
@@ -40,7 +40,7 @@ body:
     id: todo
     attributes:
       label: Todo
-      value: |
+      placeholder: |
         - [ ] 구현할 내용 1
         - [ ] 구현할 내용 2
     validations:

@@ -15,7 +15,7 @@ Swagger 출처: `.env`의 `VITE_API_BASE_URL` + `/api-docs/json`
 
 ## 구현 메모
 
-- API 함수는 `src/api/blogReviews.ts`에 둡니다.
+- API 함수는 `src/api/blog-reviews/api.ts`에 둡니다.
 - query key는 `['admin', 'blog-reviews']`를 우선합니다.
 - 등록/수정은 `multipart/form-data`입니다.
 - 등록/수정/삭제 이후 list query를 invalidate합니다.
@@ -55,6 +55,6 @@ Swagger 출처: `.env`의 `VITE_API_BASE_URL` + `/api-docs/json`
 | `title` | `string` |
 | `previewText` | `string` |
 | `blogLink` | `string` |
-| `thumbnailUrl` | `string` |
+| `thumbnailUrl` | `string \| null` | 썸네일이 없으면 키가 빠지는 게 아니라 `null` (백엔드 소스 `kusitms-com/api.kusitms.com` main `289ee1d`로 확인, 2026-11-11) |
 
 작성자 이름 필드는 내려오지 않는다 (관리자 페이지 리스트에는 '관리자'로 고정 표시).

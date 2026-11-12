@@ -3,7 +3,7 @@ name: create-pr
 description: 현재 브랜치 변경 내용을 분석해 프로젝트 PR 템플릿 기준으로 제목과 본문 초안을 작성합니다.
 user-invocable: true
 argument-hint: "[--append]"
-allowed-tools: Bash, Read, Grep, Glob
+allowed-tools: Bash, Read, Grep, Glob, Agent
 ---
 
 # create-pr
@@ -16,6 +16,7 @@ PR 제목과 본문 초안을 만듭니다. 사용자가 명시하지 않으면 
 1. `git status --short`로 미커밋 변경을 확인합니다.
 2. `git log main..HEAD --oneline`과 `git diff main..HEAD --stat`을 확인합니다.
 3. `.github/PULL_REQUEST_TEMPLATE.md`를 읽고 section 이름과 순서를 그대로 사용합니다.
+   - **리뷰 게이트**: `.claude/rules/workflow.md`의 "리뷰 게이트"를 따릅니다. 이번 대화의 `/commit-kr`에서 이미 본 커밋은 다시 보내지 않고, 아직 안 본 `src/` 변경만 `reviewer`로 확인합니다. 리뷰어에게는 커밋 범위(예: `main...HEAD`, 이미 본 커밋이 있으면 그 이후 범위)를 함께 넘깁니다. 결과 한 줄은 `💬 리뷰 요구사항` 섹션에 적습니다.
 4. 브랜치명에서 이슈 번호가 있으면 추출합니다.
 5. 변경 내용을 기능/수정/문서/테스트/설정/자동화/리팩터링으로 분류합니다.
 6. 변경 규모가 크면 `주요 변경사항`에는 핵심 요약을, `작업 내용`에는 세부 구현을 나눠 작성합니다.

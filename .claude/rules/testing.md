@@ -18,6 +18,10 @@
 - form은 검증과 submit 동작을 테스트합니다.
 - 관리자 상태 변경은 화면상의 상태 전환과 query invalidation 동작을 테스트합니다.
 
+## 모달 테스트
+
+- 모달(Base UI Dialog) 안에서 `user.type`·`user.keyboard`로 입력하기 전에 `src/test/dialog.ts`의 `waitForDialogFocus()`를 먼저 호출합니다. 모달은 열린 뒤 한 프레임 늦게 첫 요소로 포커스를 옮기기 때문에, 기다리지 않으면 부하가 큰 전체 실행에서 입력이 다른 요소로 가서 간헐적으로 실패합니다.
+
 ## 피할 것
 
 - 인터랙티브 UI에 snapshot-only 테스트만 두지 않습니다.

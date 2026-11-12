@@ -4,14 +4,14 @@ import type {
   CorporateProjectDetail,
   CorporateProjectListItem,
   CorporateProjectUpdateRequest,
-} from '@api/projects'
+} from '@api/projects/types'
 import { Button } from '@components/common/Button'
 import { Modal } from '@components/common/Modal'
 import { PageHeader } from '@components/common/PageHeader'
 import { SegmentedControl } from '@components/common/SegmentedControl'
 import { CompanyProjectModal } from '@components/projects/CompanyProjectModal'
 import { ProjectThumbnailCard } from '@components/projects/ProjectThumbnailCard'
-import { useCurrentCardinalQuery } from '@hooks/auth/useCurrentCardinal'
+import { useCurrentCardinalQuery } from '@api/auth/queries'
 import { useCardinalSelection } from '@hooks/common/useCardinalSelection'
 import { useToast } from '@hooks/common/useToast'
 import {
@@ -24,11 +24,12 @@ import {
   useCreateCompanyProjectMutation,
   useDeleteCompanyProjectMutation,
   useUpdateCompanyProjectMutation,
-} from '@hooks/projects/useCompanyProjects'
+} from '@api/projects/queries'
 import { toCohortOptions } from '@lib/cohort'
 import { toAbsoluteS3Url } from '@lib/s3'
 import { PLACEHOLDER_THUMBNAIL_URL } from './projects.constants'
 import { TOAST_MESSAGES } from '@/constants/toastMessages'
+import { LoadingState } from '@components/common/LoadingState'
 
 function revokeIfBlobUrl(url: string | undefined) {
   if (url?.startsWith('blob:')) {
@@ -195,9 +196,7 @@ export function CompanyProjectsPage() {
     return (
       <div className="flex min-h-screen flex-col">
         <PageHeader title="기업 프로젝트" />
-        <div className="text-label-14m text-label-alternative flex flex-1 items-center justify-center">
-          불러오는 중입니다...
-        </div>
+        <LoadingState className="flex-1" />
       </div>
     )
   }
@@ -310,9 +309,7 @@ export function CompanyProjectsPage() {
             </Button>
           }
         >
-          <p className="text-label-14m text-label-alternative py-10 text-center">
-            불러오는 중입니다...
-          </p>
+          <LoadingState className="py-10" />
         </Modal>
       )}
 

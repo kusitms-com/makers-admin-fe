@@ -45,33 +45,37 @@ reference에 없는 endpoint를 쓰는 경우 구현 전에 해당 reference에 
 
 도메인 이름은 실제 admin reference 기준을 우선합니다.
 
-| Domain | API 파일 | Hook 파일 | Domain reference |
-| --- | --- | --- | --- |
-| `members` | `src/api/members.ts` | `src/hooks/useMembers.ts` | `.claude/references/domain/members.md` |
-| `projects` | `src/api/projects.ts` | `src/hooks/useProjects.ts` | `.claude/references/domain/projects.md` |
-| `reviews` | `src/api/reviews.ts` | `src/hooks/useReviews.ts` | `.claude/references/domain/reviews.md` |
-| `blog-reviews` | `src/api/blogReviews.ts` | `src/hooks/useBlogReviews.ts` | `.claude/references/domain/blog-reviews.md` |
-| `introductions` | `src/api/introductions.ts` | `src/hooks/useIntroductions.ts` | `.claude/references/domain/introductions.md` |
+| Domain | 폴더 | Domain reference |
+| --- | --- | --- |
+| `members` | `src/api/members/` | `.claude/references/domain/members.md` |
+| `projects` | `src/api/projects/` | `.claude/references/domain/projects.md` |
+| `reviews` | `src/api/reviews/` | `.claude/references/domain/reviews.md` |
+| `blog-reviews` | `src/api/blog-reviews/` | `.claude/references/domain/blog-reviews.md` |
+| `introductions` | `src/api/introductions/` | `.claude/references/domain/introductions.md` |
 
 ### 4단계: API 함수 작성
 
-`src/api/{domain}.ts`에 raw request 함수와 타입을 둡니다. React, TanStack Query, UI 컴포넌트를 import하지 않습니다.
+`src/api/{domain}/api.ts`에 요청 함수를, `src/api/{domain}/types.ts`에 요청·응답 타입을 둡니다. `api.ts`는 React, TanStack Query, UI 컴포넌트를 import하지 않습니다.
 
 ```ts
-export type PendingMember = {
-  userId: number;
-  id: string;
-  name: string;
-};
+// 응답 타입은 TS interface로 적고 Zod로 검사하지 않는다. null 가능 여부는 reference 기준으로 정확히 적는다.
+export interface PendingMember {
+  userId: number
+  id: string
+  name: string
+  certificateImageUrl: string | null
+}
 
+// 토큰·envelope·401 재시도는 apiClient 인터셉터가 맡는다. 0건 목록은 서버가 data를 생략한다.
 export async function getPendingMembers(): Promise<PendingMember[]> {
-  // 실제 client 함수명과 response envelope은 기존 코드 또는 reference를 따른다.
+  const data = await apiRequest<PendingMember[] | undefined>({ method: 'GET', path: '/admin/members/pending' })
+  return data ?? []
 }
 ```
 
 ### 5단계: Query hook 작성
 
-서버 상태가 필요한 경우 `src/hooks/use{Domain}.ts`에 TanStack Query hook을 둡니다.
+서버 상태가 필요한 경우 `src/api/{domain}/queries.ts`에 TanStack Query hook을 둡니다. key 팩토리와 `queryOptions`를 함께 두고, 조회 훅은 `useIsAuthenticated()`로 로그인 상태일 때만 실행합니다. 목록이면 라우트 파일의 `clientLoader`에서 `prefetchWhenAuthenticated(xxxQueryOptions())`를 부릅니다(`.claude/rules/data-fetching.md`).
 
 ```ts
 export const memberKeys = {
@@ -93,9 +97,11 @@ export const memberKeys = {
 
 ```text
 src/api/
-  members.ts
-src/hooks/
-  useMembers.ts
+  client.ts        # axios 공통 (apiClient, apiRequest, apiRequestVoid)
+  members/
+    api.ts
+    queries.ts
+    types.ts
 ```
 
 ## Rules

@@ -1,4 +1,4 @@
-import type { BannerStatus } from '@api/introductions'
+import type { BannerStatus } from '@api/introductions/types'
 import { CardinalField } from '@components/common/CardinalField'
 import { FormField } from '@components/common/FormField'
 import { IntroductionSection } from '@components/introductions/IntroductionSection'

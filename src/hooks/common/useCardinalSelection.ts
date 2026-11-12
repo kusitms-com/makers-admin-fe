@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useCurrentCardinalQuery } from '@hooks/auth/useCurrentCardinal'
+import { useCurrentCardinalQuery } from '@api/auth/queries'
 import { toCohortOptions } from '@lib/cohort'
 
 // 등록 모달의 기수 선택. 기본값은 현재 기수이고, 기존 데이터에 있는 기수와 현재 기수 중에서 고른다.

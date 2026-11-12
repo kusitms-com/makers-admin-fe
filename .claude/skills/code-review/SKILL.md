@@ -3,7 +3,7 @@ name: code-review
 description: 변경된 코드를 프로젝트 규칙 기준으로 읽기 전용 리뷰하고, 실제 위험이 있는 finding만 보고합니다.
 user-invocable: true
 argument-hint: "[file-or-ref]"
-allowed-tools: Bash, Read, Grep, Glob
+allowed-tools: Bash, Read, Grep, Glob, Agent
 ---
 
 # code-review
@@ -42,7 +42,18 @@ git diff --staged
 
 변경 파일과 관련된 규칙만 읽습니다. 읽지 않은 규칙을 근거로 단정하지 않습니다.
 
-### 3단계: finding 작성
+### 3단계: 전문 리뷰어 호출
+
+변경 유형에 맞는 프로젝트 에이전트를 함께 부릅니다. 선택 기준은 `.claude/agents/README.md`의 선택표를 따릅니다.
+
+- 기본: `reviewer` (전체 diff의 회귀 위험)
+- API 함수·쿼리 훅·mutation 변경: `api-contract-reviewer`
+- `src/routes.ts`, `src/routes/**`, `src/layout/**`, 오류 경계 변경: `route-reviewer`
+- 컴포넌트·스타일·접근성 변경: `ui-accessibility-reviewer`
+
+여러 에이전트는 한 번에 병렬로 부르고, 각 결과를 아래 finding으로 합칩니다. 이 스킬은 전체 리뷰라 게이트와 달리 Minor·Suggestion까지 봅니다.
+
+### 4단계: finding 작성
 
 실제 위험이 있는 항목만 심각도순으로 출력합니다.
 

@@ -18,8 +18,9 @@
 src/pages/members/
   # 멤버 승인 화면 구현 시 생성
 
-src/api/members.ts
-src/hooks/useMembers.ts
+src/api/members/api.ts
+src/api/members/queries.ts  # key 팩토리·queryOptions·조회/mutation 훅
+src/api/members/types.ts
 ```
 
 ## 주요 액션
