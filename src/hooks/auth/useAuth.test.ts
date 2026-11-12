@@ -228,4 +228,21 @@ describe('관리자 세션', () => {
     expect(useAuthStore.getState().session.status).toBe('guest')
     expect(sessionStorage.getItem(refreshTokenKey)).toBeNull()
   })
+
+  it('같은 세션에서 동시에 갱신하면 요청 하나를 함께 기다리고 둘 다 새 토큰을 받는다', async () => {
+    sessionStorage.setItem(refreshTokenKey, 'refresh')
+    useAuthStore.setState({
+      session: { status: 'authenticated', accessToken: 'old', authority: 'MANAGER' },
+    })
+    const fetchMock = respondWith(responseData)
+
+    const [first, second] = await Promise.all([
+      useAuthStore.getState().refreshAccessToken(),
+      useAuthStore.getState().refreshAccessToken(),
+    ])
+
+    expect([first, second]).toEqual(['new-access', 'new-access'])
+    expect(fetchMock).toHaveBeenCalledOnce()
+    expect(useAuthStore.getState().session.status).toBe('authenticated')
+  })
 })
