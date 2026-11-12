@@ -2,6 +2,7 @@ import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { describe, expect, it, vi } from 'vitest'
 import { BlogReviewModal } from './BlogReviewModal'
+import { waitForDialogFocus } from '@/test/dialog'
 
 const PART_OPTIONS = [
   { value: 'PLAN', label: '기획' },
@@ -53,6 +54,7 @@ describe('BlogReviewModal', () => {
     const user = userEvent.setup()
     const props = renderModal()
 
+    await waitForDialogFocus()
     await user.type(screen.getByPlaceholderText('미리보기 텍스트를 입력해주세요'), 'A')
 
     expect(props.onPreviewTextChange).toHaveBeenCalledWith('A')
@@ -62,6 +64,7 @@ describe('BlogReviewModal', () => {
     const user = userEvent.setup()
     const props = renderModal()
 
+    await waitForDialogFocus()
     await user.type(screen.getByPlaceholderText('제목을 입력해주세요'), 'A')
 
     expect(props.onTitleChange).toHaveBeenCalledWith('A')
@@ -71,6 +74,7 @@ describe('BlogReviewModal', () => {
     const user = userEvent.setup()
     const props = renderModal()
 
+    await waitForDialogFocus()
     await user.type(screen.getByPlaceholderText('링크를 입력해주세요'), 'h')
 
     expect(props.onLinkChange).toHaveBeenCalledWith('h')
