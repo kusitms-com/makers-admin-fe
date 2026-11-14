@@ -64,7 +64,13 @@ export function useDeleteMeetupProjectMutation() {
 
   return useMutation({
     mutationFn: deleteMeetupProject,
-    onSuccess: () => {
+    onSuccess: (_, id) => {
+      // 다시 조회한 응답을 기다리지 않고 삭제한 항목을 바로 목록에서 뺀다.
+      queryClient.setQueryData(meetupProjectsQueryOptions().queryKey, (data) => {
+        if (!data) return data
+        const meetupList = data.meetup_list.filter((item) => item.meetup_id !== id)
+        return { ...data, meetup_count: meetupList.length, meetup_list: meetupList }
+      })
       void queryClient.invalidateQueries({ queryKey: meetupProjectKeys.all })
     },
   })
@@ -124,7 +130,13 @@ export function useDeleteCompanyProjectMutation() {
 
   return useMutation({
     mutationFn: deleteCorporateProject,
-    onSuccess: () => {
+    onSuccess: (_, id) => {
+      // 다시 조회한 응답을 기다리지 않고 삭제한 항목을 바로 목록에서 뺀다.
+      queryClient.setQueryData(companyProjectsQueryOptions().queryKey, (data) => {
+        if (!data) return data
+        const corporateList = data.corporateList.filter((item) => item.corporate_id !== id)
+        return { ...data, corporateCount: corporateList.length, corporateList }
+      })
       void queryClient.invalidateQueries({ queryKey: companyProjectKeys.all })
     },
   })

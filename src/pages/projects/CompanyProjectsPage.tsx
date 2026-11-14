@@ -14,6 +14,7 @@ import { ProjectThumbnailCard } from '@components/projects/ProjectThumbnailCard'
 import { useCurrentCardinalQuery } from '@api/auth/queries'
 import { useCardinalSelection } from '@hooks/common/useCardinalSelection'
 import { useToast } from '@hooks/common/useToast'
+import { useConfirm } from '@hooks/common/useConfirm'
 import {
   useCompanyProjectForm,
   type CompanyProjectFormValues,
@@ -67,6 +68,7 @@ export function CompanyProjectsPage() {
   const form = useCompanyProjectForm()
   const editForm = useCompanyProjectForm()
   const addToast = useToast()
+  const confirm = useConfirm()
   const createMutation = useCreateCompanyProjectMutation()
   const updateMutation = useUpdateCompanyProjectMutation()
   const deleteMutation = useDeleteCompanyProjectMutation()
@@ -175,7 +177,11 @@ export function CompanyProjectsPage() {
     })()
   }
 
-  function handleDelete(id: string) {
+  async function handleDelete(id: string) {
+    if (!(await confirm({ title: '이 프로젝트를 삭제하시겠습니까?', confirmLabel: '삭제하기' }))) {
+      return
+    }
+
     deleteMutation.mutate(Number(id), {
       onSuccess: () => {
         addToast({ type: 'complete', message: TOAST_MESSAGES.deleted })
@@ -262,7 +268,7 @@ export function CompanyProjectsPage() {
                     openDetail(project.id)
                   }}
                   onDelete={() => {
-                    handleDelete(project.id)
+                    void handleDelete(project.id)
                   }}
                 />
               ))}

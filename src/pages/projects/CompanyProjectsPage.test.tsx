@@ -5,8 +5,10 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 import type * as AuthApi from '@api/auth/api'
 import { useAuthStore } from '@hooks/auth/useAuth'
 import { useToastStore } from '@hooks/common/useToast'
+import { deleteCorporateProject } from '@api/projects/api'
 import { CompanyProjectsPage } from './CompanyProjectsPage'
 import { waitForDialogFocus } from '@/test/dialog'
+import { ConfirmProvider } from '@/providers/ConfirmProvider'
 
 const INITIAL_CORPORATE_ITEMS = [
   { corporate_id: 1, cardinal: 33, name: '큐시즘 파트너스' },
@@ -29,6 +31,8 @@ const INITIAL_CORPORATE_ITEMS = [
 }))
 
 const corporateList = [...INITIAL_CORPORATE_ITEMS]
+// true면 목록 조회가 끝나지 않는다(느린 서버 흉내).
+let holdListRequests = false
 
 vi.mock('@api/auth/api', async (importOriginal) => {
   const actual = await importOriginal<typeof AuthApi>()
@@ -36,11 +40,14 @@ vi.mock('@api/auth/api', async (importOriginal) => {
 })
 
 vi.mock('@api/projects/api', () => ({
-  getCorporateProjects: vi
-    .fn()
-    .mockImplementation(() =>
-      Promise.resolve({ corporateCount: corporateList.length, corporateList }),
-    ),
+  getCorporateProjects: vi.fn().mockImplementation(() =>
+    holdListRequests
+      ? new Promise(() => undefined)
+      : Promise.resolve({
+          corporateCount: corporateList.length,
+          corporateList: [...corporateList],
+        }),
+  ),
   createCorporateProject: vi.fn().mockResolvedValue(undefined),
   updateCorporateProject: vi.fn().mockResolvedValue(undefined),
   deleteCorporateProject: vi.fn().mockImplementation((id: number) => {
@@ -54,7 +61,9 @@ function renderPage() {
   const queryClient = new QueryClient({ defaultOptions: { mutations: { retry: false } } })
   return render(
     <QueryClientProvider client={queryClient}>
-      <CompanyProjectsPage />
+      <ConfirmProvider>
+        <CompanyProjectsPage />
+      </ConfirmProvider>
     </QueryClientProvider>,
   )
 }
@@ -62,6 +71,8 @@ function renderPage() {
 describe('CompanyProjectsPage', () => {
   beforeEach(() => {
     corporateList.splice(0, corporateList.length, ...INITIAL_CORPORATE_ITEMS)
+    vi.clearAllMocks()
+    holdListRequests = false
     useAuthStore.setState({
       session: { status: 'authenticated', accessToken: 'test-token', authority: 'MANAGER' },
     })
@@ -175,6 +186,9 @@ describe('CompanyProjectsPage', () => {
 
     await user.hover(screen.getByText('브릿지웍스'))
     await user.click(screen.getByRole('button', { name: '삭제하기' }))
+    const confirmDialog = await screen.findByRole('dialog')
+    expect(within(confirmDialog).getByText('이 프로젝트를 삭제하시겠습니까?')).toBeTruthy()
+    await user.click(within(confirmDialog).getByRole('button', { name: '삭제하기' }))
 
     await waitFor(() => {
       expect(screen.queryByText('브릿지웍스')).toBeFalsy()
@@ -182,5 +196,41 @@ describe('CompanyProjectsPage', () => {
     expect(screen.getByText('등록된 프로젝트가 없습니다')).toBeTruthy()
     expect(screen.getByRole('tab', { name: '31기', selected: true })).toBeTruthy()
     expect(useToastStore.getState().toasts.map((toast) => toast.message)).toContain('삭제했습니다.')
+  })
+
+  it('삭제 확인에서 취소하면 삭제하지 않는다', async () => {
+    const user = userEvent.setup()
+    renderPage()
+
+    // 카드마다 삭제 버튼이 있어서 프로젝트가 하나뿐인 31기에서 확인한다.
+    await user.click(await screen.findByRole('tab', { name: '31기' }))
+    await user.hover(screen.getByText('브릿지웍스'))
+    await user.click(screen.getByRole('button', { name: '삭제하기' }))
+    await user.click(
+      within(await screen.findByRole('dialog')).getByRole('button', { name: '취소' }),
+    )
+
+    expect(deleteCorporateProject).not.toHaveBeenCalled()
+    expect(screen.getByText('브릿지웍스')).toBeTruthy()
+  })
+
+  it('삭제하면 목록을 다시 받아오기 전에도 바로 목록에서 사라진다', async () => {
+    const user = userEvent.setup()
+    renderPage()
+
+    // 카드마다 삭제 버튼이 있어서 프로젝트가 하나뿐인 31기에서 확인한다.
+    await user.click(await screen.findByRole('tab', { name: '31기' }))
+    await user.hover(screen.getByText('브릿지웍스'))
+    // 삭제 뒤 다시 조회하는 요청이 끝나지 않는 상황(느린 서버)을 만든다.
+    holdListRequests = true
+    await user.click(screen.getByRole('button', { name: '삭제하기' }))
+    await user.click(
+      within(await screen.findByRole('dialog')).getByRole('button', { name: '삭제하기' }),
+    )
+
+    await waitFor(() => {
+      expect(screen.queryByText('브릿지웍스')).toBeFalsy()
+    })
+    expect(screen.getByText('등록된 프로젝트가 없습니다')).toBeTruthy()
   })
 })
