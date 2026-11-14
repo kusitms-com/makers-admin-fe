@@ -8,6 +8,7 @@ import { Inputfield } from '@components/common/Inputfield'
 import { Modal } from '@components/common/Modal'
 import { ModalActions } from '@components/common/ModalActions'
 import { SelectField, type SelectFieldOption } from '@components/common/SelectField'
+import { linkError } from '@lib/url'
 
 export interface MeetupTeamMember {
   id: string
@@ -314,6 +315,7 @@ export function MeetupProjectModal({
             <span className="text-caption-12sb text-label-alternative">깃허브 URL</span>
             <Inputfield
               value={githubUrl}
+              error={readOnly ? undefined : linkError(githubUrl)}
               onChange={(event: ChangeEvent<HTMLInputElement>) => {
                 onGithubUrlChange(event.target.value)
               }}
@@ -326,6 +328,7 @@ export function MeetupProjectModal({
             <span className="text-caption-12sb text-label-alternative">비핸스 URL</span>
             <Inputfield
               value={behanceUrl}
+              error={readOnly ? undefined : linkError(behanceUrl)}
               onChange={(event: ChangeEvent<HTMLInputElement>) => {
                 onBehanceUrlChange(event.target.value)
               }}
@@ -338,6 +341,7 @@ export function MeetupProjectModal({
             <span className="text-caption-12sb text-label-alternative">서비스 URL</span>
             <Inputfield
               value={appUrl}
+              error={readOnly ? undefined : linkError(appUrl)}
               onChange={(event: ChangeEvent<HTMLInputElement>) => {
                 onAppUrlChange(event.target.value)
               }}
@@ -350,6 +354,7 @@ export function MeetupProjectModal({
             <span className="text-caption-12sb text-label-alternative">인스타그램 URL</span>
             <Inputfield
               value={instagramUrl}
+              error={readOnly ? undefined : linkError(instagramUrl)}
               onChange={(event: ChangeEvent<HTMLInputElement>) => {
                 onInstagramUrlChange(event.target.value)
               }}
