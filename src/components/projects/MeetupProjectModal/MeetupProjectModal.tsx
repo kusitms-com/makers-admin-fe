@@ -310,7 +310,7 @@ export function MeetupProjectModal({
         />
       </FormField>
       <FormField label="링크">
-        <div className="flex flex-wrap items-center gap-3">
+        <div className="flex flex-wrap items-start gap-3">
           <div className="flex min-w-[140px] flex-1 flex-col gap-1.5">
             <span className="text-caption-12sb text-label-alternative">깃허브 URL</span>
             <Inputfield
