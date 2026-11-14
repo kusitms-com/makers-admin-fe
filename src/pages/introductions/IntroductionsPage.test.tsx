@@ -80,6 +80,23 @@ describe('IntroductionsPage', () => {
     })
   })
 
+  it('상단 배너 기수를 다음 기수로 바꿔 저장할 수 있다', async () => {
+    const user = userEvent.setup()
+    renderPage()
+
+    await user.click(await screen.findByRole('combobox', { name: '기수' }))
+    await user.click(await screen.findByRole('option', { name: '34기' }))
+
+    const saveButton = screen.getByRole<HTMLButtonElement>('button', { name: '저장하기' })
+    expect(saveButton.disabled).toBe(false)
+    await user.click(saveButton)
+
+    await waitFor(() => {
+      expect(updateIntroduction).toHaveBeenCalledTimes(1)
+    })
+    expect(vi.mocked(updateIntroduction).mock.calls[0][0].bannerCardinal).toBe(34)
+  })
+
   it('숫자 칸에는 숫자가 아닌 글자가 입력되지 않는다', async () => {
     const user = userEvent.setup()
     renderPage()

@@ -3,6 +3,7 @@ import type { AdminIntroResponse, BannerStatus, IntroUpdateRequest } from '@api/
 import { useCurrentCardinalQuery } from '@api/auth/queries'
 import { toAbsoluteS3Url } from '@lib/s3'
 import { useIntroductionQuery, useUpdateIntroductionMutation } from '@api/introductions/queries'
+import { toCohortOptions } from '@lib/cohort'
 
 export type PartKey = 'plan' | 'design' | 'frontend' | 'backend'
 
@@ -66,6 +67,7 @@ function toLogoSnapshot(items: PartnerLogo[]) {
 }
 
 function buildFormSnapshot(fields: {
+  bannerCardinal: number | undefined
   bannerStatus: BannerStatus | ''
   memberCount: string
   projectCount: string
@@ -81,6 +83,7 @@ function buildFormSnapshot(fields: {
   sponsors: PartnerLogo[]
 }) {
   return JSON.stringify({
+    bannerCardinal: fields.bannerCardinal,
     bannerStatus: fields.bannerStatus,
     memberCount: fields.memberCount,
     projectCount: fields.projectCount,
@@ -204,6 +207,7 @@ export function useIntroductionsForm() {
   const [sponsors, setSponsors] = useState<PartnerLogo[]>([])
 
   const formSnapshot = buildFormSnapshot({
+    bannerCardinal,
     bannerStatus,
     memberCount,
     projectCount,
@@ -385,6 +389,18 @@ export function useIntroductionsForm() {
   return {
     cardinal: cardinal ?? 0,
     cardinalReady: cardinal !== undefined,
+    // 다음 기수 모집 배너를 열 수 있게 현재 기수와 다음 기수, 저장된 기수 중에서 고른다.
+    cardinalOptions:
+      currentCardinalQuery.data === undefined
+        ? []
+        : toCohortOptions(
+            [
+              currentCardinalQuery.data + 1,
+              ...(bannerCardinal === undefined ? [] : [bannerCardinal]),
+            ],
+            currentCardinalQuery.data,
+          ),
+    setCardinal: setBannerCardinal,
     bannerStatus,
     setBannerStatus,
     memberCount,

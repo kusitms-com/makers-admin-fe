@@ -13,19 +13,28 @@ const BANNER_STATUS_OPTIONS: SelectFieldOption[] = [
 
 interface IntroductionBannerSectionProps {
   cardinal: number
+  cardinalOptions: SelectFieldOption[]
+  onCardinalChange: (cardinal: number) => void
   bannerStatus: BannerStatus | ''
   onBannerStatusChange: (value: BannerStatus) => void
 }
 
 export function IntroductionBannerSection({
   cardinal,
+  cardinalOptions,
+  onCardinalChange,
   bannerStatus,
   onBannerStatusChange,
 }: IntroductionBannerSectionProps) {
   return (
     <IntroductionSection title="상단 배너">
       <div className="flex items-stretch gap-3">
-        <CardinalField cardinal={cardinal} className="w-[150px] shrink-0" />
+        <CardinalField
+          cardinal={cardinal}
+          options={cardinalOptions}
+          onCardinalChange={onCardinalChange}
+          className="w-[150px] shrink-0"
+        />
         <FormField label="배너 상태" className="w-[200px] shrink-0">
           <SelectField
             value={bannerStatus}
