@@ -195,7 +195,7 @@ describe('CompanyProjectsPage', () => {
     })
     expect(screen.getByText('등록된 프로젝트가 없습니다')).toBeTruthy()
     expect(screen.getByRole('tab', { name: '31기', selected: true })).toBeTruthy()
-    expect(useToastStore.getState().toasts.map((toast) => toast.message)).toContain('삭제했습니다.')
+    expect(useToastStore.getState().toasts.map((toast) => toast.message)).toContain('삭제했습니다')
   })
 
   it('삭제 확인에서 취소하면 삭제하지 않는다', async () => {

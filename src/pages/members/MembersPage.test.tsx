@@ -278,7 +278,7 @@ describe('MentoringMembersPage', () => {
     expect(rejectMember).toHaveBeenCalledWith(102)
     expect(await screen.findByRole('button', { name: '승인 요청 2' })).toBeTruthy()
     expect(useToastStore.getState().toasts.map((toast) => toast.message)).toContain(
-      '승인 처리가 완료됐습니다.',
+      '승인 처리가 완료됐습니다',
     )
   })
 

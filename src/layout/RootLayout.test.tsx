@@ -95,7 +95,7 @@ describe('RootLayout', () => {
     await user.click(screen.getByRole('button', { name: '로그아웃' }))
 
     expect(logout).toHaveBeenCalledOnce()
-    expect(screen.queryByText('서버 로그아웃을 완료하지 못했습니다.')).toBeNull()
+    expect(screen.queryByText('서버 로그아웃을 완료하지 못했습니다')).toBeNull()
   })
 
   it('로그아웃이 Error로 거부되면 실패 토스트를 보여준다', async () => {
@@ -107,7 +107,7 @@ describe('RootLayout', () => {
 
     await user.click(screen.getByRole('button', { name: '로그아웃' }))
 
-    expect(await screen.findByText('서버 로그아웃을 완료하지 못했습니다.')).toBeTruthy()
+    expect(await screen.findByText('서버 로그아웃을 완료하지 못했습니다')).toBeTruthy()
   })
 
   it('MANAGER에게는 현재 기수만 보이고 바꿀 수 없다', async () => {
