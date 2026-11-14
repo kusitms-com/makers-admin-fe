@@ -11,33 +11,30 @@ export function Inputfield({ className, ref, error, ...props }: InputfieldProps)
   const errorId = useId()
   const hasValue = props.value != null && String(props.value).length > 0
 
-  const field = (
-    <div
-      className={cn(
-        'border-line-normal focus-within:border-brand-primary focus-within:bg-fill-normal flex h-10 items-center rounded-lg border px-3 py-1.5',
-        hasValue ? 'bg-fill-normal' : 'bg-fill-netural',
-        error && 'border-status-negative focus-within:border-status-negative',
-        className,
-      )}
-    >
-      <input
-        ref={ref}
-        className="text-label-14m text-label-strong placeholder:text-label-assitive w-full bg-transparent outline-none"
-        aria-invalid={error ? true : undefined}
-        aria-describedby={error ? errorId : undefined}
-        {...props}
-      />
-    </div>
-  )
-
-  if (!error) return field
-
+  // 오류가 생기고 사라져도 input의 트리 위치가 같아야 입력 중 포커스를 잃지 않는다. 문구만 형제로 붙였다 뗀다.
   return (
-    <div className="flex flex-col gap-1">
-      {field}
-      <p id={errorId} className="text-caption-12r text-status-negative">
-        {error}
-      </p>
-    </div>
+    <>
+      <div
+        className={cn(
+          'border-line-normal focus-within:border-brand-primary focus-within:bg-fill-normal flex h-10 items-center rounded-lg border px-3 py-1.5',
+          hasValue ? 'bg-fill-normal' : 'bg-fill-netural',
+          error && 'border-status-negative focus-within:border-status-negative',
+          className,
+        )}
+      >
+        <input
+          ref={ref}
+          className="text-label-14m text-label-strong placeholder:text-label-assitive w-full bg-transparent outline-none"
+          aria-invalid={error ? true : undefined}
+          aria-describedby={error ? errorId : undefined}
+          {...props}
+        />
+      </div>
+      {error && (
+        <p id={errorId} className="text-caption-12r text-status-negative">
+          {error}
+        </p>
+      )}
+    </>
   )
 }
