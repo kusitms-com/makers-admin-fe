@@ -58,28 +58,33 @@ describe('Sidebar', () => {
     expect(onLogout).toHaveBeenCalledTimes(1)
   })
 
-  it('현재 기수를 보여 주고, 변경 핸들러가 없으면 변경 버튼을 숨긴다', () => {
+  it('변경 핸들러가 없으면 현재 기수만 보여 주고 바꿀 수 없다', () => {
     render(
       <MemoryRouter>
         <Sidebar currentCardinal={34} />
       </MemoryRouter>,
     )
 
-    expect(screen.getByText('현재 34기')).toBeTruthy()
-    expect(screen.queryByRole('button', { name: '35기로 변경' })).toBeNull()
+    const select = screen.getByRole('combobox', { name: '현재 기수' })
+    expect(select.textContent).toContain('34기')
+    expect(
+      select.getAttribute('aria-disabled') ?? select.getAttribute('data-disabled'),
+    ).not.toBeNull()
   })
 
-  it('변경 핸들러가 있으면 다음 기수 변경 버튼을 누를 수 있다', async () => {
+  it('변경 핸들러가 있으면 이전·다음 기수를 골라 바꿀 수 있다', async () => {
     const user = userEvent.setup()
-    const onCardinalAdvance = vi.fn()
+    const onCardinalChange = vi.fn()
     render(
       <MemoryRouter>
-        <Sidebar currentCardinal={34} onCardinalAdvance={onCardinalAdvance} />
+        <Sidebar currentCardinal={34} onCardinalChange={onCardinalChange} />
       </MemoryRouter>,
     )
 
-    await user.click(screen.getByRole('button', { name: '35기로 변경' }))
+    await user.click(screen.getByRole('combobox', { name: '현재 기수' }))
+    expect(await screen.findByRole('option', { name: '33기' })).toBeTruthy()
+    await user.click(screen.getByRole('option', { name: '35기' }))
 
-    expect(onCardinalAdvance).toHaveBeenCalledOnce()
+    expect(onCardinalChange).toHaveBeenCalledWith(35)
   })
 })

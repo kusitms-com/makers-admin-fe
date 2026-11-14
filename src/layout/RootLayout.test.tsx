@@ -1,5 +1,5 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import { render, screen, within } from '@testing-library/react'
+import { render, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter, Route, Routes } from 'react-router'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
@@ -42,6 +42,15 @@ function renderRootLayout(initialEntries: string[]) {
       </MemoryRouter>
     </QueryClientProvider>,
   )
+}
+
+async function chooseCardinal(user: ReturnType<typeof userEvent.setup>, label: string) {
+  const select = await screen.findByRole('combobox', { name: '현재 기수' })
+  await waitFor(() => {
+    expect(select.textContent).toContain('34기')
+  })
+  await user.click(select)
+  await user.click(await screen.findByRole('option', { name: label }))
 }
 
 function loginAs(authority: 'MANAGER' | 'OWNER') {
@@ -101,12 +110,17 @@ describe('RootLayout', () => {
     expect(await screen.findByText('서버 로그아웃을 완료하지 못했습니다.')).toBeTruthy()
   })
 
-  it('MANAGER에게는 현재 기수만 보이고 변경 버튼은 보이지 않는다', async () => {
+  it('MANAGER에게는 현재 기수만 보이고 바꿀 수 없다', async () => {
+    const user = userEvent.setup()
     loginAs('MANAGER')
     renderRootLayout(['/meetup'])
 
-    expect(await screen.findByText('현재 34기')).toBeTruthy()
-    expect(screen.queryByRole('button', { name: '35기로 변경' })).toBeNull()
+    const select = await screen.findByRole('combobox', { name: '현재 기수' })
+    await waitFor(() => {
+      expect(select.textContent).toContain('34기')
+    })
+    await user.click(select)
+    expect(screen.queryByRole('option', { name: '35기' })).toBeNull()
   })
 
   it('OWNER가 확인하면 다음 기수로 바꾸고 결과를 토스트로 알린다', async () => {
@@ -114,7 +128,7 @@ describe('RootLayout', () => {
     loginAs('OWNER')
     renderRootLayout(['/meetup'])
 
-    await user.click(await screen.findByRole('button', { name: '35기로 변경' }))
+    await chooseCardinal(user, '35기')
     const dialog = await screen.findByRole('dialog')
     expect(within(dialog).getByText('전체 회원의 역할(YB/OB)이 다시 계산됩니다.')).toBeTruthy()
     await user.click(within(dialog).getByRole('button', { name: '변경하기' }))
@@ -128,7 +142,7 @@ describe('RootLayout', () => {
     loginAs('OWNER')
     renderRootLayout(['/meetup'])
 
-    await user.click(await screen.findByRole('button', { name: '35기로 변경' }))
+    await chooseCardinal(user, '35기')
     await user.click(
       within(await screen.findByRole('dialog')).getByRole('button', { name: '취소' }),
     )

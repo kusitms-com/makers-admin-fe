@@ -11,8 +11,8 @@ import {
   ReviewIcon,
 } from '@/assets/icons/generated'
 import { cn } from '@lib/utils'
-import { Button } from '../Button'
 import { Logo } from '../Logo'
+import { SelectField, type SelectFieldOption } from '../SelectField'
 
 interface SidebarNavConfig {
   path: string
@@ -60,13 +60,23 @@ interface SidebarProps {
   onLogout?: () => void
   // 어드민 전체의 기준 기수. 아직 못 받았으면 표시하지 않는다.
   currentCardinal?: number
-  // OWNER에게만 넘긴다. 있으면 다음 기수로 바꾸는 버튼을 보여 준다.
-  onCardinalAdvance?: () => void
+  // OWNER에게만 넘긴다. 있으면 이전·다음 기수로 바꿀 수 있고, 없으면 현재 기수만 보여 준다.
+  onCardinalChange?: (cardinal: number) => void
   className?: string
 }
 
 // NavLink를 사용하므로 react-router의 Router context 안에서만 렌더링 가능하다.
-export function Sidebar({ onLogout, currentCardinal, onCardinalAdvance, className }: SidebarProps) {
+// 백엔드가 현재 기수에서 ±1기만 허용하므로 선택지도 그 범위로 둔다.
+function toCardinalOptions(currentCardinal: number, editable: boolean): SelectFieldOption[] {
+  const cardinals = editable
+    ? [currentCardinal + 1, currentCardinal, currentCardinal - 1].filter(
+        (cardinal) => cardinal >= 1,
+      )
+    : [currentCardinal]
+  return cardinals.map((cardinal) => ({ value: String(cardinal), label: `${String(cardinal)}기` }))
+}
+
+export function Sidebar({ onLogout, currentCardinal, onCardinalChange, className }: SidebarProps) {
   return (
     <aside
       className={cn(
@@ -88,15 +98,17 @@ export function Sidebar({ onLogout, currentCardinal, onCardinalAdvance, classNam
         </div>
         <div className="flex flex-col gap-2">
           {currentCardinal !== undefined && (
-            <div className="flex items-center justify-between gap-2 px-4">
-              <span className="text-label-14m text-label-alternative">
-                현재 {currentCardinal}기
-              </span>
-              {onCardinalAdvance && (
-                <Button variant="outlined" size="s" onClick={onCardinalAdvance}>
-                  {currentCardinal + 1}기로 변경
-                </Button>
-              )}
+            <div className="flex flex-col gap-1.5 px-3">
+              <span className="text-label-13b text-label-alternative">현재 기수</span>
+              <SelectField
+                aria-label="현재 기수"
+                value={String(currentCardinal)}
+                options={toCardinalOptions(currentCardinal, onCardinalChange !== undefined)}
+                disabled={!onCardinalChange}
+                onValueChange={(value) => {
+                  if (Number(value) !== currentCardinal) onCardinalChange?.(Number(value))
+                }}
+              />
             </div>
           )}
           <button
