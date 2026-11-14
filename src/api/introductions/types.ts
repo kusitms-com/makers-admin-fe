@@ -1,4 +1,4 @@
-export type BannerStatus = 'CLOSE' | 'MANAGE_RECRUIT' | 'MEMBER_RECRUIT'
+export type BannerStatus = 'CLOSE' | 'UPCOMING_RECRUIT' | 'MANAGE_RECRUIT' | 'MEMBER_RECRUIT'
 
 // 목록 항목의 이름 외 텍스트(description/corporation/topic)는 서버가 name만 필수로 검사해서
 // 기존 데이터나 다른 클라이언트가 넣은 데이터는 null일 수 있다(IntroService#isNamedItem).

@@ -22,7 +22,7 @@ Swagger 출처: `.env`의 `VITE_API_BASE_URL` + `/api-docs/json`
 | Field | Type |
 | --- | --- |
 | `bannerCardinal` | `number` (필수) |
-| `bannerStatus` | `'CLOSE' \| 'MANAGE_RECRUIT' \| 'MEMBER_RECRUIT'` (필수) |
+| `bannerStatus` | `'CLOSE' \| 'UPCOMING_RECRUIT' \| 'MANAGE_RECRUIT' \| 'MEMBER_RECRUIT'` (필수) |
 | `memberCount` / `projectCount` / `universityCount` | `number` (필수) |
 | `introYoutubeLink` | `string` (필수) |
 | `planningImage` / `designImage` / `frontendImage` / `backendImage` | `File` (선택, 생략 시 기존 값 유지) |
@@ -95,7 +95,9 @@ partnerLogos[1].imageFile=@newlogo.png
 }
 ```
 
-- 목록 항목의 `description`/`corporation`/`topic`은 서버가 `name`만 필수로 검사해서, 기존 데이터나 다른 클라이언트가 넣은 데이터는 `null`일 수 있습니다(엔티티 컬럼 nullable). `banner_status`는 `'CLOSE' | 'MANAGE_RECRUIT' | 'MEMBER_RECRUIT' | null`입니다. (백엔드 소스 `kusitms-com/api.kusitms.com` main `289ee1d`로 확인, 2026-11-11)
+- 목록 항목의 `description`/`corporation`/`topic`은 서버가 `name`만 필수로 검사해서, 기존 데이터나 다른 클라이언트가 넣은 데이터는 `null`일 수 있습니다(엔티티 컬럼 nullable). `banner_status`는 `'CLOSE' | 'UPCOMING_RECRUIT' | 'MANAGE_RECRUIT' | 'MEMBER_RECRUIT' | null`입니다. (백엔드 소스 `kusitms-com/api.kusitms.com` main `289ee1d`로 확인, 2026-11-11. `UPCOMING_RECRUIT`는 `6e91760`에서 추가, 2026-11-13 운영 배포)
+
+**공개 API(`GET /api/introductions`)의 배너 값**: 어드민 응답과 달리 enum 이름이 아니라 한글 이름을 돌려준다. `banner_status`는 `모집 마감`/`모집 예정`/`운영진 모집`/`학회원 모집`, `banner_content`는 `KUSITMS {기수}기 {리크루팅 종료|모집 예정|운영진 모집 중|학회원 모집 중}`. 홈페이지 모집 상태(`closed`/`upcoming`/`open-staff`/`open-member`)와 1:1로 대응한다(`BannerStatus` enum).
 
 이전 버전과의 차이:
 

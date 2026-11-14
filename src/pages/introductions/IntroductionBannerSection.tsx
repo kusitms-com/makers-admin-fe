@@ -6,6 +6,7 @@ import { SelectField, type SelectFieldOption } from '@components/common/SelectFi
 
 const BANNER_STATUS_OPTIONS: SelectFieldOption[] = [
   { value: 'CLOSE', label: '마감' },
+  { value: 'UPCOMING_RECRUIT', label: '모집 예정' },
   { value: 'MANAGE_RECRUIT', label: '운영진 모집중' },
   { value: 'MEMBER_RECRUIT', label: '회원 모집중' },
 ]
