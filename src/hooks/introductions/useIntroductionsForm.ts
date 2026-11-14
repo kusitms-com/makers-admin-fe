@@ -31,6 +31,11 @@ export function revokeIfBlobUrl(url: string | undefined) {
   }
 }
 
+// 회원·프로젝트·학교 수 칸은 숫자만 받는다. 붙여넣은 'abc-1' 같은 값에서 숫자가 아닌 글자를 지운다.
+function toDigits(value: string) {
+  return value.replace(/\D/g, '')
+}
+
 function toOptionalCount(value: string): number | undefined {
   if (value === '') return undefined
   const parsed = Number(value)
@@ -383,11 +388,17 @@ export function useIntroductionsForm() {
     bannerStatus,
     setBannerStatus,
     memberCount,
-    setMemberCount,
+    setMemberCount: (value: string) => {
+      setMemberCount(toDigits(value))
+    },
     projectCount,
-    setProjectCount,
+    setProjectCount: (value: string) => {
+      setProjectCount(toDigits(value))
+    },
     universityCount,
-    setUniversityCount,
+    setUniversityCount: (value: string) => {
+      setUniversityCount(toDigits(value))
+    },
     introYoutubeLink,
     setIntroYoutubeLink,
     partImages,

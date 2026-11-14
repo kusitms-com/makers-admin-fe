@@ -80,6 +80,17 @@ describe('IntroductionsPage', () => {
     })
   })
 
+  it('숫자 칸에는 숫자가 아닌 글자가 입력되지 않는다', async () => {
+    const user = userEvent.setup()
+    renderPage()
+
+    const memberCount = await screen.findByLabelText<HTMLInputElement>('누적 회원 수')
+    await user.clear(memberCount)
+    await user.type(memberCount, 'abc-1')
+
+    expect(memberCount.value).toBe('1')
+  })
+
   it('기존 운영진 항목을 수정해 저장하면 조회 응답의 id가 그대로 실려간다', async () => {
     vi.mocked(getIntroduction).mockResolvedValue({
       ...emptyIntroResponse(),
