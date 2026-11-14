@@ -80,6 +80,21 @@ describe('BlogReviewModal', () => {
     expect(props.onLinkChange).toHaveBeenCalledWith('h')
   })
 
+  it('링크 형식이 틀리면 안내 문구를 보여 준다', () => {
+    renderModal({ link: 'abc' })
+
+    expect(screen.getByText('링크 형식을 확인해주세요.')).toBeTruthy()
+    expect(screen.getByPlaceholderText('링크를 입력해주세요').getAttribute('aria-invalid')).toBe(
+      'true',
+    )
+  })
+
+  it('올바른 링크면 안내 문구가 없다', () => {
+    renderModal({ link: 'https://blog.naver.com/kusitms/1' })
+
+    expect(screen.queryByText('링크 형식을 확인해주세요.')).toBeFalsy()
+  })
+
   it('파트 드롭다운에서 값을 선택하면 onPartChange가 호출된다', async () => {
     const user = userEvent.setup()
     const props = renderModal()

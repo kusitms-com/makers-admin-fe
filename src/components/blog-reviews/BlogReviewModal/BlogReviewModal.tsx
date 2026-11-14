@@ -7,6 +7,7 @@ import { Modal } from '@components/common/Modal'
 import { ModalActions } from '@components/common/ModalActions'
 import { SelectField, type SelectFieldOption } from '@components/common/SelectField'
 import { TextareaField } from '@components/common/TextareaField'
+import { linkError } from '@lib/url'
 
 interface BlogReviewModalProps {
   open: boolean
@@ -112,6 +113,7 @@ export function BlogReviewModal({
       <FormField label="링크">
         <Inputfield
           value={link}
+          error={linkError(link)}
           onChange={(event: ChangeEvent<HTMLInputElement>) => {
             onLinkChange(event.target.value)
           }}

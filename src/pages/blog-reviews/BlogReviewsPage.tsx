@@ -22,6 +22,7 @@ import { useCardinalSelection } from '@hooks/common/useCardinalSelection'
 import { useToast } from '@hooks/common/useToast'
 import { TOAST_MESSAGES } from '@/constants/toastMessages'
 import { LoadingState } from '@components/common/LoadingState'
+import { isHttpUrl } from '@lib/url'
 
 interface BlogReviewRow {
   id: string
@@ -228,7 +229,12 @@ export function BlogReviewsPage() {
     const trimmedTitle = title.trim()
     const trimmedLink = link.trim()
 
-    if (!isBlogReviewActivity(activityValue) || !activityLabel || !trimmedTitle || !trimmedLink) {
+    if (
+      !isBlogReviewActivity(activityValue) ||
+      !activityLabel ||
+      !trimmedTitle ||
+      !isHttpUrl(trimmedLink)
+    ) {
       return
     }
 
@@ -386,7 +392,7 @@ export function BlogReviewsPage() {
         saveDisabled={
           !activity ||
           !title.trim() ||
-          !link.trim() ||
+          !isHttpUrl(link) ||
           createBlogReviewMutation.isPending ||
           updateBlogReviewMutation.isPending ||
           (editingSnapshot ? !isDirty : currentCardinalQuery.data === undefined)
