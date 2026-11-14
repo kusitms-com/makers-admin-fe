@@ -8,6 +8,8 @@ describe('isHttpUrl', () => {
     expect(isHttpUrl('abc')).toBe(false)
     expect(isHttpUrl('github.com/kusitms')).toBe(false)
     expect(isHttpUrl('javascript:alert(1)')).toBe(false)
+    expect(isHttpUrl('https:example.com')).toBe(false)
+    expect(isHttpUrl('https://')).toBe(false)
   })
 })
 
