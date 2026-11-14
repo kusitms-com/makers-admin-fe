@@ -4,7 +4,7 @@ import userEvent from '@testing-library/user-event'
 import { MemoryRouter, Route, Routes } from 'react-router'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import type * as AuthApi from '@api/auth/api'
-import { updateCurrentCardinal } from '@api/auth/api'
+import { getCurrentCardinal, updateCurrentCardinal } from '@api/auth/api'
 import { useAuthStore } from '@hooks/auth/useAuth'
 import { ConfirmProvider } from '@/providers/ConfirmProvider'
 import { ToastProvider } from '@/providers/ToastProvider'
@@ -61,6 +61,7 @@ const originalLogout = useAuthStore.getState().logout
 
 beforeEach(() => {
   vi.mocked(updateCurrentCardinal).mockClear()
+  vi.mocked(getCurrentCardinal).mockResolvedValue(34)
 })
 
 afterEach(() => {
@@ -147,6 +148,25 @@ describe('RootLayout', () => {
       within(await screen.findByRole('dialog')).getByRole('button', { name: '취소' }),
     )
 
+    expect(updateCurrentCardinal).not.toHaveBeenCalled()
+  })
+
+  it('확인하는 사이 다른 관리자가 기수를 바꿨으면 요청하지 않는다', async () => {
+    const user = userEvent.setup()
+    loginAs('OWNER')
+    renderRootLayout(['/meetup'])
+
+    await chooseCardinal(user, '35기')
+    const dialog = await screen.findByRole('dialog')
+    // 모달을 띄워 둔 사이 다른 OWNER가 35기로 바꾼 상황
+    vi.mocked(getCurrentCardinal).mockResolvedValue(35)
+    await user.click(within(dialog).getByRole('button', { name: '변경하기' }))
+
+    expect(
+      await screen.findByText(
+        '다른 관리자가 현재 기수를 변경했습니다. 바뀐 기수를 확인한 뒤 다시 시도해주세요',
+      ),
+    ).toBeTruthy()
     expect(updateCurrentCardinal).not.toHaveBeenCalled()
   })
 })
