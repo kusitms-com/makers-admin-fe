@@ -57,4 +57,29 @@ describe('Sidebar', () => {
 
     expect(onLogout).toHaveBeenCalledTimes(1)
   })
+
+  it('현재 기수를 보여 주고, 변경 핸들러가 없으면 변경 버튼을 숨긴다', () => {
+    render(
+      <MemoryRouter>
+        <Sidebar currentCardinal={34} />
+      </MemoryRouter>,
+    )
+
+    expect(screen.getByText('현재 34기')).toBeTruthy()
+    expect(screen.queryByRole('button', { name: '35기로 변경' })).toBeNull()
+  })
+
+  it('변경 핸들러가 있으면 다음 기수 변경 버튼을 누를 수 있다', async () => {
+    const user = userEvent.setup()
+    const onCardinalAdvance = vi.fn()
+    render(
+      <MemoryRouter>
+        <Sidebar currentCardinal={34} onCardinalAdvance={onCardinalAdvance} />
+      </MemoryRouter>,
+    )
+
+    await user.click(screen.getByRole('button', { name: '35기로 변경' }))
+
+    expect(onCardinalAdvance).toHaveBeenCalledOnce()
+  })
 })

@@ -12,4 +12,5 @@ export const TOAST_MESSAGES = {
   approvalPartiallyFailed: '일부 회원 처리에 실패했습니다. 다시 시도해주세요.',
   unsupportedBlogReviewPart: '지원하지 않는 파트의 후기는 수정할 수 없습니다.',
   logoutFailed: '서버 로그아웃을 완료하지 못했습니다.',
+  cardinalChangeFailed: '현재 기수를 변경하지 못했습니다. 다시 시도해주세요.',
 } as const

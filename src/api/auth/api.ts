@@ -1,6 +1,6 @@
 import { z } from 'zod'
 import { apiRequest, apiRequestVoid } from '../client'
-import type { CurrentCardinalResponse } from './types'
+import type { CurrentCardinalResponse, CurrentCardinalUpdateResponse } from './types'
 
 // 세션을 만드는 값이라 다른 응답과 달리 형태를 검사한다. 토큰이 비어 있으면 깨진 세션으로 진행되기 때문이다.
 // role은 화면에서 쓰지 않아 검사하지 않는다(signin은 YB/OB만 반환).
@@ -54,4 +54,13 @@ export async function getCurrentCardinal(): Promise<number> {
     skipAuth: true,
   })
   return data.currentCardinal
+}
+
+// OWNER 전용. 현재 기수에서 ±1기만 바꿀 수 있고, 바꾸면 전체 회원의 YB/OB를 다시 계산한다.
+export function updateCurrentCardinal(cardinal: number): Promise<CurrentCardinalUpdateResponse> {
+  return apiRequest({
+    method: 'PUT',
+    path: '/admin/owner/current-cardinal',
+    body: { cardinal },
+  })
 }

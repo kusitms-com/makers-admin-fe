@@ -1,30 +1,61 @@
-import { render, screen } from '@testing-library/react'
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import { render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter, Route, Routes } from 'react-router'
-import { afterEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import type * as AuthApi from '@api/auth/api'
+import { updateCurrentCardinal } from '@api/auth/api'
 import { useAuthStore } from '@hooks/auth/useAuth'
+import { ConfirmProvider } from '@/providers/ConfirmProvider'
 import { ToastProvider } from '@/providers/ToastProvider'
 import { RootLayout } from './RootLayout'
 
+vi.mock('@api/auth/api', async (importOriginal) => {
+  const actual = await importOriginal<typeof AuthApi>()
+  return {
+    ...actual,
+    getCurrentCardinal: vi.fn().mockResolvedValue(34),
+    updateCurrentCardinal: vi.fn().mockResolvedValue({
+      previousCardinal: 34,
+      currentCardinal: 35,
+      changedToOb: 23,
+      changedToYb: 0,
+    }),
+  }
+})
+
 function renderRootLayout(initialEntries: string[]) {
+  const queryClient = new QueryClient({ defaultOptions: { mutations: { retry: false } } })
   return render(
-    <MemoryRouter initialEntries={initialEntries}>
-      <ToastProvider>
-        <Routes>
-          <Route element={<RootLayout />}>
-            <Route path="/meetup" element={<div>밋업 페이지 콘텐츠</div>} />
-            <Route path="/review" element={<div>후기 페이지 콘텐츠</div>} />
-          </Route>
-        </Routes>
-      </ToastProvider>
-    </MemoryRouter>,
+    <QueryClientProvider client={queryClient}>
+      <MemoryRouter initialEntries={initialEntries}>
+        <ToastProvider>
+          <ConfirmProvider>
+            <Routes>
+              <Route element={<RootLayout />}>
+                <Route path="/meetup" element={<div>밋업 페이지 콘텐츠</div>} />
+                <Route path="/review" element={<div>후기 페이지 콘텐츠</div>} />
+              </Route>
+            </Routes>
+          </ConfirmProvider>
+        </ToastProvider>
+      </MemoryRouter>
+    </QueryClientProvider>,
   )
+}
+
+function loginAs(authority: 'MANAGER' | 'OWNER') {
+  useAuthStore.setState({ session: { status: 'authenticated', accessToken: 'token', authority } })
 }
 
 const originalLogout = useAuthStore.getState().logout
 
+beforeEach(() => {
+  vi.mocked(updateCurrentCardinal).mockClear()
+})
+
 afterEach(() => {
-  useAuthStore.setState({ logout: originalLogout })
+  useAuthStore.setState({ logout: originalLogout, session: { status: 'loading' } })
 })
 
 describe('RootLayout', () => {
@@ -68,5 +99,40 @@ describe('RootLayout', () => {
     await user.click(screen.getByRole('button', { name: '로그아웃' }))
 
     expect(await screen.findByText('서버 로그아웃을 완료하지 못했습니다.')).toBeTruthy()
+  })
+
+  it('MANAGER에게는 현재 기수만 보이고 변경 버튼은 보이지 않는다', async () => {
+    loginAs('MANAGER')
+    renderRootLayout(['/meetup'])
+
+    expect(await screen.findByText('현재 34기')).toBeTruthy()
+    expect(screen.queryByRole('button', { name: '35기로 변경' })).toBeNull()
+  })
+
+  it('OWNER가 확인하면 다음 기수로 바꾸고 결과를 토스트로 알린다', async () => {
+    const user = userEvent.setup()
+    loginAs('OWNER')
+    renderRootLayout(['/meetup'])
+
+    await user.click(await screen.findByRole('button', { name: '35기로 변경' }))
+    const dialog = await screen.findByRole('dialog')
+    expect(within(dialog).getByText('전체 회원의 역할(YB/OB)이 다시 계산됩니다.')).toBeTruthy()
+    await user.click(within(dialog).getByRole('button', { name: '변경하기' }))
+
+    expect(await screen.findByText('35기로 변경했습니다. YB→OB 23명')).toBeTruthy()
+    expect(updateCurrentCardinal).toHaveBeenCalledWith(35, expect.anything())
+  })
+
+  it('OWNER가 확인 모달에서 취소하면 기수를 바꾸지 않는다', async () => {
+    const user = userEvent.setup()
+    loginAs('OWNER')
+    renderRootLayout(['/meetup'])
+
+    await user.click(await screen.findByRole('button', { name: '35기로 변경' }))
+    await user.click(
+      within(await screen.findByRole('dialog')).getByRole('button', { name: '취소' }),
+    )
+
+    expect(updateCurrentCardinal).not.toHaveBeenCalled()
   })
 })

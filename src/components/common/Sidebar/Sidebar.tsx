@@ -11,6 +11,7 @@ import {
   ReviewIcon,
 } from '@/assets/icons/generated'
 import { cn } from '@lib/utils'
+import { Button } from '../Button'
 import { Logo } from '../Logo'
 
 interface SidebarNavConfig {
@@ -57,11 +58,15 @@ function SidebarNavLink({ path, icon: Icon, label }: SidebarNavLinkProps) {
 
 interface SidebarProps {
   onLogout?: () => void
+  // 어드민 전체의 기준 기수. 아직 못 받았으면 표시하지 않는다.
+  currentCardinal?: number
+  // OWNER에게만 넘긴다. 있으면 다음 기수로 바꾸는 버튼을 보여 준다.
+  onCardinalAdvance?: () => void
   className?: string
 }
 
 // NavLink를 사용하므로 react-router의 Router context 안에서만 렌더링 가능하다.
-export function Sidebar({ onLogout, className }: SidebarProps) {
+export function Sidebar({ onLogout, currentCardinal, onCardinalAdvance, className }: SidebarProps) {
   return (
     <aside
       className={cn(
@@ -81,14 +86,28 @@ export function Sidebar({ onLogout, className }: SidebarProps) {
             <SidebarNavLink key={item.path} path={item.path} icon={item.icon} label={item.label} />
           ))}
         </div>
-        <button
-          type="button"
-          onClick={onLogout}
-          className="text-body-16r text-label-netural hover:bg-fill-alternative flex h-12 cursor-pointer items-center gap-2.5 rounded-[8px] px-4 transition-colors"
-        >
-          <LogoutIcon className="text-label-alternative size-5 shrink-0" aria-hidden="true" />
-          로그아웃
-        </button>
+        <div className="flex flex-col gap-2">
+          {currentCardinal !== undefined && (
+            <div className="flex items-center justify-between gap-2 px-4">
+              <span className="text-label-14m text-label-alternative">
+                현재 {currentCardinal}기
+              </span>
+              {onCardinalAdvance && (
+                <Button variant="outlined" size="s" onClick={onCardinalAdvance}>
+                  {currentCardinal + 1}기로 변경
+                </Button>
+              )}
+            </div>
+          )}
+          <button
+            type="button"
+            onClick={onLogout}
+            className="text-body-16r text-label-netural hover:bg-fill-alternative flex h-12 cursor-pointer items-center gap-2.5 rounded-[8px] px-4 transition-colors"
+          >
+            <LogoutIcon className="text-label-alternative size-5 shrink-0" aria-hidden="true" />
+            로그아웃
+          </button>
+        </div>
       </nav>
     </aside>
   )
