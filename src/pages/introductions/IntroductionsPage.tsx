@@ -191,6 +191,8 @@ export function IntroductionsPage() {
       <div className="flex flex-col gap-7 px-6 pt-6 pb-15">
         <IntroductionBannerSection
           cardinal={form.cardinal}
+          cardinalOptions={form.cardinalOptions}
+          onCardinalChange={form.setCardinal}
           bannerStatus={form.bannerStatus}
           onBannerStatusChange={form.setBannerStatus}
         />

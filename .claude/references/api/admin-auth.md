@@ -18,6 +18,7 @@ Swagger 출처: `.env`의 `VITE_API_BASE_URL` + `/api-docs/json`
 | `POST` | `/api/auth/logout` | 로그아웃 | Bearer access token 필요, 요청 본문 없음 → `BaseResponseObject` |
 | `GET` | `/api/auth/current-cardinal` | 현재 기수 조회 | |
 | `GET` | `/api/auth/check-id` | 아이디 중복 체크 | |
+| `PUT` | `/admin/owner/current-cardinal` | 현재 기수 변경 | **OWNER 전용**. `{ "cardinal": number }` → `{ previousCardinal, currentCardinal, changedToOb, changedToYb }`. 현재 기수 ±1만 허용(같은 값은 변경 없이 성공). 변경 즉시 전체 회원의 YB/OB를 다시 계산(가입 기수 >= 현재 기수: YB, 그 외: OB). 어드민은 사이드바 하단 드롭다운에서 ±1기로 변경(OWNER만, 그 외 권한은 비활성) (백엔드 소스 `OwnerController`/`CardinalAdminService`로 확인, 2026-11-15) |
 
 ## `SignInRequest`
 

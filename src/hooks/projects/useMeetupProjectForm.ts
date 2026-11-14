@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import dayjs from 'dayjs'
 import { useForm, useWatch, type Resolver } from 'react-hook-form'
 import { z } from 'zod'
+import { LINK_FORMAT_ERROR, linkError } from '@lib/url'
 import type { MeetupTeamMember } from '@components/projects/MeetupProjectModal'
 
 const DATE_FORMAT = 'YYYY-MM-DD'
@@ -15,10 +16,10 @@ const meetupProjectFormSchema = z.object({
   members: z.array(z.object({ id: z.string(), part: z.string(), name: z.string().min(1) })).min(1),
   logoUrl: z.string().min(1),
   posterUrl: z.string().min(1),
-  githubUrl: z.string(),
-  behanceUrl: z.string(),
-  appUrl: z.string(),
-  instagramUrl: z.string(),
+  githubUrl: z.string().refine((value) => !linkError(value), LINK_FORMAT_ERROR),
+  behanceUrl: z.string().refine((value) => !linkError(value), LINK_FORMAT_ERROR),
+  appUrl: z.string().refine((value) => !linkError(value), LINK_FORMAT_ERROR),
+  instagramUrl: z.string().refine((value) => !linkError(value), LINK_FORMAT_ERROR),
   startDate: z.string().min(1),
   endDate: z.string().min(1),
 })

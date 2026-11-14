@@ -3,6 +3,7 @@ import type { AdminIntroResponse, BannerStatus, IntroUpdateRequest } from '@api/
 import { useCurrentCardinalQuery } from '@api/auth/queries'
 import { toAbsoluteS3Url } from '@lib/s3'
 import { useIntroductionQuery, useUpdateIntroductionMutation } from '@api/introductions/queries'
+import { toCohortOptions } from '@lib/cohort'
 
 export type PartKey = 'plan' | 'design' | 'frontend' | 'backend'
 
@@ -29,6 +30,11 @@ export function revokeIfBlobUrl(url: string | undefined) {
   if (url?.startsWith('blob:')) {
     URL.revokeObjectURL(url)
   }
+}
+
+// 회원·프로젝트·학교 수 칸은 숫자만 받는다. 붙여넣은 'abc-1' 같은 값에서 숫자가 아닌 글자를 지운다.
+function toDigits(value: string) {
+  return value.replace(/\D/g, '')
 }
 
 function toOptionalCount(value: string): number | undefined {
@@ -61,6 +67,7 @@ function toLogoSnapshot(items: PartnerLogo[]) {
 }
 
 function buildFormSnapshot(fields: {
+  bannerCardinal: number | undefined
   bannerStatus: BannerStatus | ''
   memberCount: string
   projectCount: string
@@ -76,6 +83,7 @@ function buildFormSnapshot(fields: {
   sponsors: PartnerLogo[]
 }) {
   return JSON.stringify({
+    bannerCardinal: fields.bannerCardinal,
     bannerStatus: fields.bannerStatus,
     memberCount: fields.memberCount,
     projectCount: fields.projectCount,
@@ -171,6 +179,8 @@ export function useIntroductionsForm() {
   const currentCardinalQuery = useCurrentCardinalQuery()
 
   const [bannerCardinal, setBannerCardinal] = useState<number | undefined>()
+  // 처음 불러온 배너 기수. 다른 기수를 골랐다가 저장 전에 원래 값으로 되돌릴 수 있게 선택지에 남겨 둔다.
+  const [loadedBannerCardinal, setLoadedBannerCardinal] = useState<number | undefined>()
   const [bannerStatus, setBannerStatus] = useState<BannerStatus | ''>('')
   const [memberCount, setMemberCount] = useState('')
   const [projectCount, setProjectCount] = useState('')
@@ -199,6 +209,7 @@ export function useIntroductionsForm() {
   const [sponsors, setSponsors] = useState<PartnerLogo[]>([])
 
   const formSnapshot = buildFormSnapshot({
+    bannerCardinal,
     bannerStatus,
     memberCount,
     projectCount,
@@ -225,6 +236,7 @@ export function useIntroductionsForm() {
     const hydrated = hydrateFromResponse(data)
 
     setBannerCardinal(hydrated.bannerCardinal)
+    setLoadedBannerCardinal(hydrated.bannerCardinal)
     setBannerStatus(hydrated.bannerStatus)
     setMemberCount(hydrated.memberCount)
     setProjectCount(hydrated.projectCount)
@@ -380,14 +392,34 @@ export function useIntroductionsForm() {
   return {
     cardinal: cardinal ?? 0,
     cardinalReady: cardinal !== undefined,
+    // 다음 기수 모집 배너를 열 수 있게 현재 기수와 다음 기수, 저장된 기수 중에서 고른다.
+    cardinalOptions:
+      currentCardinalQuery.data === undefined
+        ? []
+        : toCohortOptions(
+            [
+              currentCardinalQuery.data + 1,
+              ...[loadedBannerCardinal, bannerCardinal].filter(
+                (value): value is number => value !== undefined,
+              ),
+            ],
+            currentCardinalQuery.data,
+          ),
+    setCardinal: setBannerCardinal,
     bannerStatus,
     setBannerStatus,
     memberCount,
-    setMemberCount,
+    setMemberCount: (value: string) => {
+      setMemberCount(toDigits(value))
+    },
     projectCount,
-    setProjectCount,
+    setProjectCount: (value: string) => {
+      setProjectCount(toDigits(value))
+    },
     universityCount,
-    setUniversityCount,
+    setUniversityCount: (value: string) => {
+      setUniversityCount(toDigits(value))
+    },
     introYoutubeLink,
     setIntroYoutubeLink,
     partImages,

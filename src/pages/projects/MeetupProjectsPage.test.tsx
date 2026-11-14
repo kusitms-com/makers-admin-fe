@@ -7,6 +7,7 @@ import type * as AuthApi from '@api/auth/api'
 import { useAuthStore } from '@hooks/auth/useAuth'
 import { MeetupProjectsPage } from './MeetupProjectsPage'
 import { waitForDialogFocus } from '@/test/dialog'
+import { ConfirmProvider } from '@/providers/ConfirmProvider'
 
 const INITIAL_MEETUP_ITEMS = [
   { meetup_id: 1, cardinal: 33, name: '큐첵' },
@@ -90,7 +91,9 @@ function renderPage() {
   const queryClient = new QueryClient({ defaultOptions: { mutations: { retry: false } } })
   return render(
     <QueryClientProvider client={queryClient}>
-      <MeetupProjectsPage />
+      <ConfirmProvider>
+        <MeetupProjectsPage />
+      </ConfirmProvider>
     </QueryClientProvider>,
   )
 }
@@ -228,6 +231,9 @@ describe('MeetupProjectsPage', () => {
 
     await user.hover(screen.getByText('모먼트'))
     await user.click(screen.getByRole('button', { name: '삭제하기' }))
+    const confirmDialog = await screen.findByRole('dialog')
+    expect(within(confirmDialog).getByText('이 프로젝트를 삭제하시겠습니까?')).toBeTruthy()
+    await user.click(within(confirmDialog).getByRole('button', { name: '삭제하기' }))
 
     await waitFor(() => {
       expect(screen.queryByText('모먼트')).toBeFalsy()
