@@ -97,6 +97,24 @@ describe('IntroductionsPage', () => {
     expect(vi.mocked(updateIntroduction).mock.calls[0][0].bannerCardinal).toBe(34)
   })
 
+  it('다른 기수를 골랐다가 저장 전에 처음 불러온 배너 기수로 되돌릴 수 있다', async () => {
+    const user = userEvent.setup()
+    vi.mocked(getIntroduction).mockResolvedValue({ ...emptyIntroResponse(), banner_cardinal: 31 })
+    renderPage()
+
+    const select = await screen.findByRole('combobox', { name: '기수' })
+    await waitFor(() => {
+      expect(select.textContent).toContain('31기')
+    })
+    await user.click(select)
+    await user.click(await screen.findByRole('option', { name: '34기' }))
+    await user.click(select)
+    await user.click(await screen.findByRole('option', { name: '31기' }))
+
+    expect(select.textContent).toContain('31기')
+    expect(screen.getByRole<HTMLButtonElement>('button', { name: '저장하기' }).disabled).toBe(true)
+  })
+
   it('숫자 칸에는 숫자가 아닌 글자가 입력되지 않는다', async () => {
     const user = userEvent.setup()
     renderPage()

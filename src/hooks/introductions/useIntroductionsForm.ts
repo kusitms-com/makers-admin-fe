@@ -179,6 +179,8 @@ export function useIntroductionsForm() {
   const currentCardinalQuery = useCurrentCardinalQuery()
 
   const [bannerCardinal, setBannerCardinal] = useState<number | undefined>()
+  // 처음 불러온 배너 기수. 다른 기수를 골랐다가 저장 전에 원래 값으로 되돌릴 수 있게 선택지에 남겨 둔다.
+  const [loadedBannerCardinal, setLoadedBannerCardinal] = useState<number | undefined>()
   const [bannerStatus, setBannerStatus] = useState<BannerStatus | ''>('')
   const [memberCount, setMemberCount] = useState('')
   const [projectCount, setProjectCount] = useState('')
@@ -234,6 +236,7 @@ export function useIntroductionsForm() {
     const hydrated = hydrateFromResponse(data)
 
     setBannerCardinal(hydrated.bannerCardinal)
+    setLoadedBannerCardinal(hydrated.bannerCardinal)
     setBannerStatus(hydrated.bannerStatus)
     setMemberCount(hydrated.memberCount)
     setProjectCount(hydrated.projectCount)
@@ -396,7 +399,9 @@ export function useIntroductionsForm() {
         : toCohortOptions(
             [
               currentCardinalQuery.data + 1,
-              ...(bannerCardinal === undefined ? [] : [bannerCardinal]),
+              ...[loadedBannerCardinal, bannerCardinal].filter(
+                (value): value is number => value !== undefined,
+              ),
             ],
             currentCardinalQuery.data,
           ),
