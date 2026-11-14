@@ -26,3 +26,14 @@ export function useUpdateCurrentCardinalMutation() {
     },
   })
 }
+
+// 확인 모달을 띄워 둔 사이 다른 OWNER가 기수를 바꿨는지 보려고, 캐시 대신 서버 값을 다시 받는다.
+export function useFetchLatestCurrentCardinal() {
+  const queryClient = useQueryClient()
+  return () =>
+    queryClient.fetchQuery({
+      queryKey: currentCardinalQueryKey,
+      queryFn: getCurrentCardinal,
+      staleTime: 0,
+    })
+}
